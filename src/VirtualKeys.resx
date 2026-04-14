@@ -1,0 +1,284 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms</value>
+  </resheader>
+
+  <!-- Mouse buttons -->
+  <data name="01" xml:space="preserve"><value>VK_LBUTTON</value></data>
+  <data name="02" xml:space="preserve"><value>VK_RBUTTON</value></data>
+  <data name="03" xml:space="preserve"><value>VK_CANCEL</value></data>
+  <data name="04" xml:space="preserve"><value>VK_MBUTTON</value></data>
+  <data name="05" xml:space="preserve"><value>VK_XBUTTON1</value></data>
+  <data name="06" xml:space="preserve"><value>VK_XBUTTON2</value></data>
+
+  <!-- Backspace / Tab -->
+  <data name="08" xml:space="preserve"><value>VK_BACK</value></data>
+  <data name="09" xml:space="preserve"><value>VK_TAB</value></data>
+
+  <!-- Clear / Enter -->
+  <data name="0C" xml:space="preserve"><value>VK_CLEAR</value></data>
+  <data name="0D" xml:space="preserve"><value>VK_RETURN</value></data>
+
+  <!-- Shift / Ctrl / Alt -->
+  <data name="10" xml:space="preserve"><value>VK_SHIFT</value></data>
+  <data name="11" xml:space="preserve"><value>VK_CONTROL</value></data>
+  <data name="12" xml:space="preserve"><value>VK_MENU</value></data>
+
+  <!-- Pause / Caps -->
+  <data name="13" xml:space="preserve"><value>VK_PAUSE</value></data>
+  <data name="14" xml:space="preserve"><value>VK_CAPITAL</value></data>
+
+  <!-- IME -->
+  <data name="15" xml:space="preserve"><value>VK_KANA</value></data>
+  <data name="16" xml:space="preserve"><value>VK_IME_ON</value></data>
+  <data name="17" xml:space="preserve"><value>VK_JUNJA</value></data>
+  <data name="18" xml:space="preserve"><value>VK_FINAL</value></data>
+  <data name="19" xml:space="preserve"><value>VK_HANJA</value></data>
+  <data name="1A" xml:space="preserve"><value>VK_IME_OFF</value></data>
+
+  <!-- Escape -->
+  <data name="1B" xml:space="preserve"><value>VK_ESCAPE</value></data>
+
+  <!-- Space / Navigation -->
+  <data name="20" xml:space="preserve"><value>VK_SPACE</value></data>
+  <data name="21" xml:space="preserve"><value>VK_PRIOR</value></data>
+  <data name="22" xml:space="preserve"><value>VK_NEXT</value></data>
+  <data name="23" xml:space="preserve"><value>VK_END</value></data>
+  <data name="24" xml:space="preserve"><value>VK_HOME</value></data>
+  <data name="25" xml:space="preserve"><value>VK_LEFT</value></data>
+  <data name="26" xml:space="preserve"><value>VK_UP</value></data>
+  <data name="27" xml:space="preserve"><value>VK_RIGHT</value></data>
+  <data name="28" xml:space="preserve"><value>VK_DOWN</value></data>
+
+  <!-- Insert / Delete -->
+  <data name="2D" xml:space="preserve"><value>VK_INSERT</value></data>
+  <data name="2E" xml:space="preserve"><value>VK_DELETE</value></data>
+
+  <!-- 0–9 -->
+  <data name="30" xml:space="preserve"><value>0</value></data>
+  <data name="31" xml:space="preserve"><value>1</value></data>
+  <data name="32" xml:space="preserve"><value>2</value></data>
+  <data name="33" xml:space="preserve"><value>3</value></data>
+  <data name="34" xml:space="preserve"><value>4</value></data>
+  <data name="35" xml:space="preserve"><value>5</value></data>
+  <data name="36" xml:space="preserve"><value>6</value></data>
+  <data name="37" xml:space="preserve"><value>7</value></data>
+  <data name="38" xml:space="preserve"><value>8</value></data>
+  <data name="39" xml:space="preserve"><value>9</value></data>
+
+  <!-- A–Z -->
+  <data name="41" xml:space="preserve"><value>A</value></data>
+  <data name="42" xml:space="preserve"><value>B</value></data>
+  <data name="43" xml:space="preserve"><value>C</value></data>
+  <data name="44" xml:space="preserve"><value>D</value></data>
+  <data name="45" xml:space="preserve"><value>E</value></data>
+  <data name="46" xml:space="preserve"><value>F</value></data>
+  <data name="47" xml:space="preserve"><value>G</value></data>
+  <data name="48" xml:space="preserve"><value>H</value></data>
+  <data name="49" xml:space="preserve"><value>I</value></data>
+  <data name="4A" xml:space="preserve"><value>J</value></data>
+  <data name="4B" xml:space="preserve"><value>K</value></data>
+  <data name="4C" xml:space="preserve"><value>L</value></data>
+  <data name="4D" xml:space="preserve"><value>M</value></data>
+  <data name="4E" xml:space="preserve"><value>N</value></data>
+  <data name="4F" xml:space="preserve"><value>O</value></data>
+  <data name="50" xml:space="preserve"><value>P</value></data>
+  <data name="51" xml:space="preserve"><value>Q</value></data>
+  <data name="52" xml:space="preserve"><value>R</value></data>
+  <data name="53" xml:space="preserve"><value>S</value></data>
+  <data name="54" xml:space="preserve"><value>T</value></data>
+  <data name="55" xml:space="preserve"><value>U</value></data>
+  <data name="56" xml:space="preserve"><value>V</value></data>
+  <data name="57" xml:space="preserve"><value>W</value></data>
+  <data name="58" xml:space="preserve"><value>X</value></data>
+  <data name="59" xml:space="preserve"><value>Y</value></data>
+  <data name="5A" xml:space="preserve"><value>Z</value></data>
+
+  <!-- Windows keys -->
+  <data name="5B" xml:space="preserve"><value>VK_LWIN</value></data>
+  <data name="5C" xml:space="preserve"><value>VK_RWIN</value></data>
+  <data name="5D" xml:space="preserve"><value>VK_APPS</value></data>
+
+  <!-- Sleep -->
+  <data name="5F" xml:space="preserve"><value>VK_SLEEP</value></data>
+
+  <!-- Numpad -->
+  <data name="60" xml:space="preserve"><value>VK_NUMPAD0</value></data>
+  <data name="61" xml:space="preserve"><value>VK_NUMPAD1</value></data>
+  <data name="62" xml:space="preserve"><value>VK_NUMPAD2</value></data>
+  <data name="63" xml:space="preserve"><value>VK_NUMPAD3</value></data>
+  <data name="64" xml:space="preserve"><value>VK_NUMPAD4</value></data>
+  <data name="65" xml:space="preserve"><value>VK_NUMPAD5</value></data>
+  <data name="66" xml:space="preserve"><value>VK_NUMPAD6</value></data>
+  <data name="67" xml:space="preserve"><value>VK_NUMPAD7</value></data>
+  <data name="68" xml:space="preserve"><value>VK_NUMPAD8</value></data>
+  <data name="69" xml:space="preserve"><value>VK_NUMPAD9</value></data>
+
+  <!-- Operators -->
+  <data name="6A" xml:space="preserve"><value>VK_MULTIPLY</value></data>
+  <data name="6B" xml:space="preserve"><value>VK_ADD</value></data>
+  <data name="6C" xml:space="preserve"><value>VK_SEPARATOR</value></data>
+  <data name="6D" xml:space="preserve"><value>VK_SUBTRACT</value></data>
+  <data name="6E" xml:space="preserve"><value>VK_DECIMAL</value></data>
+  <data name="6F" xml:space="preserve"><value>VK_DIVIDE</value></data>
+
+  <!-- Function keys -->
+  <data name="70" xml:space="preserve"><value>VK_F1</value></data>
+  <data name="71" xml:space="preserve"><value>VK_F2</value></data>
+  <data name="72" xml:space="preserve"><value>VK_F3</value></data>
+  <data name="73" xml:space="preserve"><value>VK_F4</value></data>
+  <data name="74" xml:space="preserve"><value>VK_F5</value></data>
+  <data name="75" xml:space="preserve"><value>VK_F6</value></data>
+  <data name="76" xml:space="preserve"><value>VK_F7</value></data>
+  <data name="77" xml:space="preserve"><value>VK_F8</value></data>
+  <data name="78" xml:space="preserve"><value>VK_F9</value></data>
+  <data name="79" xml:space="preserve"><value>VK_F10</value></data>
+  <data name="7A" xml:space="preserve"><value>VK_F11</value></data>
+  <data name="7B" xml:space="preserve"><value>VK_F12</value></data>
+  <data name="7C" xml:space="preserve"><value>VK_F13</value></data>
+  <data name="7D" xml:space="preserve"><value>VK_F14</value></data>
+  <data name="7E" xml:space="preserve"><value>VK_F15</value></data>
+  <data name="7F" xml:space="preserve"><value>VK_F16</value></data>
+  <data name="80" xml:space="preserve"><value>VK_F17</value></data>
+  <data name="81" xml:space="preserve"><value>VK_F18</value></data>
+  <data name="82" xml:space="preserve"><value>VK_F19</value></data>
+  <data name="83" xml:space="preserve"><value>VK_F20</value></data>
+  <data name="84" xml:space="preserve"><value>VK_F21</value></data>
+  <data name="85" xml:space="preserve"><value>VK_F22</value></data>
+  <data name="86" xml:space="preserve"><value>VK_F23</value></data>
+  <data name="87" xml:space="preserve"><value>VK_F24</value></data>
+
+  <!-- Lock keys -->
+  <data name="90" xml:space="preserve"><value>VK_NUMLOCK</value></data>
+  <data name="91" xml:space="preserve"><value>VK_SCROLL</value></data>
+
+  <!-- Shift/Ctrl/Alt (left/right) -->
+  <data name="A0" xml:space="preserve"><value>VK_LSHIFT</value></data>
+  <data name="A1" xml:space="preserve"><value>VK_RSHIFT</value></data>
+  <data name="A2" xml:space="preserve"><value>VK_LCONTROL</value></data>
+  <data name="A3" xml:space="preserve"><value>VK_RCONTROL</value></data>
+  <data name="A4" xml:space="preserve"><value>VK_LMENU</value></data>
+  <data name="A5" xml:space="preserve"><value>VK_RMENU</value></data>
+
+  <!-- Browser keys -->
+  <data name="A6" xml:space="preserve"><value>VK_BROWSER_BACK</value></data>
+  <data name="A7" xml:space="preserve"><value>VK_BROWSER_FORWARD</value></data>
+  <data name="A8" xml:space="preserve"><value>VK_BROWSER_REFRESH</value></data>
+  <data name="A9" xml:space="preserve"><value>VK_BROWSER_STOP</value></data>
+  <data name="AA" xml:space="preserve"><value>VK_BROWSER_SEARCH</value></data>
+  <data name="AB" xml:space="preserve"><value>VK_BROWSER_FAVORITES</value></data>
+  <data name="AC" xml:space="preserve"><value>VK_BROWSER_HOME</value></data>
+
+  <!-- Volume -->
+  <data name="AD" xml:space="preserve"><value>VK_VOLUME_MUTE</value></data>
+  <data name="AE" xml:space="preserve"><value>VK_VOLUME_DOWN</value></data>
+  <data name="AF" xml:space="preserve"><value>VK_VOLUME_UP</value></data>
+
+  <!-- Media -->
+  <data name="B0" xml:space="preserve"><value>VK_MEDIA_NEXT_TRACK</value></data>
+  <data name="B1" xml:space="preserve"><value>VK_MEDIA_PREV_TRACK</value></data>
+  <data name="B2" xml:space="preserve"><value>VK_MEDIA_STOP</value></data>
+  <data name="B3" xml:space="preserve"><value>VK_MEDIA_PLAY_PAUSE</value></data>
+
+  <!-- Launch -->
+  <data name="B4" xml:space="preserve"><value>VK_LAUNCH_MAIL</value></data>
+  <data name="B5" xml:space="preserve"><value>VK_LAUNCH_MEDIA_SELECT</value></data>
+  <data name="B6" xml:space="preserve"><value>VK_LAUNCH_APP1</value></data>
+  <data name="B7" xml:space="preserve"><value>VK_LAUNCH_APP2</value></data>
+
+  <!-- OEM keys -->
+  <data name="BA" xml:space="preserve"><value>VK_OEM_1</value></data>
+  <data name="BB" xml:space="preserve"><value>VK_OEM_PLUS</value></data>
+  <data name="BC" xml:space="preserve"><value>VK_OEM_COMMA</value></data>
+  <data name="BD" xml:space="preserve"><value>VK_OEM_MINUS</value></data>
+  <data name="BE" xml:space="preserve"><value>VK_OEM_PERIOD</value></data>
+  <data name="BF" xml:space="preserve"><value>VK_OEM_2</value></data>
+  <data name="C0" xml:space="preserve"><value>VK_OEM_3</value></data>
+
+    <!-- Gamepad / OEM / Misc continued -->
+
+  <data name="C1" xml:space="preserve"><value>VK_GAMEPAD_A</value></data>
+  <data name="C2" xml:space="preserve"><value>VK_GAMEPAD_B</value></data>
+  <data name="C3" xml:space="preserve"><value>VK_GAMEPAD_X</value></data>
+  <data name="C4" xml:space="preserve"><value>VK_GAMEPAD_Y</value></data>
+  <data name="C5" xml:space="preserve"><value>VK_GAMEPAD_RIGHT_SHOULDER</value></data>
+  <data name="C6" xml:space="preserve"><value>VK_GAMEPAD_LEFT_SHOULDER</value></data>
+  <data name="C7" xml:space="preserve"><value>VK_GAMEPAD_LEFT_TRIGGER</value></data>
+  <data name="C8" xml:space="preserve"><value>VK_GAMEPAD_RIGHT_TRIGGER</value></data>
+
+  <data name="C9" xml:space="preserve"><value>VK_GAMEPAD_DPAD_UP</value></data>
+  <data name="CA" xml:space="preserve"><value>VK_GAMEPAD_DPAD_DOWN</value></data>
+  <data name="CB" xml:space="preserve"><value>VK_GAMEPAD_DPAD_LEFT</value></data>
+  <data name="CC" xml:space="preserve"><value>VK_GAMEPAD_DPAD_RIGHT</value></data>
+
+  <data name="CD" xml:space="preserve"><value>VK_GAMEPAD_MENU</value></data>
+  <data name="CE" xml:space="preserve"><value>VK_GAMEPAD_VIEW</value></data>
+
+  <data name="CF" xml:space="preserve"><value>VK_GAMEPAD_LEFT_THUMBSTICK_BUTTON</value></data>
+  <data name="D0" xml:space="preserve"><value>VK_GAMEPAD_RIGHT_THUMBSTICK_BUTTON</value></data>
+
+  <data name="D1" xml:space="preserve"><value>VK_GAMEPAD_LEFT_THUMBSTICK_UP</value></data>
+  <data name="D2" xml:space="preserve"><value>VK_GAMEPAD_LEFT_THUMBSTICK_DOWN</value></data>
+  <data name="D3" xml:space="preserve"><value>VK_GAMEPAD_LEFT_THUMBSTICK_RIGHT</value></data>
+  <data name="D4" xml:space="preserve"><value>VK_GAMEPAD_LEFT_THUMBSTICK_LEFT</value></data>
+
+  <data name="D5" xml:space="preserve"><value>VK_GAMEPAD_RIGHT_THUMBSTICK_UP</value></data>
+  <data name="D6" xml:space="preserve"><value>VK_GAMEPAD_RIGHT_THUMBSTICK_DOWN</value></data>
+  <data name="D7" xml:space="preserve"><value>VK_GAMEPAD_RIGHT_THUMBSTICK_RIGHT</value></data>
+  <data name="D8" xml:space="preserve"><value>VK_GAMEPAD_RIGHT_THUMBSTICK_LEFT</value></data>
+
+  <!-- OEM keys continued -->
+  <data name="DB" xml:space="preserve"><value>VK_OEM_4</value></data>
+  <data name="DC" xml:space="preserve"><value>VK_OEM_5</value></data>
+  <data name="DD" xml:space="preserve"><value>VK_OEM_6</value></data>
+  <data name="DE" xml:space="preserve"><value>VK_OEM_7</value></data>
+  <data name="DF" xml:space="preserve"><value>VK_OEM_8</value></data>
+
+  <!-- OEM specific -->
+  <data name="E1" xml:space="preserve"><value>VK_OEM_AX</value></data>
+  <data name="E2" xml:space="preserve"><value>VK_OEM_102</value></data>
+  <data name="E3" xml:space="preserve"><value>VK_ICO_HELP</value></data>
+  <data name="E4" xml:space="preserve"><value>VK_ICO_00</value></data>
+
+  <!-- Process / Packet -->
+  <data name="E5" xml:space="preserve"><value>VK_PROCESSKEY</value></data>
+  <data name="E6" xml:space="preserve"><value>VK_ICO_CLEAR</value></data>
+  <data name="E7" xml:space="preserve"><value>VK_PACKET</value></data>
+
+  <!-- OEM reset -->
+  <data name="E9" xml:space="preserve"><value>VK_OEM_RESET</value></data>
+  <data name="EA" xml:space="preserve"><value>VK_OEM_JUMP</value></data>
+  <data name="EB" xml:space="preserve"><value>VK_OEM_PA1</value></data>
+  <data name="EC" xml:space="preserve"><value>VK_OEM_PA2</value></data>
+  <data name="ED" xml:space="preserve"><value>VK_OEM_PA3</value></data>
+  <data name="EE" xml:space="preserve"><value>VK_OEM_WSCTRL</value></data>
+  <data name="EF" xml:space="preserve"><value>VK_OEM_CUSEL</value></data>
+  <data name="F0" xml:space="preserve"><value>VK_OEM_ATTN</value></data>
+  <data name="F1" xml:space="preserve"><value>VK_OEM_FINISH</value></data>
+  <data name="F2" xml:space="preserve"><value>VK_OEM_COPY</value></data>
+  <data name="F3" xml:space="preserve"><value>VK_OEM_AUTO</value></data>
+  <data name="F4" xml:space="preserve"><value>VK_OEM_ENLW</value></data>
+  <data name="F5" xml:space="preserve"><value>VK_OEM_BACKTAB</value></data>
+
+  <!-- Attn / CrSel / ExSel -->
+  <data name="F6" xml:space="preserve"><value>VK_ATTN</value></data>
+  <data name="F7" xml:space="preserve"><value>VK_CRSEL</value></data>
+  <data name="F8" xml:space="preserve"><value>VK_EXSEL</value></data>
+  <data name="F9" xml:space="preserve"><value>VK_EREOF</value></data>
+  <data name="FA" xml:space="preserve"><value>VK_PLAY</value></data>
+  <data name="FB" xml:space="preserve"><value>VK_ZOOM</value></data>
+  <data name="FC" xml:space="preserve"><value>VK_NONAME</value></data>
+  <data name="FD" xml:space="preserve"><value>VK_PA1</value></data>
+  <data name="FE" xml:space="preserve"><value>VK_OEM_CLEAR</value></data>
+
+</root>
