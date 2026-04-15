@@ -44,7 +44,7 @@ namespace KeyboardRepeatFilter
             // Create tray icon
             _notifyIcon = new NotifyIcon
             {
-                Icon = new Icon("app.ico"),
+                Icon = new Icon(System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("KeyboardRepeatFilter.app.ico")),
                 Text = "Keyboard Repeat Filter",
                 ContextMenu = contextMenu,
                 Visible = true

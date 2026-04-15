@@ -1,8 +1,12 @@
 {
+  "LogLevel": "Trace",
+  "LogFilePath": "C:/Temp/KeyboardRepeatFilter.log",
   "MinRepeatIntervalMs": 28.0,
   "ExcludedVkCodes": [
     8,
-    13,174,175
+    13,
+    174,
+    175
   ],
   "PerKeyMinRepeatIntervalMs": {
     "73": 40.0

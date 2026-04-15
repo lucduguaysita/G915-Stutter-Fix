@@ -16,14 +16,10 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="app.ico" />
+    <None Remove="src\app.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="app.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="app.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
+    <EmbeddedResource Include="app.ico" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />

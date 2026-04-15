@@ -17,8 +17,7 @@ namespace KeyboardRepeatFilter
         private const int WmSysKeyDown = 0x0104;
         private const int WmSysKeyUp = 0x0105;
         private const uint WmQuit = 0x0012;
-
-        private const string LogFilePath = "C:\\Temp\\KeyboardRepeatFilter.log";
+        
         private readonly FilterConfig _config;
         private readonly long[] _lastUpTicks = new long[256];
         private readonly bool[] _isPressed = new bool[256];
@@ -145,9 +144,18 @@ namespace KeyboardRepeatFilter
                     {
                         if (!_isPressed[vk] && (now - _lastUpTicks[vk]) < _thresholdTicksByVk[vk])
                         {
-                            string keyName = VirtualKeys.ResourceManager.GetString(vk.ToString("X2"));
-                            File.AppendAllText(LogFilePath, $@"{keyName}={vk} stuttering suppressed{Environment.NewLine}");
-
+                            if (_config.LogLevel == "Trace")
+                            {
+                                string keyName = VirtualKeys.ResourceManager.GetString(vk.ToString("X2"));
+                                try
+                                {
+                                    File.AppendAllText(_config.LogFilePath, $@"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff")} - {keyName}={vk} filtered{Environment.NewLine}");
+                                }
+                                catch
+                                {
+                                    // silent any errors when writing to the log file.
+                                }
+                            }
                             // Filter this key press as it's a bounce.
                             return new IntPtr(1);
                         }
