@@ -28,21 +28,34 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="VirtualKeys.Designer.cs">
+    <Compile Update="src\VirtualKeys.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>VirtualKeys.resx</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Update="VirtualKeys.resx">
+    <EmbeddedResource Update="src\VirtualKeys.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>VirtualKeys.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>KeyboardRepeatFilter</CustomToolNamespace>
+      <LogicalName>KeyboardRepeatFilter.VirtualKeys.resources</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Update="config.json">
+    <None Update="src\config.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>config.json</Link>
     </None>
   </ItemGroup>
+  <Target Name="RefreshReleasesFolder" AfterTargets="Build">
+    <PropertyGroup>
+      <ReleasesDir>$(MSBuildProjectDirectory)\releases\</ReleasesDir>
+    </PropertyGroup>
+    <RemoveDir Directories="$(ReleasesDir)" />
+    <MakeDir Directories="$(ReleasesDir)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ReleasesDir)" />
+    <Copy SourceFiles="$(TargetDir)Newtonsoft.Json.dll" DestinationFolder="$(ReleasesDir)" Condition="Exists('$(TargetDir)Newtonsoft.Json.dll')" />
+    <Copy SourceFiles="$(TargetDir)config.json" DestinationFolder="$(ReleasesDir)" Condition="Exists('$(TargetDir)config.json')" />
+  </Target>
 </Project>

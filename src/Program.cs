@@ -1,6 +1,9 @@
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 
@@ -10,6 +13,9 @@ namespace KeyboardRepeatFilter
     {
         private static KeyboardHookFilter _filter;
         private static NotifyIcon _notifyIcon;
+        private static FilterConfig _config;
+        private static DateTime _startedAtUtc;
+        private static bool _shutdownLogged;
 
         [STAThread]
         private static void Main()
@@ -17,9 +23,15 @@ namespace KeyboardRepeatFilter
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            var config = LoadConfig();
+            _config = LoadConfig();
+            _startedAtUtc = DateTime.UtcNow;
+            RegisterGlobalExceptionHandlers();
+            Application.ApplicationExit += (_, __) => LogShutdown("ApplicationExit");
 
-            _filter = new KeyboardHookFilter(config);
+            LogLifecycle("Startup",
+                $"version={Assembly.GetExecutingAssembly().GetName().Version}, pid={Process.GetCurrentProcess().Id}, minRepeatIntervalMs={_config.MinRepeatIntervalMs}");
+
+            _filter = new KeyboardHookFilter(_config);
             _filter.Start();
 
             // Build tray menu
@@ -36,6 +48,10 @@ namespace KeyboardRepeatFilter
                 startupItem.Checked = StartupManager.IsInStartup();
             };
             contextMenu.MenuItems.Add(startupItem);
+
+            // --- About item ---
+            var aboutMenuItem = new MenuItem("About...", OnAbout);
+            contextMenu.MenuItems.Add(aboutMenuItem);
 
             // --- Exit item ---
             var exitMenuItem = new MenuItem("Exit", OnExit);
@@ -58,7 +74,104 @@ namespace KeyboardRepeatFilter
         {
             _notifyIcon.Visible = false;
             _filter.Stop();
+            LogShutdown("UserExit");
             Application.Exit();
+        }
+
+        private static void OnAbout(object sender, EventArgs e)
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            var version = assembly.GetName().Version?.ToString() ?? "unknown";
+            var repoUrl = "https://github.com/lucduguaysita/G915-Stutter-Fix";
+
+            var aboutText =
+                "G915 Stutter Fix\r\n" +
+                $"Version: {version}\r\n\r\n" +
+                "User-mode keyboard event filter for invalid HID repeats.\r\n\r\n" +
+                $"Project: {repoUrl}\r\n" +
+                "License: MIT\r\n\r\n" +
+                "Open the GitHub project page?";
+
+            var result = MessageBox.Show(
+                aboutText,
+                "About G915 Stutter Fix",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Information);
+
+            if (result == DialogResult.Yes)
+            {
+                try
+                {
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = repoUrl,
+                        UseShellExecute = true
+                    });
+                }
+                catch
+                {
+                    // Keep tray app resilient if shell launch is unavailable.
+                }
+            }
+        }
+
+        private static void RegisterGlobalExceptionHandlers()
+        {
+            Application.ThreadException += (sender, args) =>
+            {
+                LogShutdown("UnhandledThreadException", args.Exception);
+            };
+
+            AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
+            {
+                var ex = args.ExceptionObject as Exception;
+                LogShutdown(args.IsTerminating ? "UnhandledExceptionTerminating" : "UnhandledException", ex);
+            };
+        }
+
+        private static void LogShutdown(string reason, Exception ex = null)
+        {
+            if (_shutdownLogged)
+            {
+                return;
+            }
+
+            _shutdownLogged = true;
+            var uptime = DateTime.UtcNow - _startedAtUtc;
+            var message =
+                $"reason={reason}, uptimeSec={uptime.TotalSeconds:F1}, pid={Process.GetCurrentProcess().Id}";
+
+            if (ex != null)
+            {
+                message += $", exception={ex.GetType().Name}: {ex.Message}";
+            }
+
+            LogLifecycle("Shutdown", message);
+        }
+
+        private static void LogLifecycle(string phase, string details)
+        {
+            try
+            {
+                var logPath = _config?.LogFilePath;
+                if (string.IsNullOrWhiteSpace(logPath))
+                {
+                    return;
+                }
+
+                var directory = Path.GetDirectoryName(logPath);
+                if (!string.IsNullOrWhiteSpace(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+
+                File.AppendAllText(logPath,
+                    $"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} - {phase}: {details}{Environment.NewLine}");
+            }
+            catch
+            {
+                // Keep tray app resilient; logging failures must not crash startup or shutdown.
+            }
         }
 
         private static FilterConfig LoadConfig()

@@ -59,5 +59,1841 @@ namespace KeyboardRepeatFilter {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_LBUTTON.
+        /// </summary>
+        internal static string _01 {
+            get {
+                return ResourceManager.GetString("01", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_RBUTTON.
+        /// </summary>
+        internal static string _02 {
+            get {
+                return ResourceManager.GetString("02", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_CANCEL.
+        /// </summary>
+        internal static string _03 {
+            get {
+                return ResourceManager.GetString("03", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_MBUTTON.
+        /// </summary>
+        internal static string _04 {
+            get {
+                return ResourceManager.GetString("04", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_XBUTTON1.
+        /// </summary>
+        internal static string _05 {
+            get {
+                return ResourceManager.GetString("05", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_XBUTTON2.
+        /// </summary>
+        internal static string _06 {
+            get {
+                return ResourceManager.GetString("06", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_BACK.
+        /// </summary>
+        internal static string _08 {
+            get {
+                return ResourceManager.GetString("08", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_TAB.
+        /// </summary>
+        internal static string _09 {
+            get {
+                return ResourceManager.GetString("09", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_CLEAR.
+        /// </summary>
+        internal static string _0C {
+            get {
+                return ResourceManager.GetString("0C", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_RETURN.
+        /// </summary>
+        internal static string _0D {
+            get {
+                return ResourceManager.GetString("0D", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_SHIFT.
+        /// </summary>
+        internal static string _10 {
+            get {
+                return ResourceManager.GetString("10", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_CONTROL.
+        /// </summary>
+        internal static string _11 {
+            get {
+                return ResourceManager.GetString("11", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_MENU.
+        /// </summary>
+        internal static string _12 {
+            get {
+                return ResourceManager.GetString("12", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_PAUSE.
+        /// </summary>
+        internal static string _13 {
+            get {
+                return ResourceManager.GetString("13", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_CAPITAL.
+        /// </summary>
+        internal static string _14 {
+            get {
+                return ResourceManager.GetString("14", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_KANA.
+        /// </summary>
+        internal static string _15 {
+            get {
+                return ResourceManager.GetString("15", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_IME_ON.
+        /// </summary>
+        internal static string _16 {
+            get {
+                return ResourceManager.GetString("16", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_JUNJA.
+        /// </summary>
+        internal static string _17 {
+            get {
+                return ResourceManager.GetString("17", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_FINAL.
+        /// </summary>
+        internal static string _18 {
+            get {
+                return ResourceManager.GetString("18", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_HANJA.
+        /// </summary>
+        internal static string _19 {
+            get {
+                return ResourceManager.GetString("19", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_IME_OFF.
+        /// </summary>
+        internal static string _1A {
+            get {
+                return ResourceManager.GetString("1A", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_ESCAPE.
+        /// </summary>
+        internal static string _1B {
+            get {
+                return ResourceManager.GetString("1B", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_SPACE.
+        /// </summary>
+        internal static string _20 {
+            get {
+                return ResourceManager.GetString("20", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_PRIOR.
+        /// </summary>
+        internal static string _21 {
+            get {
+                return ResourceManager.GetString("21", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_NEXT.
+        /// </summary>
+        internal static string _22 {
+            get {
+                return ResourceManager.GetString("22", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_END.
+        /// </summary>
+        internal static string _23 {
+            get {
+                return ResourceManager.GetString("23", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_HOME.
+        /// </summary>
+        internal static string _24 {
+            get {
+                return ResourceManager.GetString("24", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_LEFT.
+        /// </summary>
+        internal static string _25 {
+            get {
+                return ResourceManager.GetString("25", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_UP.
+        /// </summary>
+        internal static string _26 {
+            get {
+                return ResourceManager.GetString("26", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_RIGHT.
+        /// </summary>
+        internal static string _27 {
+            get {
+                return ResourceManager.GetString("27", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_DOWN.
+        /// </summary>
+        internal static string _28 {
+            get {
+                return ResourceManager.GetString("28", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_INSERT.
+        /// </summary>
+        internal static string _2D {
+            get {
+                return ResourceManager.GetString("2D", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_DELETE.
+        /// </summary>
+        internal static string _2E {
+            get {
+                return ResourceManager.GetString("2E", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 0.
+        /// </summary>
+        internal static string _30 {
+            get {
+                return ResourceManager.GetString("30", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 1.
+        /// </summary>
+        internal static string _31 {
+            get {
+                return ResourceManager.GetString("31", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 2.
+        /// </summary>
+        internal static string _32 {
+            get {
+                return ResourceManager.GetString("32", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 3.
+        /// </summary>
+        internal static string _33 {
+            get {
+                return ResourceManager.GetString("33", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 4.
+        /// </summary>
+        internal static string _34 {
+            get {
+                return ResourceManager.GetString("34", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 5.
+        /// </summary>
+        internal static string _35 {
+            get {
+                return ResourceManager.GetString("35", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 6.
+        /// </summary>
+        internal static string _36 {
+            get {
+                return ResourceManager.GetString("36", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 7.
+        /// </summary>
+        internal static string _37 {
+            get {
+                return ResourceManager.GetString("37", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 8.
+        /// </summary>
+        internal static string _38 {
+            get {
+                return ResourceManager.GetString("38", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 9.
+        /// </summary>
+        internal static string _39 {
+            get {
+                return ResourceManager.GetString("39", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A.
+        /// </summary>
+        internal static string _41 {
+            get {
+                return ResourceManager.GetString("41", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to B.
+        /// </summary>
+        internal static string _42 {
+            get {
+                return ResourceManager.GetString("42", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to C.
+        /// </summary>
+        internal static string _43 {
+            get {
+                return ResourceManager.GetString("43", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to D.
+        /// </summary>
+        internal static string _44 {
+            get {
+                return ResourceManager.GetString("44", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to E.
+        /// </summary>
+        internal static string _45 {
+            get {
+                return ResourceManager.GetString("45", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to F.
+        /// </summary>
+        internal static string _46 {
+            get {
+                return ResourceManager.GetString("46", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to G.
+        /// </summary>
+        internal static string _47 {
+            get {
+                return ResourceManager.GetString("47", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to H.
+        /// </summary>
+        internal static string _48 {
+            get {
+                return ResourceManager.GetString("48", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to I.
+        /// </summary>
+        internal static string _49 {
+            get {
+                return ResourceManager.GetString("49", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to J.
+        /// </summary>
+        internal static string _4A {
+            get {
+                return ResourceManager.GetString("4A", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to K.
+        /// </summary>
+        internal static string _4B {
+            get {
+                return ResourceManager.GetString("4B", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to L.
+        /// </summary>
+        internal static string _4C {
+            get {
+                return ResourceManager.GetString("4C", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to M.
+        /// </summary>
+        internal static string _4D {
+            get {
+                return ResourceManager.GetString("4D", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to N.
+        /// </summary>
+        internal static string _4E {
+            get {
+                return ResourceManager.GetString("4E", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to O.
+        /// </summary>
+        internal static string _4F {
+            get {
+                return ResourceManager.GetString("4F", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to P.
+        /// </summary>
+        internal static string _50 {
+            get {
+                return ResourceManager.GetString("50", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Q.
+        /// </summary>
+        internal static string _51 {
+            get {
+                return ResourceManager.GetString("51", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to R.
+        /// </summary>
+        internal static string _52 {
+            get {
+                return ResourceManager.GetString("52", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to S.
+        /// </summary>
+        internal static string _53 {
+            get {
+                return ResourceManager.GetString("53", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to T.
+        /// </summary>
+        internal static string _54 {
+            get {
+                return ResourceManager.GetString("54", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to U.
+        /// </summary>
+        internal static string _55 {
+            get {
+                return ResourceManager.GetString("55", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to V.
+        /// </summary>
+        internal static string _56 {
+            get {
+                return ResourceManager.GetString("56", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to W.
+        /// </summary>
+        internal static string _57 {
+            get {
+                return ResourceManager.GetString("57", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to X.
+        /// </summary>
+        internal static string _58 {
+            get {
+                return ResourceManager.GetString("58", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Y.
+        /// </summary>
+        internal static string _59 {
+            get {
+                return ResourceManager.GetString("59", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Z.
+        /// </summary>
+        internal static string _5A {
+            get {
+                return ResourceManager.GetString("5A", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_LWIN.
+        /// </summary>
+        internal static string _5B {
+            get {
+                return ResourceManager.GetString("5B", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_RWIN.
+        /// </summary>
+        internal static string _5C {
+            get {
+                return ResourceManager.GetString("5C", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_APPS.
+        /// </summary>
+        internal static string _5D {
+            get {
+                return ResourceManager.GetString("5D", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_SLEEP.
+        /// </summary>
+        internal static string _5F {
+            get {
+                return ResourceManager.GetString("5F", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_NUMPAD0.
+        /// </summary>
+        internal static string _60 {
+            get {
+                return ResourceManager.GetString("60", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_NUMPAD1.
+        /// </summary>
+        internal static string _61 {
+            get {
+                return ResourceManager.GetString("61", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_NUMPAD2.
+        /// </summary>
+        internal static string _62 {
+            get {
+                return ResourceManager.GetString("62", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_NUMPAD3.
+        /// </summary>
+        internal static string _63 {
+            get {
+                return ResourceManager.GetString("63", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_NUMPAD4.
+        /// </summary>
+        internal static string _64 {
+            get {
+                return ResourceManager.GetString("64", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_NUMPAD5.
+        /// </summary>
+        internal static string _65 {
+            get {
+                return ResourceManager.GetString("65", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_NUMPAD6.
+        /// </summary>
+        internal static string _66 {
+            get {
+                return ResourceManager.GetString("66", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_NUMPAD7.
+        /// </summary>
+        internal static string _67 {
+            get {
+                return ResourceManager.GetString("67", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_NUMPAD8.
+        /// </summary>
+        internal static string _68 {
+            get {
+                return ResourceManager.GetString("68", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_NUMPAD9.
+        /// </summary>
+        internal static string _69 {
+            get {
+                return ResourceManager.GetString("69", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_MULTIPLY.
+        /// </summary>
+        internal static string _6A {
+            get {
+                return ResourceManager.GetString("6A", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_ADD.
+        /// </summary>
+        internal static string _6B {
+            get {
+                return ResourceManager.GetString("6B", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_SEPARATOR.
+        /// </summary>
+        internal static string _6C {
+            get {
+                return ResourceManager.GetString("6C", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_SUBTRACT.
+        /// </summary>
+        internal static string _6D {
+            get {
+                return ResourceManager.GetString("6D", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_DECIMAL.
+        /// </summary>
+        internal static string _6E {
+            get {
+                return ResourceManager.GetString("6E", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_DIVIDE.
+        /// </summary>
+        internal static string _6F {
+            get {
+                return ResourceManager.GetString("6F", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_F1.
+        /// </summary>
+        internal static string _70 {
+            get {
+                return ResourceManager.GetString("70", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_F2.
+        /// </summary>
+        internal static string _71 {
+            get {
+                return ResourceManager.GetString("71", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_F3.
+        /// </summary>
+        internal static string _72 {
+            get {
+                return ResourceManager.GetString("72", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_F4.
+        /// </summary>
+        internal static string _73 {
+            get {
+                return ResourceManager.GetString("73", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_F5.
+        /// </summary>
+        internal static string _74 {
+            get {
+                return ResourceManager.GetString("74", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_F6.
+        /// </summary>
+        internal static string _75 {
+            get {
+                return ResourceManager.GetString("75", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_F7.
+        /// </summary>
+        internal static string _76 {
+            get {
+                return ResourceManager.GetString("76", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_F8.
+        /// </summary>
+        internal static string _77 {
+            get {
+                return ResourceManager.GetString("77", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_F9.
+        /// </summary>
+        internal static string _78 {
+            get {
+                return ResourceManager.GetString("78", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_F10.
+        /// </summary>
+        internal static string _79 {
+            get {
+                return ResourceManager.GetString("79", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_F11.
+        /// </summary>
+        internal static string _7A {
+            get {
+                return ResourceManager.GetString("7A", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_F12.
+        /// </summary>
+        internal static string _7B {
+            get {
+                return ResourceManager.GetString("7B", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_F13.
+        /// </summary>
+        internal static string _7C {
+            get {
+                return ResourceManager.GetString("7C", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_F14.
+        /// </summary>
+        internal static string _7D {
+            get {
+                return ResourceManager.GetString("7D", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_F15.
+        /// </summary>
+        internal static string _7E {
+            get {
+                return ResourceManager.GetString("7E", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_F16.
+        /// </summary>
+        internal static string _7F {
+            get {
+                return ResourceManager.GetString("7F", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_F17.
+        /// </summary>
+        internal static string _80 {
+            get {
+                return ResourceManager.GetString("80", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_F18.
+        /// </summary>
+        internal static string _81 {
+            get {
+                return ResourceManager.GetString("81", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_F19.
+        /// </summary>
+        internal static string _82 {
+            get {
+                return ResourceManager.GetString("82", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_F20.
+        /// </summary>
+        internal static string _83 {
+            get {
+                return ResourceManager.GetString("83", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_F21.
+        /// </summary>
+        internal static string _84 {
+            get {
+                return ResourceManager.GetString("84", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_F22.
+        /// </summary>
+        internal static string _85 {
+            get {
+                return ResourceManager.GetString("85", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_F23.
+        /// </summary>
+        internal static string _86 {
+            get {
+                return ResourceManager.GetString("86", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_F24.
+        /// </summary>
+        internal static string _87 {
+            get {
+                return ResourceManager.GetString("87", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_NUMLOCK.
+        /// </summary>
+        internal static string _90 {
+            get {
+                return ResourceManager.GetString("90", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_SCROLL.
+        /// </summary>
+        internal static string _91 {
+            get {
+                return ResourceManager.GetString("91", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_LSHIFT.
+        /// </summary>
+        internal static string A0 {
+            get {
+                return ResourceManager.GetString("A0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_RSHIFT.
+        /// </summary>
+        internal static string A1 {
+            get {
+                return ResourceManager.GetString("A1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_LCONTROL.
+        /// </summary>
+        internal static string A2 {
+            get {
+                return ResourceManager.GetString("A2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_RCONTROL.
+        /// </summary>
+        internal static string A3 {
+            get {
+                return ResourceManager.GetString("A3", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_LMENU.
+        /// </summary>
+        internal static string A4 {
+            get {
+                return ResourceManager.GetString("A4", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_RMENU.
+        /// </summary>
+        internal static string A5 {
+            get {
+                return ResourceManager.GetString("A5", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_BROWSER_BACK.
+        /// </summary>
+        internal static string A6 {
+            get {
+                return ResourceManager.GetString("A6", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_BROWSER_FORWARD.
+        /// </summary>
+        internal static string A7 {
+            get {
+                return ResourceManager.GetString("A7", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_BROWSER_REFRESH.
+        /// </summary>
+        internal static string A8 {
+            get {
+                return ResourceManager.GetString("A8", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_BROWSER_STOP.
+        /// </summary>
+        internal static string A9 {
+            get {
+                return ResourceManager.GetString("A9", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_BROWSER_SEARCH.
+        /// </summary>
+        internal static string AA {
+            get {
+                return ResourceManager.GetString("AA", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_BROWSER_FAVORITES.
+        /// </summary>
+        internal static string AB {
+            get {
+                return ResourceManager.GetString("AB", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_BROWSER_HOME.
+        /// </summary>
+        internal static string AC {
+            get {
+                return ResourceManager.GetString("AC", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_VOLUME_MUTE.
+        /// </summary>
+        internal static string AD {
+            get {
+                return ResourceManager.GetString("AD", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_VOLUME_DOWN.
+        /// </summary>
+        internal static string AE {
+            get {
+                return ResourceManager.GetString("AE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_VOLUME_UP.
+        /// </summary>
+        internal static string AF {
+            get {
+                return ResourceManager.GetString("AF", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_MEDIA_NEXT_TRACK.
+        /// </summary>
+        internal static string B0 {
+            get {
+                return ResourceManager.GetString("B0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_MEDIA_PREV_TRACK.
+        /// </summary>
+        internal static string B1 {
+            get {
+                return ResourceManager.GetString("B1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_MEDIA_STOP.
+        /// </summary>
+        internal static string B2 {
+            get {
+                return ResourceManager.GetString("B2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_MEDIA_PLAY_PAUSE.
+        /// </summary>
+        internal static string B3 {
+            get {
+                return ResourceManager.GetString("B3", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_LAUNCH_MAIL.
+        /// </summary>
+        internal static string B4 {
+            get {
+                return ResourceManager.GetString("B4", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_LAUNCH_MEDIA_SELECT.
+        /// </summary>
+        internal static string B5 {
+            get {
+                return ResourceManager.GetString("B5", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_LAUNCH_APP1.
+        /// </summary>
+        internal static string B6 {
+            get {
+                return ResourceManager.GetString("B6", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_LAUNCH_APP2.
+        /// </summary>
+        internal static string B7 {
+            get {
+                return ResourceManager.GetString("B7", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_OEM_1.
+        /// </summary>
+        internal static string BA {
+            get {
+                return ResourceManager.GetString("BA", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_OEM_PLUS.
+        /// </summary>
+        internal static string BB {
+            get {
+                return ResourceManager.GetString("BB", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_OEM_COMMA.
+        /// </summary>
+        internal static string BC {
+            get {
+                return ResourceManager.GetString("BC", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_OEM_MINUS.
+        /// </summary>
+        internal static string BD {
+            get {
+                return ResourceManager.GetString("BD", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_OEM_PERIOD.
+        /// </summary>
+        internal static string BE {
+            get {
+                return ResourceManager.GetString("BE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_OEM_2.
+        /// </summary>
+        internal static string BF {
+            get {
+                return ResourceManager.GetString("BF", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_OEM_3.
+        /// </summary>
+        internal static string C0 {
+            get {
+                return ResourceManager.GetString("C0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_GAMEPAD_A.
+        /// </summary>
+        internal static string C1 {
+            get {
+                return ResourceManager.GetString("C1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_GAMEPAD_B.
+        /// </summary>
+        internal static string C2 {
+            get {
+                return ResourceManager.GetString("C2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_GAMEPAD_X.
+        /// </summary>
+        internal static string C3 {
+            get {
+                return ResourceManager.GetString("C3", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_GAMEPAD_Y.
+        /// </summary>
+        internal static string C4 {
+            get {
+                return ResourceManager.GetString("C4", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_GAMEPAD_RIGHT_SHOULDER.
+        /// </summary>
+        internal static string C5 {
+            get {
+                return ResourceManager.GetString("C5", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_GAMEPAD_LEFT_SHOULDER.
+        /// </summary>
+        internal static string C6 {
+            get {
+                return ResourceManager.GetString("C6", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_GAMEPAD_LEFT_TRIGGER.
+        /// </summary>
+        internal static string C7 {
+            get {
+                return ResourceManager.GetString("C7", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_GAMEPAD_RIGHT_TRIGGER.
+        /// </summary>
+        internal static string C8 {
+            get {
+                return ResourceManager.GetString("C8", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_GAMEPAD_DPAD_UP.
+        /// </summary>
+        internal static string C9 {
+            get {
+                return ResourceManager.GetString("C9", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_GAMEPAD_DPAD_DOWN.
+        /// </summary>
+        internal static string CA {
+            get {
+                return ResourceManager.GetString("CA", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_GAMEPAD_DPAD_LEFT.
+        /// </summary>
+        internal static string CB {
+            get {
+                return ResourceManager.GetString("CB", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_GAMEPAD_DPAD_RIGHT.
+        /// </summary>
+        internal static string CC {
+            get {
+                return ResourceManager.GetString("CC", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_GAMEPAD_MENU.
+        /// </summary>
+        internal static string CD {
+            get {
+                return ResourceManager.GetString("CD", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_GAMEPAD_VIEW.
+        /// </summary>
+        internal static string CE {
+            get {
+                return ResourceManager.GetString("CE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_GAMEPAD_LEFT_THUMBSTICK_BUTTON.
+        /// </summary>
+        internal static string CF {
+            get {
+                return ResourceManager.GetString("CF", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_GAMEPAD_RIGHT_THUMBSTICK_BUTTON.
+        /// </summary>
+        internal static string D0 {
+            get {
+                return ResourceManager.GetString("D0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_GAMEPAD_LEFT_THUMBSTICK_UP.
+        /// </summary>
+        internal static string D1 {
+            get {
+                return ResourceManager.GetString("D1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_GAMEPAD_LEFT_THUMBSTICK_DOWN.
+        /// </summary>
+        internal static string D2 {
+            get {
+                return ResourceManager.GetString("D2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_GAMEPAD_LEFT_THUMBSTICK_RIGHT.
+        /// </summary>
+        internal static string D3 {
+            get {
+                return ResourceManager.GetString("D3", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_GAMEPAD_LEFT_THUMBSTICK_LEFT.
+        /// </summary>
+        internal static string D4 {
+            get {
+                return ResourceManager.GetString("D4", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_GAMEPAD_RIGHT_THUMBSTICK_UP.
+        /// </summary>
+        internal static string D5 {
+            get {
+                return ResourceManager.GetString("D5", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_GAMEPAD_RIGHT_THUMBSTICK_DOWN.
+        /// </summary>
+        internal static string D6 {
+            get {
+                return ResourceManager.GetString("D6", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_GAMEPAD_RIGHT_THUMBSTICK_RIGHT.
+        /// </summary>
+        internal static string D7 {
+            get {
+                return ResourceManager.GetString("D7", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_GAMEPAD_RIGHT_THUMBSTICK_LEFT.
+        /// </summary>
+        internal static string D8 {
+            get {
+                return ResourceManager.GetString("D8", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_OEM_4.
+        /// </summary>
+        internal static string DB {
+            get {
+                return ResourceManager.GetString("DB", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_OEM_5.
+        /// </summary>
+        internal static string DC {
+            get {
+                return ResourceManager.GetString("DC", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_OEM_6.
+        /// </summary>
+        internal static string DD {
+            get {
+                return ResourceManager.GetString("DD", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_OEM_7.
+        /// </summary>
+        internal static string DE {
+            get {
+                return ResourceManager.GetString("DE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_OEM_8.
+        /// </summary>
+        internal static string DF {
+            get {
+                return ResourceManager.GetString("DF", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_OEM_AX.
+        /// </summary>
+        internal static string E1 {
+            get {
+                return ResourceManager.GetString("E1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_OEM_102.
+        /// </summary>
+        internal static string E2 {
+            get {
+                return ResourceManager.GetString("E2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_ICO_HELP.
+        /// </summary>
+        internal static string E3 {
+            get {
+                return ResourceManager.GetString("E3", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_ICO_00.
+        /// </summary>
+        internal static string E4 {
+            get {
+                return ResourceManager.GetString("E4", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_PROCESSKEY.
+        /// </summary>
+        internal static string E5 {
+            get {
+                return ResourceManager.GetString("E5", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_ICO_CLEAR.
+        /// </summary>
+        internal static string E6 {
+            get {
+                return ResourceManager.GetString("E6", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_PACKET.
+        /// </summary>
+        internal static string E7 {
+            get {
+                return ResourceManager.GetString("E7", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_OEM_RESET.
+        /// </summary>
+        internal static string E9 {
+            get {
+                return ResourceManager.GetString("E9", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_OEM_JUMP.
+        /// </summary>
+        internal static string EA {
+            get {
+                return ResourceManager.GetString("EA", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_OEM_PA1.
+        /// </summary>
+        internal static string EB {
+            get {
+                return ResourceManager.GetString("EB", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_OEM_PA2.
+        /// </summary>
+        internal static string EC {
+            get {
+                return ResourceManager.GetString("EC", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_OEM_PA3.
+        /// </summary>
+        internal static string ED {
+            get {
+                return ResourceManager.GetString("ED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_OEM_WSCTRL.
+        /// </summary>
+        internal static string EE {
+            get {
+                return ResourceManager.GetString("EE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_OEM_CUSEL.
+        /// </summary>
+        internal static string EF {
+            get {
+                return ResourceManager.GetString("EF", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_OEM_ATTN.
+        /// </summary>
+        internal static string F0 {
+            get {
+                return ResourceManager.GetString("F0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_OEM_FINISH.
+        /// </summary>
+        internal static string F1 {
+            get {
+                return ResourceManager.GetString("F1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_OEM_COPY.
+        /// </summary>
+        internal static string F2 {
+            get {
+                return ResourceManager.GetString("F2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_OEM_AUTO.
+        /// </summary>
+        internal static string F3 {
+            get {
+                return ResourceManager.GetString("F3", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_OEM_ENLW.
+        /// </summary>
+        internal static string F4 {
+            get {
+                return ResourceManager.GetString("F4", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_OEM_BACKTAB.
+        /// </summary>
+        internal static string F5 {
+            get {
+                return ResourceManager.GetString("F5", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_ATTN.
+        /// </summary>
+        internal static string F6 {
+            get {
+                return ResourceManager.GetString("F6", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_CRSEL.
+        /// </summary>
+        internal static string F7 {
+            get {
+                return ResourceManager.GetString("F7", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_EXSEL.
+        /// </summary>
+        internal static string F8 {
+            get {
+                return ResourceManager.GetString("F8", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_EREOF.
+        /// </summary>
+        internal static string F9 {
+            get {
+                return ResourceManager.GetString("F9", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_PLAY.
+        /// </summary>
+        internal static string FA {
+            get {
+                return ResourceManager.GetString("FA", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_ZOOM.
+        /// </summary>
+        internal static string FB {
+            get {
+                return ResourceManager.GetString("FB", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_NONAME.
+        /// </summary>
+        internal static string FC {
+            get {
+                return ResourceManager.GetString("FC", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_PA1.
+        /// </summary>
+        internal static string FD {
+            get {
+                return ResourceManager.GetString("FD", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VK_OEM_CLEAR.
+        /// </summary>
+        internal static string FE {
+            get {
+                return ResourceManager.GetString("FE", resourceCulture);
+            }
+        }
     }
 }
