@@ -58,3 +58,17 @@ The project is released under the MIT License, which allows full reuse, modifica
 Minor inconvenience?
 Yes.
 There will be a log in c:\temp\KeyboardRepeatFilter.log that shows which virtual key was stuttering. It can be safely deleted.
+
+**Why is the debounce threshold set to 28 ms?**
+The 28 ms threshold is chosen because it cleanly separates real human keypress timing from the invalid HID sequences produced by the G915/G915X stutter issue.
+
+In testing:
+
+Real, intentional double‑keypresses from humans occur at 35–50 ms or slower
+
+The G915/G915X stutter events occur at 1–10 ms, sometimes up to ~22 ms
+
+28 ms is the boundary where all glitch events are filtered, but no legitimate typing is affected
+
+This value is not arbitrary — it reflects the biomechanical limit of how fast a person can physically press the same key twice (down → up → down).
+Anything below ~30 ms is not humanly possible and is therefore safe to discard.
