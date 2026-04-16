@@ -2,8 +2,8 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 
@@ -16,10 +16,23 @@ namespace KeyboardRepeatFilter
         private static FilterConfig _config;
         private static DateTime _startedAtUtc;
         private static bool _shutdownLogged;
+        private static Mutex _mutex;
 
         [STAThread]
         private static void Main()
         {
+            const string appName = "KeyboardRepeatFilter";
+            bool createdNew;
+
+            _mutex = new Mutex(true, appName, out createdNew);
+
+            if (!createdNew)
+            {
+                // Another instance is already running.
+                MessageBox.Show("Another instance of Keyboard Repeat Filter is already running.", "Keyboard Repeat Filter", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
@@ -67,6 +80,9 @@ namespace KeyboardRepeatFilter
             };
  
             Application.Run();
+
+            // Release the mutex when the application exits.
+            _mutex.ReleaseMutex();
         }
 
 

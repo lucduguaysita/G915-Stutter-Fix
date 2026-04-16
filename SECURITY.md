@@ -6,7 +6,7 @@ Security fixes are provided for the latest release series.
 
 Current supported version:
 
-- `1.1.x`
+- `1.2.x`
 
 Older versions may not receive security updates.
 

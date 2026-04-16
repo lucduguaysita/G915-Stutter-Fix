@@ -51,7 +51,7 @@
 
 When reporting an issue, include:
 
-- App version (`1.1.0`, etc.)
+- App version (`1.2.0`, etc.)
 - Windows version/build
 - Keyboard model
 - Current `config.json` (redact anything sensitive)

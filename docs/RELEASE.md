@@ -27,7 +27,7 @@ Example:
 
 ```bash
 git add .
-git commit -m "Release v1.1.0"
+git commit -m "Release v1.2.0"
 git push origin main
 ```
 
@@ -36,15 +36,15 @@ git push origin main
 Example:
 
 ```bash
-git tag -a v1.1.0 -m "Release v1.1.0"
-git push origin v1.1.0
+git tag -a v1.2.0 -m "Release v1.2.0"
+git push origin v1.2.0
 ```
 
 ## 6) Create GitHub release
 
 1. Open the repo on GitHub.
-2. Create a new release from tag `v1.1.0`.
-3. Title example: `G915 Stutter Fix v1.1.0`.
+2. Create a new release from tag `v1.2.0`.
+3. Title example: `G915 Stutter Fix v1.2.0`.
 4. Paste notes from `CHANGELOG.md`.
 5. Attach files from `releases`:
    - `KeyboardRepeatFilter.exe`
