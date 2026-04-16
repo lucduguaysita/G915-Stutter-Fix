@@ -17,5 +17,4 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 - Add a Singleton pattern to prevent the application from starting multiple instances.
-- 
 
