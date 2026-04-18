@@ -1,164 +1,115 @@
-
 <style>
   @media (prefers-color-scheme: dark) {
     .kb-body { fill: #1a1a1a; stroke: #333; }
-    .kb-key { fill: #2a2a2a; stroke: #444; }
-    .kb-label { fill: #aaa; }
-    .kb-deck { fill: #111; stroke: #222; }
+    .kb-key  { fill: #2a2a2a; stroke: #444; }
+    .kb-deck { fill: #111;  stroke: #222; }
   }
   @media (prefers-color-scheme: light) {
     .kb-body { fill: #1c1c1e; stroke: #0a0a0a; }
-    .kb-key { fill: #2e2e30; stroke: #1a1a1a; }
-    .kb-label { fill: #bbb; }
-    .kb-deck { fill: #111; stroke: #0a0a0a; }
+    .kb-key  { fill: #2e2e30; stroke: #1a1a1a; }
+    .kb-deck { fill: #111;  stroke: #0a0a0a; }
   }
 </style>
 
-<svg viewBox="0 0 680 260" width="100%" xmlns="http://www.w3.org/2000/svg" role="img">
-<title>Logitech G915-style keyboard with stutter heatmap</title>
-<desc>A top-down view of a tenkeyless mechanical keyboard. Keys with the most double-press stutters are highlighted in amber and red, with I being the most problematic.</desc>
-
+<svg viewBox="0 0 680 280" width="100%" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>Logitech G915-style keyboard — stutter heatmap</title>
+<desc>Top-down keyboard. Stuttering keys highlighted red through amber. Legend below keyboard body.</desc>
 <defs>
   <style>
     .kb-body { fill: #1c1c1e; stroke: #0a0a0a; }
-    .kb-key { fill: #2e2e30; stroke: #1a1a1a; }
-    .kb-label { fill: #bbb; font-family: monospace; font-size: 7px; }
-    .kb-deck { fill: #111; stroke: #0a0a0a; }
+    .kb-key  { fill: #2e2e30; stroke: #1a1a1a; }
+    .kb-deck { fill: #111;  stroke: #0a0a0a; }
     @media (prefers-color-scheme: dark) {
       .kb-body { fill: #1a1a1a; stroke: #333; }
-      .kb-key { fill: #2a2a2a; stroke: #444; }
-      .kb-label { fill: #999; }
+      .kb-key  { fill: #2a2a2a; stroke: #444; }
     }
   </style>
 </defs>
-
-<rect x="14" y="14" width="652" height="232" rx="12" class="kb-body" stroke-width="2"/>
-<rect x="20" y="20" width="640" height="220" rx="9" class="kb-deck" stroke-width="1"/>
-
 <script>
 (function(){
-  const stutCounts = { I:19, N:10, V:7, B:5, D:4, A:4, T:2, H:2, O:1, C:1, L:1, P:1 };
-  const maxCount = 19;
-
-  function heatColor(key) {
-    const c = stutCounts[key] || 0;
-    if (!c) return null;
-    const t = c / maxCount;
-    if (t > 0.7) return { fill:'#E24B4A', label:'#FCEBEB' };
-    if (t > 0.4) return { fill:'#EF9F27', label:'#412402' };
-    if (t > 0.15) return { fill:'#FAC775', label:'#412402' };
-    return { fill:'#FAEEDA', label:'#633806' };
-  }
-
-  const svg = document.currentScript.closest('svg');
-  const KW = 38, KH = 34, GAP = 3;
-  const startX = 28, startY = 32;
-
-  const rows = [
-    { y: 0, keys: [
-      {l:'Esc'},{l:'F1'},{l:'F2'},{l:'F3'},{l:'F4',gap:6},{l:'F5'},{l:'F6'},{l:'F7'},{l:'F8',gap:6},{l:'F9'},{l:'F10'},{l:'F11'},{l:'F12'},
-      {l:'PrtSc'},{l:'ScrLk'},{l:'Pause'}
-    ]},
-    { y: 1, keys: [
-      {l:'`'},{l:'1'},{l:'2'},{l:'3'},{l:'4'},{l:'5'},{l:'6'},{l:'7'},{l:'8'},{l:'9'},{l:'0'},{l:'-'},{l:'='},{l:'⌫',w:2},
-      {l:'Ins'},{l:'Home'},{l:'PgUp'}
-    ]},
-    { y: 2, keys: [
-      {l:'Tab',w:1.5},{l:'Q'},{l:'W'},{l:'E'},{l:'R'},{l:'T'},{l:'Y'},{l:'U'},{l:'I'},{l:'O'},{l:'P'},{l:'['},{l:']'},{l:'\\',w:1.5},
-      {l:'Del'},{l:'End'},{l:'PgDn'}
-    ]},
-    { y: 3, keys: [
-      {l:'Caps',w:1.75},{l:'A'},{l:'S'},{l:'D'},{l:'F'},{l:'G'},{l:'H'},{l:'J'},{l:'K'},{l:'L'},{l:';'},{l:'\''},{l:'↵',w:2.25}
-    ]},
-    { y: 4, keys: [
-      {l:'⇧',w:2.25},{l:'Z'},{l:'X'},{l:'C'},{l:'V'},{l:'B'},{l:'N'},{l:'M'},{l:','},{l:'.'},{l:'/'},{l:'⇧',w:2.75},
-      {l:'↑'}
-    ]},
-    { y: 5, keys: [
-      {l:'Ctrl',w:1.25},{l:'❖',w:1.25},{l:'Alt',w:1.25},{l:'Space',w:6.25},{l:'Alt',w:1.25},{l:'❖',w:1},{l:'▤',w:1},{l:'Ctrl',w:1.25},
-      {l:'←'},{l:'↓'},{l:'→'}
-    ]}
+  const KW=33, KH=28, GAP=2, startX=10, startY=22;
+  const rowYOffsets=[0,1.05,2.1,3.15,4.2,5.25];
+  const ROW_H=KH+GAP;
+  const rows=[
+    [{l:'Esc'},{l:'F1'},{l:'F2'},{l:'F3'},{l:'F4',gap:5},{l:'F5'},{l:'F6'},{l:'F7'},{l:'F8',gap:5},{l:'F9'},{l:'F10'},{l:'F11'},{l:'F12'},{l:'Prt',gap:4},{l:'Scr'},{l:'Pau'}],
+    [{l:'`'},{l:'1'},{l:'2'},{l:'3'},{l:'4'},{l:'5'},{l:'6'},{l:'7'},{l:'8'},{l:'9'},{l:'0'},{l:'-'},{l:'='},{l:'⌫',w:2},{l:'Ins',gap:4},{l:'Hom'},{l:'PgU'}],
+    [{l:'Tab',w:1.5},{l:'Q'},{l:'W'},{l:'E'},{l:'R'},{l:'T'},{l:'Y'},{l:'U'},{l:'I'},{l:'O'},{l:'P'},{l:'['},{l:']'},{l:'\\',w:1.5},{l:'Del',gap:4},{l:'End'},{l:'PgD'}],
+    [{l:'Cap',w:1.75},{l:'A'},{l:'S'},{l:'D'},{l:'F'},{l:'G'},{l:'H'},{l:'J'},{l:'K'},{l:'L'},{l:';'},{l:'\''},{l:'↵',w:2.25}],
+    [{l:'⇧',w:2.25},{l:'Z'},{l:'X'},{l:'C'},{l:'V'},{l:'B'},{l:'N'},{l:'M'},{l:','},{l:'.'},{l:'/'},{l:'⇧',w:2.75},{l:'↑',gap:4}],
+    [{l:'Ctl',w:1.25},{l:'❖',w:1.25},{l:'Alt',w:1.25},{l:'Spc',w:6.25},{l:'Alt',w:1.25},{l:'❖',w:1},{l:'▤',w:1},{l:'Ctl',w:1.25},{l:'←',gap:4},{l:'↓'},{l:'→'}]
   ];
 
-  const rowYOffsets = [0, 1.05, 2.1, 3.15, 4.2, 5.25];
-  const ROW_H = KH + GAP;
-
-  rows.forEach((row, ri) => {
-    let cx = startX;
-    row.keys.forEach(key => {
-      const gap = key.gap || 0;
-      cx += gap;
-      const kw = (key.w || 1) * KW + (key.w > 1 ? (key.w - 1) * GAP : 0);
-      const ky = startY + rowYOffsets[ri] * ROW_H;
-      const heat = heatColor(key.l);
-
-      const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
-      rect.setAttribute('x', cx);
-      rect.setAttribute('y', ky);
-      rect.setAttribute('width', kw - 1);
-      rect.setAttribute('height', KH);
-      rect.setAttribute('rx', '3');
-      if (heat) {
-        rect.setAttribute('fill', heat.fill);
-        rect.setAttribute('stroke', '#0a0a0a');
-        rect.setAttribute('stroke-width', '1');
-      } else {
-        rect.setAttribute('class', 'kb-key');
-        rect.setAttribute('stroke-width', '0.5');
-      }
-      svg.appendChild(rect);
-
-      const text = document.createElementNS('http://www.w3.org/2000/svg','text');
-      text.setAttribute('x', cx + kw/2 - 0.5);
-      text.setAttribute('y', ky + KH/2 + 3);
-      text.setAttribute('text-anchor', 'middle');
-      text.setAttribute('font-size', key.l.length > 3 ? '6' : key.l.length > 2 ? '7' : '8');
-      text.setAttribute('font-family', 'monospace');
-      text.setAttribute('font-weight', heat ? '600' : '400');
-      if (heat) {
-        text.setAttribute('fill', heat.label);
-      } else {
-        text.setAttribute('class', 'kb-label');
-      }
-      text.textContent = key.l;
-      svg.appendChild(text);
-
-      if (heat && stutCounts[key.l]) {
-        const badge = document.createElementNS('http://www.w3.org/2000/svg','text');
-        badge.setAttribute('x', cx + kw - 4);
-        badge.setAttribute('y', ky + 8);
-        badge.setAttribute('text-anchor', 'end');
-        badge.setAttribute('font-size', '5.5');
-        badge.setAttribute('font-family', 'monospace');
-        badge.setAttribute('font-weight', '700');
-        badge.setAttribute('fill', stutCounts[key.l] > 10 ? '#791F1F' : '#633806');
-        badge.textContent = stutCounts[key.l];
-        svg.appendChild(badge);
-      }
-
-      cx += kw + GAP;
+  let globalMaxX=0, globalMaxY=0;
+  rows.forEach((keys,ri)=>{
+    let cx=startX;
+    keys.forEach(key=>{
+      cx+=key.gap||0;
+      const kw=(key.w||1)*KW+((key.w||1)>1?((key.w||1)-1)*GAP:0);
+      const ky=startY+rowYOffsets[ri]*ROW_H;
+      globalMaxX=Math.max(globalMaxX,cx+kw);
+      globalMaxY=Math.max(globalMaxY,ky+KH);
+      cx+=kw+GAP;
     });
   });
 
-  const legX = 30, legY = 242;
-  const items = [
-    { fill:'#E24B4A', label:'Critical (15+)' },
-    { fill:'#EF9F27', label:'High (8–14)' },
-    { fill:'#FAC775', label:'Medium (3–7)' },
-    { fill:'#FAEEDA', label:'Low (1–2)' },
-  ];
-  items.forEach((item, i) => {
-    const x = legX + i * 140;
-    const r = document.createElementNS('http://www.w3.org/2000/svg','rect');
-    r.setAttribute('x', x); r.setAttribute('y', legY - 8);
-    r.setAttribute('width', 10); r.setAttribute('height', 8);
-    r.setAttribute('rx', '2'); r.setAttribute('fill', item.fill);
-    svg.appendChild(r);
-    const t = document.createElementNS('http://www.w3.org/2000/svg','text');
-    t.setAttribute('x', x + 14); t.setAttribute('y', legY);
-    t.setAttribute('font-size', '8'); t.setAttribute('font-family', 'sans-serif');
-    t.setAttribute('fill', '#888'); t.textContent = item.label;
-    svg.appendChild(t);
+  const PAD=8;
+  const bodyX=startX-PAD, bodyY=startY-PAD;
+  const bodyW=globalMaxX-startX+PAD*2+2;
+  const bodyH=globalMaxY-startY+PAD*2+2;
+
+  const svg=document.currentScript.closest('svg');
+
+  function mkRect(attrs){
+    const el=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));
+    return el;
+  }
+  function mkText(attrs, content){
+    const el=document.createElementNS('http://www.w3.org/2000/svg','text');
+    Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));
+    el.textContent=content;
+    return el;
+  }
+
+  svg.insertBefore(mkRect({x:bodyX,y:bodyY,width:bodyW,height:bodyH,rx:10,class:'kb-body','stroke-width':2}), svg.firstChild);
+  svg.insertBefore(mkRect({x:bodyX+5,y:bodyY+5,width:bodyW-10,height:bodyH-10,rx:7,class:'kb-deck','stroke-width':1}), svg.childNodes[1]);
+
+  const stut={I:19,N:10,V:7,B:5,D:4,A:4,T:2,H:2,O:1,C:1,L:1,P:1};
+  function heatColor(k){
+    const c=stut[k]||0; if(!c) return null;
+    const t=c/19;
+    if(t>0.7) return{fill:'#E24B4A',label:'#FCEBEB'};
+    if(t>0.4) return{fill:'#EF9F27',label:'#412402'};
+    if(t>0.15) return{fill:'#FAC775',label:'#412402'};
+    return{fill:'#FAEEDA',label:'#633806'};
+  }
+
+  rows.forEach((keys,ri)=>{
+    let cx=startX;
+    keys.forEach(key=>{
+      cx+=key.gap||0;
+      const kw=(key.w||1)*KW+((key.w||1)>1?((key.w||1)-1)*GAP:0);
+      const ky=startY+rowYOffsets[ri]*ROW_H;
+      const heat=heatColor(key.l);
+      const keyRect=mkRect({x:cx,y:ky,width:kw-1,height:KH,rx:3,
+        ...(heat?{fill:heat.fill,stroke:'#0a0a0a','stroke-width':1}:{class:'kb-key','stroke-width':0.5})});
+      svg.appendChild(keyRect);
+      const fs=key.l.length>4?'5.5':key.l.length>2?'6.5':'8';
+      svg.appendChild(mkText({x:cx+kw/2-0.5,y:ky+KH/2+3,'text-anchor':'middle','font-size':fs,'font-family':'monospace','font-weight':heat?600:400,fill:heat?heat.label:'#bbb'},key.l));
+      if(heat&&stut[key.l]){
+        svg.appendChild(mkText({x:cx+kw-3,y:ky+7,'text-anchor':'end','font-size':5,'font-family':'monospace','font-weight':700,fill:stut[key.l]>10?'#791F1F':'#633806'},stut[key.l]));
+      }
+      cx+=kw+GAP;
+    });
+  });
+
+  const legY=bodyY+bodyH+26;
+  const legItems=[{fill:'#E24B4A',label:'Critical (15+)'},{fill:'#EF9F27',label:'High (8–14)'},{fill:'#FAC775',label:'Medium (3–7)'},{fill:'#FAEEDA',label:'Low (1–2)'}];
+  const legStartX=Math.round((680-legItems.length*130)/2);
+  legItems.forEach((item,i)=>{
+    const x=legStartX+i*130;
+    svg.appendChild(mkRect({x,y:legY-10,width:11,height:11,rx:2,fill:item.fill,stroke:'#0a0a0a','stroke-width':0.5}));
+    svg.appendChild(mkText({x:x+16,y:legY,'font-size':10,'font-family':'sans-serif',fill:'#888'},item.label));
   });
 })();
 </script>
