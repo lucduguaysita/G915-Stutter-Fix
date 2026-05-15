@@ -8,6 +8,7 @@ Use this quick checklist before publishing a release.
 - `releases` folder is refreshed automatically.
 - `releases` contains:
   - `KeyboardRepeatFilter.exe`
+  - `KeyboardHeatmap.exe`
   - `Newtonsoft.Json.dll`
   - `config.json`
 - `releases` does not contain stale files from previous builds.
@@ -28,16 +29,10 @@ Use this quick checklist before publishing a release.
 
 - Edit `releases/config.json` and restart app.
 - Updated `MinRepeatIntervalMs` is reflected in startup log.
-- Per-key override (`PerKeyMinRepeatIntervalMs`) changes behavior for that key.
-- Excluded key (`ExcludedVkCodes`) is not filtered.
 
-## Exit and lifecycle logs
+## KeyboardHeatmap
 
-- Exit app using tray menu.
-- Shutdown log entry is written with reason and uptime.
-- Restart app and verify new startup entry is appended.
-
-## Startup registration
-
-- Toggle `Autostart` from tray menu.
-- Sign out/in (or reboot) and confirm app starts automatically when enabled.
+- Run `KeyboardHeatmap.exe` from `releases` with a valid log file.
+- `KeyboardHeatmap.html` is generated in the expected output location.
+- Open the HTML file in a browser and confirm the heatmap renders correctly.
+- Run `KeyboardHeatmap.exe -v` and confirm the daily event count section appears.

@@ -13,7 +13,13 @@
     <Title>G915-Stutter-Fix</Title>
     <AssemblyTitle>G915-Stutter-Fix</AssemblyTitle>
     <ApplicationIcon>app.ico</ApplicationIcon>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="KeyboardHeatmap\**" />
+    <EmbeddedResource Remove="KeyboardHeatmap\**" />
+    <None Remove="KeyboardHeatmap\**" />
+  </ItemGroup>
   <ItemGroup>
     <None Remove="app.ico" />
     <None Remove="src\app.ico" />
@@ -48,7 +54,7 @@
       <Link>config.json</Link>
     </None>
   </ItemGroup>
-  <Target Name="RefreshReleasesFolder" AfterTargets="Build">
+  <Target Name="RefreshReleasesFolder" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
     <PropertyGroup>
       <ReleasesDir>$(MSBuildProjectDirectory)\releases\</ReleasesDir>
     </PropertyGroup>
@@ -57,5 +63,6 @@
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ReleasesDir)" />
     <Copy SourceFiles="$(TargetDir)Newtonsoft.Json.dll" DestinationFolder="$(ReleasesDir)" Condition="Exists('$(TargetDir)Newtonsoft.Json.dll')" />
     <Copy SourceFiles="$(TargetDir)config.json" DestinationFolder="$(ReleasesDir)" Condition="Exists('$(TargetDir)config.json')" />
+    <Copy SourceFiles="$(MSBuildProjectDirectory)\KeyboardHeatmap\bin\Release\KeyboardHeatmap.exe" DestinationFolder="$(ReleasesDir)" Condition="Exists('$(MSBuildProjectDirectory)\KeyboardHeatmap\bin\Release\KeyboardHeatmap.exe')" />
   </Target>
 </Project>

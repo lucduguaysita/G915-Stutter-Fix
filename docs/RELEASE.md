@@ -13,6 +13,7 @@ This project uses GitHub releases and git tags for versioned distribution.
 - Build `Release` configuration.
 - Confirm `releases` is refreshed and contains:
   - `KeyboardRepeatFilter.exe`
+  - `KeyboardHeatmap.exe`
   - `Newtonsoft.Json.dll`
   - `config.json`
 
@@ -27,7 +28,7 @@ Example:
 
 ```bash
 git add .
-git commit -m "Release v1.2.0"
+git commit -m "Release v1.3.0"
 git push origin main
 ```
 
@@ -36,18 +37,19 @@ git push origin main
 Example:
 
 ```bash
-git tag -a v1.2.0 -m "Release v1.2.0"
-git push origin v1.2.0
+git tag -a v1.3.0 -m "Release v1.3.0"
+git push origin v1.3.0
 ```
 
 ## 6) Create GitHub release
 
 1. Open the repo on GitHub.
-2. Create a new release from tag `v1.2.0`.
-3. Title example: `G915 Stutter Fix v1.2.0`.
+2. Create a new release from tag `v1.3.0`.
+3. Title example: `G915 Stutter Fix v1.3.0`.
 4. Paste notes from `CHANGELOG.md`.
 5. Attach files from `releases`:
    - `KeyboardRepeatFilter.exe`
+   - `KeyboardHeatmap.exe`
    - `Newtonsoft.Json.dll`
    - `config.json`
 6. Publish release.
@@ -56,4 +58,5 @@ git push origin v1.2.0
 
 - Download release assets from GitHub and run once on a clean machine/profile.
 - Verify tray startup, filtering, and logs.
+- Run `KeyboardHeatmap.exe` and confirm the HTML report is generated correctly.
 - Confirm docs reflect final shipped behavior.
