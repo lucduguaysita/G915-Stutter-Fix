@@ -57,7 +57,7 @@ Open the generated `KeyboardHeatmap.html` in any browser to view the heatmap.
 KeyboardHeatmap.exe
 
 # Generate a heatmap from a specific log file
-KeyboardHeatmap.exe -logFile "C:\temp\KeyboardRepeatFilter.log"
+KeyboardHeatmap.exe "C:\temp\KeyboardRepeatFilter.log"
 
 # Generate a heatmap with daily filtered event count
 KeyboardHeatmap.exe -v
