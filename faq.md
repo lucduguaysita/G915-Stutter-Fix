@@ -96,3 +96,14 @@ In testing:
 This value is not arbitrary. It reflects the biomechanical limit of how fast a person can physically press the same key twice (down -> up -> down).
 
 Anything below about 30 ms is not humanly possible and is therefore safe to discard.
+
+## Why I do not see the keyboard heatmap when invoking `KeyboardHeatmap.exe`?
+`KeyboardHeatmap.exe` is a CLI tool that reads the filter log and generates a self-contained HTML heatmap of filtered key counts.
+By default the log file is expected to be in `C:\temp`. If the log file is not found, it will not generate the heatmap.\
+To fix this, you can either:
+
+Create the default c:\temp directory and ensure the log file is being written there
+
+Or 
+
+Alter the config.json to point to the correct log file path by changing the `LogFilePath` value. This way, `KeyboardHeatmap.exe` will read from the correct location and generate the heatmap successfully.
