@@ -60,6 +60,9 @@ Yes.
 
 It does not inject into processes, install drivers, or modify system files.
 It simply listens to keyboard events and discards invalid ones.
+This is not a keylogger, only duplicated key are log in c:\temp.
+There is no phone home, no update checks, no network connectivity is required.
+It works perfectly in a air-gapped environment.
 
 ## Why is `Newtonsoft.Json.dll` included?
 
