@@ -11,8 +11,7 @@ User reports confirm the fix eliminates stuttering/double‑keypress issues on a
 | `KeyboardRepeatFilter.exe` | Runs in the system tray and silently filters stutter/duplicate keypresses in real time. |
 | `KeyboardHeatmap.exe` | CLI tool that reads the filter log and generates a self-contained HTML heatmap of filtered key counts. |
 ## Keyboard Heatmap (New!)
-
-<img width="856" height="505" alt="image" src="https://github.com/user-attachments/assets/dcdec3ad-ca1b-488b-8958-08de4103a487" />
+<img width="872" height="815" alt="image" src="https://github.com/user-attachments/assets/5f8ecb43-6f98-474b-add5-14fc1468279d" />
 
 
 A diagnostic visualization showing which keys generate filtered or duplicate events…
