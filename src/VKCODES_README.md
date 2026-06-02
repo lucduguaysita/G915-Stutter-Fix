@@ -6,7 +6,7 @@ A reference for all Windows Virtual Key (`VK_*`) codes mapped to their hexadecim
 
 ## Mouse Buttons
 
-| Hex | Constant |
+| Dec | Constant |
 |-----|----------|
 | `001` | `VK_LBUTTON` |
 | `002` | `VK_RBUTTON` |
@@ -19,7 +19,7 @@ A reference for all Windows Virtual Key (`VK_*`) codes mapped to their hexadecim
 
 ## Control Keys
 
-| Hex | Constant |
+| Dec | Constant |
 |-----|----------|
 | `008` | `VK_BACK` |
 | `009` | `VK_TAB` |
@@ -33,7 +33,7 @@ A reference for all Windows Virtual Key (`VK_*`) codes mapped to their hexadecim
 
 ## Modifier Keys
 
-| Hex | Constant |
+| Dec | Constant |
 |-----|----------|
 | `016` | `VK_SHIFT` |
 | `017` | `VK_CONTROL` |
@@ -49,7 +49,7 @@ A reference for all Windows Virtual Key (`VK_*`) codes mapped to their hexadecim
 
 ## IME Keys
 
-| Hex | Constant |
+| Dec | Constant |
 |-----|----------|
 | `021` | `VK_KANA` |
 | `022` | `VK_IME_ON` |
@@ -62,7 +62,7 @@ A reference for all Windows Virtual Key (`VK_*`) codes mapped to their hexadecim
 
 ## Navigation & Editing
 
-| Hex | Constant |
+| Dec | Constant |
 |-----|----------|
 | `032` | `VK_SPACE` |
 | `033` | `VK_PRIOR` (Page Up) |
@@ -82,7 +82,7 @@ A reference for all Windows Virtual Key (`VK_*`) codes mapped to their hexadecim
 
 ### Digits (0–9)
 
-| Hex | Key |
+| Dec | Key |
 |-----|-----|
 | `048` | `0` |
 | `049` | `1` |
@@ -97,7 +97,7 @@ A reference for all Windows Virtual Key (`VK_*`) codes mapped to their hexadecim
 
 ### Letters (A–Z)
 
-| Hex | Key | Hex | Key | Hex | Key |
+| Dec | Key | Dec | Key | Dec | Key |
 |-----|-----|-----|-----|-----|-----|
 | `065` | `A` | `074` | `J` | `083` | `S` |
 | `066` | `B` | `075` | `K` | `084` | `T` |
@@ -113,7 +113,7 @@ A reference for all Windows Virtual Key (`VK_*`) codes mapped to their hexadecim
 
 ## Windows & System Keys
 
-| Hex | Constant |
+| Dec | Constant |
 |-----|----------|
 | `091` | `VK_LWIN` |
 | `092` | `VK_RWIN` |
@@ -124,7 +124,7 @@ A reference for all Windows Virtual Key (`VK_*`) codes mapped to their hexadecim
 
 ## Numpad Keys
 
-| Hex | Constant |
+| Dec | Constant |
 |-----|----------|
 | `096` | `VK_NUMPAD0` |
 | `097` | `VK_NUMPAD1` |
@@ -148,7 +148,7 @@ A reference for all Windows Virtual Key (`VK_*`) codes mapped to their hexadecim
 
 ## Function Keys
 
-| Hex | Constant | Hex | Constant |
+| Dec | Constant | Dec | Constant |
 |-----|----------|-----|----------|
 | `112` | `VK_F1`  | `124` | `VK_F13` |
 | `113` | `VK_F2`  | `125` | `VK_F14` |
@@ -167,7 +167,7 @@ A reference for all Windows Virtual Key (`VK_*`) codes mapped to their hexadecim
 
 ## Lock Keys
 
-| Hex | Constant |
+| Dec | Constant |
 |-----|----------|
 | `145` | `VK_SCROLL` |
 
@@ -175,7 +175,7 @@ A reference for all Windows Virtual Key (`VK_*`) codes mapped to their hexadecim
 
 ## Browser Keys
 
-| Hex | Constant |
+| Dec | Constant |
 |-----|----------|
 | `166` | `VK_BROWSER_BACK` |
 | `167` | `VK_BROWSER_FORWARD` |
@@ -189,7 +189,7 @@ A reference for all Windows Virtual Key (`VK_*`) codes mapped to their hexadecim
 
 ## Volume & Media Keys
 
-| Hex | Constant |
+| Dec | Constant |
 |-----|----------|
 | `173` | `VK_VOLUME_MUTE` |
 | `174` | `VK_VOLUME_DOWN` |
@@ -203,7 +203,7 @@ A reference for all Windows Virtual Key (`VK_*`) codes mapped to their hexadecim
 
 ## Launch Keys
 
-| Hex | Constant |
+| Dec | Constant |
 |-----|----------|
 | `180` | `VK_LAUNCH_MAIL` |
 | `181` | `VK_LAUNCH_MEDIA_SELECT` |
@@ -214,7 +214,7 @@ A reference for all Windows Virtual Key (`VK_*`) codes mapped to their hexadecim
 
 ## OEM Keys
 
-| Hex | Constant |
+| Dec | Constant |
 |-----|----------|
 | `186` | `VK_OEM_1` |
 | `187` | `VK_OEM_PLUS` |
@@ -249,7 +249,7 @@ A reference for all Windows Virtual Key (`VK_*`) codes mapped to their hexadecim
 
 ## Gamepad Keys
 
-| Hex | Constant |
+| Dec | Constant |
 |-----|----------|
 | `193` | `VK_GAMEPAD_A` |
 | `194` | `VK_GAMEPAD_B` |
@@ -280,7 +280,7 @@ A reference for all Windows Virtual Key (`VK_*`) codes mapped to their hexadecim
 
 ## ICO / Misc Keys
 
-| Hex | Constant |
+| Dec | Constant |
 |-----|----------|
 | `227` | `VK_ICO_HELP` |
 | `228` | `VK_ICO_00` |
@@ -290,7 +290,7 @@ A reference for all Windows Virtual Key (`VK_*`) codes mapped to their hexadecim
 
 ## Process / Special Keys
 
-| Hex | Constant |
+| Dec | Constant |
 |-----|----------|
 | `229` | `VK_PROCESSKEY` |
 | `231` | `VK_PACKET` |
