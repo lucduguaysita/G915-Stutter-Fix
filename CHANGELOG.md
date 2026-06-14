@@ -2,6 +2,22 @@ one # Changelog
 
 All notable changes to this project are documented in this file.
 
+## [2.1.0] - 2026-06-14
+
+### Added
+- **Restart as administrator**: a new tray menu item (shown only while running
+  unelevated) relaunches the app with administrator rights via a UAC prompt, so the
+  keyboard hook can also filter input for elevated windows instead of being bypassed
+  for them (UIPI). The elevated-window notification is now clickable and triggers the
+  same relaunch.
+
+### Changed
+- The elevated-window notification stays up longer and pauses its auto-dismiss
+  countdown while the pointer is over it, so it can be read and clicked.
+- The single-instance guard now waits briefly for the mutex instead of exiting
+  immediately, so the "Restart as administrator" handoff (old instance releasing as
+  the elevated one starts) no longer trips the singleton and kills the new instance.
+
 ## [2.0.0] - 2026-06-13
 
 ### Added

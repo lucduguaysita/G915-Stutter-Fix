@@ -19,7 +19,7 @@ namespace KeyboardRepeatFilter
         private readonly Font _titleFont = new Font("Segoe UI", 9.5f, FontStyle.Bold);
         private readonly Font _bodyFont = new Font("Segoe UI", 9f, FontStyle.Regular);
 
-        public ToastForm(string title, string message, int durationMs)
+        public ToastForm(string title, string message, int durationMs, Action onClick = null)
         {
             FormBorderStyle = FormBorderStyle.None;
             ShowInTaskbar = false;
@@ -55,12 +55,43 @@ namespace KeyboardRepeatFilter
             Controls.Add(panel);
             Padding = new Padding(1); // lets the BackColor show as a 1px border
 
-            // Click anywhere to dismiss early.
-            EventHandler dismiss = (_, __) => Close();
+            // Click anywhere to act (when an action is supplied) and dismiss. With no
+            // action it simply dismisses early.
+            EventHandler dismiss = (_, __) =>
+            {
+                if (onClick != null)
+                {
+                    try { onClick(); }
+                    catch { /* never let a toast click crash the tray app */ }
+                }
+                Close();
+            };
             Click += dismiss;
             panel.Click += dismiss;
             titleLbl.Click += dismiss;
             bodyLbl.Click += dismiss;
+            if (onClick != null)
+            {
+                Cursor = panel.Cursor = titleLbl.Cursor = bodyLbl.Cursor = Cursors.Hand;
+            }
+
+            // Keep the toast up while the user is reading or about to click it: pause
+            // the auto-dismiss countdown on hover and restart it (full duration) once
+            // the pointer leaves, so it can never vanish out from under the cursor.
+            EventHandler pause = (_, __) => _life.Stop();
+            EventHandler resume = (_, __) =>
+            {
+                if (!Bounds.Contains(Cursor.Position))
+                {
+                    _life.Stop();
+                    _life.Start();
+                }
+            };
+            foreach (Control c in new Control[] { this, panel, accent, titleLbl, bodyLbl })
+            {
+                c.MouseEnter += pause;
+                c.MouseLeave += resume;
+            }
 
             var area = Screen.PrimaryScreen.WorkingArea;
             Location = new Point(area.Right - Width - 12, area.Bottom - Height - 12);

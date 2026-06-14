@@ -6,6 +6,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
 using System.Threading;
 using System.Windows.Forms;
 using Newtonsoft.Json;
@@ -35,13 +36,27 @@ namespace KeyboardRepeatFilter
         private static void Main()
         {
             const string appName = "KeyboardRepeatFilter";
-            bool createdNew;
 
-            _mutex = new Mutex(true, appName, out createdNew);
+            _mutex = new Mutex(false, appName);
 
-            if (!createdNew)
+            bool acquired;
+            try
             {
-                // Another instance is already running.
+                // Wait briefly rather than bailing immediately. During a "Restart as
+                // administrator" handoff the old instance is still releasing the mutex
+                // as the elevated one starts; this lets the new instance wait that out
+                // instead of dying. A genuine second launch simply waits the timeout
+                // and then exits below.
+                acquired = _mutex.WaitOne(TimeSpan.FromSeconds(5));
+            }
+            catch (AbandonedMutexException)
+            {
+                // The previous owner exited without releasing; we now hold it.
+                acquired = true;
+            }
+
+            if (!acquired)
+            {
                 MessageBox.Show("Another instance of Keyboard Repeat Filter is already running.", "Keyboard Repeat Filter", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
@@ -74,6 +89,15 @@ namespace KeyboardRepeatFilter
                 startupItem.Checked = StartupManager.IsInStartup();
             };
             contextMenu.MenuItems.Add(startupItem);
+
+            // --- Restart as administrator ---
+            // Only offered while running unelevated: a medium-integrity hook is
+            // bypassed (UIPI) for elevated windows, so relaunching elevated is the
+            // only way to filter their keystrokes. Hidden once already elevated.
+            if (!IsElevated())
+            {
+                contextMenu.MenuItems.Add(new MenuItem("Restart as administrator", (s, e) => RestartAsAdmin()));
+            }
 
             // --- Filter mode (radio choice, persisted to config.json) ---
             bool isReleaseMode = string.Equals(_config.FilterMode, "BlockRelease", StringComparison.OrdinalIgnoreCase);
@@ -135,10 +159,74 @@ namespace KeyboardRepeatFilter
 
             Application.Run();
 
-            // Release the mutex when the application exits.
-            _mutex.ReleaseMutex();
+            // Release the mutex when the application exits so a relaunch (e.g. the
+            // elevated handoff) can acquire it promptly.
+            try { _mutex.ReleaseMutex(); } catch { /* not owned / already released */ }
         }
 
+
+        // True when this process is already running with administrator rights, in
+        // which case the hook is not bypassed and no elevation is needed.
+        private static bool IsElevated()
+        {
+            try
+            {
+                using (var identity = WindowsIdentity.GetCurrent())
+                {
+                    return new WindowsPrincipal(identity).IsInRole(WindowsBuiltInRole.Administrator);
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        // Relaunches the app elevated (UAC) so the keyboard hook can filter input
+        // for administrator windows, then stands the current instance down so the
+        // new one is not blocked by the single-instance mutex.
+        private static void RestartAsAdmin()
+        {
+            if (IsElevated())
+            {
+                return;
+            }
+
+            var psi = new ProcessStartInfo
+            {
+                FileName = Application.ExecutablePath,
+                WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory,
+                UseShellExecute = true, // required to invoke a shell verb
+                Verb = "runas"          // triggers the UAC consent prompt
+            };
+
+            try
+            {
+                Process.Start(psi);
+            }
+            catch (System.ComponentModel.Win32Exception)
+            {
+                // User declined the UAC prompt (ERROR_CANCELLED, 1223). Keep running
+                // unelevated rather than exiting.
+                return;
+            }
+            catch (Exception ex)
+            {
+                LogLifecycle("ElevationError", ex.Message);
+                return;
+            }
+
+            // The elevated instance is launching; release our hold so it can take
+            // over without tripping the "already running" guard.
+            LogLifecycle("Elevating", "relaunching with administrator rights at user request");
+            _bypassTimer?.Stop();
+            try { _toast?.Close(); } catch { /* ignore */ }
+            _notifyIcon.Visible = false;
+            _filter?.Stop();
+            // The mutex is released by the tail of Main once Application.Run returns;
+            // the elevated instance waits (see Main) for that release before starting.
+            Application.Exit();
+        }
 
         private static void OnExit(object sender, EventArgs e)
         {
@@ -233,10 +321,14 @@ namespace KeyboardRepeatFilter
             try { _toast?.Close(); }
             catch { /* a previous toast may already be gone */ }
 
+            // Long-lived because it is actionable: the user needs time to read it and
+            // click to elevate. Hovering pauses this countdown (see ToastForm), and
+            // moving the pointer away restarts it, so it stays as long as it is needed.
             _toast = new ToastForm(
                 "Keyboard Repeat Filter",
-                "Paused while an administrator window is active. Filtering resumes when you switch back.",
-                4000);
+                "Paused while an administrator window is active. Click here to run as administrator, or switch back to resume.",
+                15000,
+                RestartAsAdmin);
             _toast.FormClosed += (_, __) =>
             {
                 _toast?.Dispose();
