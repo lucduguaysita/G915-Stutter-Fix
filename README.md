@@ -149,21 +149,9 @@ success, `KeyboardHeatmap.exe` opens it for you automatically.
 Right-click the tray icon to switch **Filter mode**, toggle the notice popup, enable
 **Autostart**, or launch the heatmap.
 
-### KeyboardHeatmap
+#### "Unknown publisher" is normal
 
-`KeyboardHeatmap.exe` parses `KeyboardRepeatFilter.log` and produces a single self-contained `.html`
-heatmap — no dependencies required. You can run it directly, or launch it from
-**Tray → Keyboard Heatmap → Generate report**. (Logging must be enabled — see below.)
-
-> **Tip:** the heatmap is built from the log, so set `"LogLevel": "Trace"` in `config.json` and make
-> sure `LogFilePath` points somewhere writable. If no log exists yet, the tray launcher explains
-> exactly what to do instead of failing silently.
-
----
-
-## "Unknown publisher" is normal
-
-When you first run `KeyboardRepeatFilter.exe`, Windows may show one or both of these prompts:
+The first time you run `KeyboardRepeatFilter.exe`, Windows may show one or both of these prompts:
 
 - **User Account Control** ("Do you want to allow this app to make changes?") listing
   **Publisher: Unknown**, with a yellow banner.
@@ -175,16 +163,20 @@ verified publisher name. Code-signing certificates cost money and need renewing 
 isn't justified for a tiny, open-source, fully offline utility. Nothing about these warnings
 indicates the app is unsafe.
 
-To run it:
+To run it: on the **UAC** prompt click **Yes**; on the **SmartScreen** prompt click **More info**,
+then **Run anyway**. If you'd rather verify before trusting it, the complete C# source is in the
+`src` folder, the app makes no network access, and you can build the executables yourself from
+source (see [Build Environment](#build-environment)).
 
-- On the **UAC** prompt, click **Yes**.
-- On the **SmartScreen** prompt, click **More info**, then **Run anyway**.
+### KeyboardHeatmap
 
-If you'd rather verify before trusting it: the complete C# source is in the `src` folder, the app
-makes no network access, and you can build the executables yourself from source (see
-[Build Environment](#build-environment)).
+`KeyboardHeatmap.exe` parses `KeyboardRepeatFilter.log` and produces a single self-contained `.html`
+heatmap — no dependencies required. You can run it directly, or launch it from
+**Tray → Keyboard Heatmap → Generate report**. (Logging must be enabled — see below.)
 
----
+> **Tip:** the heatmap is built from the log, so set `"LogLevel": "Trace"` in `config.json` and make
+> sure `LogFilePath` points somewhere writable. If no log exists yet, the tray launcher explains
+> exactly what to do instead of failing silently.
 
 ## Configuration at a glance
 
