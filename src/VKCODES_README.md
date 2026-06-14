@@ -1,6 +1,6 @@
 # Windows Virtual Key Codes (VK Codes)
 
-A reference for all Windows Virtual Key (`VK_*`) codes mapped to their hexadecimal values.
+A reference for all Windows Virtual Key (`VK_*`) codes mapped to their decimal values.
 
 ---
 
