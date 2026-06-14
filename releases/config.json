@@ -1,14 +1,16 @@
 {
   "LogLevel": "Trace",
   "LogFilePath": "C:/Temp/KeyboardRepeatFilter.log",
+  "FilterMode": "BlockRepress",
+  "ShowElevatedWindowNotice": true,
   "MinRepeatIntervalMs": 28.0,
-  "ExcludedVkCodes": [
-    8,
-    13,
-    174,
-    175
+  "ExcludedKeys": [
+    "Back",
+    "Return",
+    "Volume_Down",
+    "Volume_Up"
   ],
   "PerKeyMinRepeatIntervalMs": {
-    "73": 40.0
+    "I": 40.0
   }
 }

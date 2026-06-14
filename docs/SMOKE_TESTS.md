@@ -29,10 +29,35 @@ Use this quick checklist before publishing a release.
 
 - Edit `releases/config.json` and restart app.
 - Updated `MinRepeatIntervalMs` is reflected in startup log.
+- A key listed in `ExcludedKeys` by name (for example `"Back"`) is not filtered.
+- An unrecognized key name produces a `ConfigWarning` line in the log.
+
+## Tray menu and modes
+
+- **Filter mode** submenu shows a checkmark next to the active mode.
+- Switching to **Protect held keys** takes effect immediately and writes
+  `"FilterMode": "BlockRelease"` to `config.json`.
+- With **Protect held keys** active, a held `Ctrl`/`Shift` shortcut survives a bounce.
+- **Disable nag popups** toggles `ShowElevatedWindowNotice` in `config.json`.
+- **Autostart** toggle reflects and updates the startup registration.
+
+## Elevated-window detection
+
+- Focus a window running as administrator (for example an elevated terminal).
+- Tray icon turns yellow and the tooltip explains the paused state.
+- A brief popup appears and does **not** steal keyboard focus (typing stays in the elevated window).
+- A `HookBypass` line is logged; switching back to a normal window logs `HookActive` and restores
+  the icon.
+- With **Disable nag popups** checked, no popup appears (icon and log still update).
 
 ## KeyboardHeatmap
 
-- Run `KeyboardHeatmap.exe` from `releases` with a valid log file.
-- `KeyboardHeatmap.html` is generated in the expected output location.
-- Open the HTML file in a browser and confirm the heatmap renders correctly.
-- Run `KeyboardHeatmap.exe -v` and confirm the daily event count section appears.
+- Run `KeyboardHeatmap.exe` from `releases` with a valid log file (or use **Tray → Keyboard
+  Heatmap → Generate report**).
+- `KeyboardHeatmap.html` is generated in the expected output location and opens in the browser.
+- Heatmap renders with the ember color ramp; the busiest QWERTY row is flagged with ⚠.
+- Run `KeyboardHeatmap.exe -v` and confirm the daily event count section appears with
+  green→yellow→crimson bars.
+- If the log contains a `ConfigWarning`, the report shows the warning banner.
+- Launching the heatmap with no log file present shows the "enable logging" guidance instead of
+  failing silently.

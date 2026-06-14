@@ -17,6 +17,21 @@
 - Verify events are being recorded while typing.
 - Make sure another keyboard utility is not taking exclusive control of input hooks.
 
+## The tray icon turned yellow
+
+The icon goes yellow (and its tooltip reads "paused for this admin window") while
+the window you are using belongs to an app running **as administrator** — for
+example an elevated terminal, installer, or a game launched with elevated rights.
+
+This is a Windows security rule, not a bug: a keyboard filter running as a normal
+user is not allowed to see or change keystrokes going to a higher-privilege
+window, so stutter filtering is simply inactive there. The moment you switch back
+to a normal window, the icon returns to normal and filtering resumes. Each switch
+is noted in the log (`HookBypass` / `HookActive`).
+
+You do not have to do anything. If you want filtering to also cover elevated apps,
+the app itself would need to be started with the same elevated rights.
+
 ## Stutter still happens
 
 - Increase `MinRepeatIntervalMs` in `config.json` by small steps (for example `28` -> `30`).
@@ -51,7 +66,7 @@
 
 When reporting an issue, include:
 
-- App version (`1.2.0`, etc.)
+- App version (`2.0.0`, etc.)
 - Windows version/build
 - Keyboard model
 - Current `config.json` (redact anything sensitive)

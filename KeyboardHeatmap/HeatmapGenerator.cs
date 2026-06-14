@@ -19,33 +19,42 @@ namespace KeyboardHeatmap
             new[] { "Z","X","C","V","B","N","M" }
         };
 
-        private static readonly string[] RowLabels = { "Row 1", "Row 2", "Row 3 ⚠" };
+        private static readonly string[] RowLabels = { "Row 1", "Row 2", "Row 3" };
 
-        // Purple ramp — light to dark (5 stops, matches widget palette)
-        // Light mode: fill / text / border
+        // Ember ramp — cool to hot (5 stops). Each stop is fill / text / border,
+        // with the text colour chosen for contrast against its fill so key labels
+        // stay readable at every intensity.
+        // Light mode: pale amber -> amber -> orange -> red -> crimson
         private static readonly string[][] LightRamp = new[]
         {
-            new[] { "#EEEDFE", "#3C3489", "#AFA9EC" },
-            new[] { "#CECBF6", "#3C3489", "#AFA9EC" },
-            new[] { "#AFA9EC", "#3C3489", "#7F77DD" },
-            new[] { "#7F77DD", "#EEEDFE", "#3C3489" },
-            new[] { "#534AB7", "#EEEDFE", "#26215C" }
+            new[] { "#FFE7A8", "#6E3B0B", "#F3CB6E" },
+            new[] { "#FFC04F", "#6E3B0B", "#F0A02E" },
+            new[] { "#F8843C", "#431A04", "#D2641F" },
+            new[] { "#E0431F", "#FFFFFF", "#B0300F" },
+            new[] { "#A81457", "#FFFFFF", "#7E0E3F" }
         };
 
-        // Dark mode: fill / text / border
+        // Dark mode: dim ember -> bright gold (glows brighter as the count rises)
         private static readonly string[][] DarkRamp = new[]
         {
-            new[] { "#3C3489", "#CECBF6", "#534AB7" },
-            new[] { "#534AB7", "#EEEDFE", "#7F77DD" },
-            new[] { "#7F77DD", "#EEEDFE", "#AFA9EC" },
-            new[] { "#AFA9EC", "#26215C", "#AFA9EC" },
-            new[] { "#CECBF6", "#26215C", "#AFA9EC" }
+            new[] { "#4A2E0E", "#F2CB80", "#6B4316" },
+            new[] { "#8A4E14", "#FFDC93", "#A8651E" },
+            new[] { "#E07B22", "#2A1505", "#B86018" },
+            new[] { "#F59E2D", "#2A1505", "#C97E20" },
+            new[] { "#FFD24D", "#3A2406", "#E0A82E" }
         };
 
         public static string Generate(List<LogEntry> entries, bool showDaily = false)
         {
             // ── Aggregate ──────────────────────────────────────────────────────────
             var filtered = entries.Where(e => e.Kind == LogEntryKind.Filtered).ToList();
+
+            // Distinct config warnings (the same warning repeats on every startup).
+            var configWarnings = entries
+                .Where(e => e.Kind == LogEntryKind.ConfigWarning && !string.IsNullOrWhiteSpace(e.Message))
+                .Select(e => e.Message.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
             var letterCounts  = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
             var specialCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
@@ -63,6 +72,18 @@ namespace KeyboardHeatmap
 
             int totalFiltered = filtered.Count;
             int maxLetterCount = letterCounts.Count > 0 ? letterCounts.Values.Max() : 1;
+
+            // Per-row filtered totals, so we can flag whichever row captured the
+            // most key events (nothing is flagged when there are no events).
+            var rowTotals = new int[KeyRows.Length];
+            for (int ri = 0; ri < KeyRows.Length; ri++)
+            {
+                foreach (string key in KeyRows[ri])
+                {
+                    if (letterCounts.TryGetValue(key, out int c)) rowTotals[ri] += c;
+                }
+            }
+            int maxRowTotal = rowTotals.Max();
 
             string topKey = letterCounts.Count > 0
                 ? letterCounts.OrderByDescending(kv => kv.Value).First().Key
@@ -100,12 +121,31 @@ namespace KeyboardHeatmap
             sb.AppendLine("<h1>Keyboard Repeat Filter — Heatmap</h1>");
             sb.AppendLine($"<p class=\"subtitle\">Double-typed key events intercepted by KeyboardRepeatFilter &nbsp;|&nbsp; {dateFrom} – {dateTo}</p>");
 
+            // Config warning banner
+            if (configWarnings.Count > 0)
+            {
+                string heading = configWarnings.Count == 1
+                    ? "⚠ 1 config warning in log"
+                    : $"⚠ {configWarnings.Count} config warnings in log";
+
+                sb.AppendLine("<div class=\"config-warn\">");
+                sb.AppendLine($"  <strong>{heading}</strong>");
+                sb.AppendLine("  <p>Check the key names in <code>config.json</code> — unrecognized entries are ignored.</p>");
+                sb.AppendLine("  <ul>");
+                foreach (var msg in configWarnings)
+                {
+                    sb.AppendLine($"    <li>{EscapeHtml(msg)}</li>");
+                }
+                sb.AppendLine("  </ul>");
+                sb.AppendLine("</div>");
+            }
+
             // Stat cards
             sb.AppendLine("<div class=\"stats\">");
             AppendStat(sb, totalFiltered.ToString(), "Total filtered events");
             AppendStat(sb, topKeyCount > 0 ? $"{topKey} ({topKeyCount}×)" : "—", "Most filtered key");
             AppendStat(sb, uniqueKeys.ToString(), "Unique keys affected");
-            AppendStat(sb, $"{dateFrom}", "First event");
+            AppendStat(sb, $"{dateTo}", "Last event");
             sb.AppendLine("</div>");
 
             // Legend
@@ -129,12 +169,14 @@ namespace KeyboardHeatmap
 
             for (int ri = 0; ri < KeyRows.Length; ri++)
             {
-                bool isWarningRow = ri == 2;
+                bool isWarningRow = rowTotals[ri] > 0 && rowTotals[ri] == maxRowTotal;
                 string rowClass = isWarningRow ? "kb-row-wrap warning-row" : "kb-row-wrap";
                 string badgeClass = isWarningRow ? "row-badge warning-badge" : "row-badge";
+                string label = isWarningRow ? RowLabels[ri] + " ⚠" : RowLabels[ri];
+                string badgeTitle = isWarningRow ? " title=\"This row has the most filtered events\"" : "";
 
                 sb.AppendLine($"<div class=\"{rowClass}\">");
-                sb.AppendLine($"<span class=\"{badgeClass}\">{RowLabels[ri]}</span>");
+                sb.AppendLine($"<span class=\"{badgeClass}\"{badgeTitle}>{label}</span>");
                 sb.AppendLine($"<div class=\"kb-row\" style=\"padding-left:{offsets[ri]}px\">");
 
                 foreach (string key in KeyRows[ri])
@@ -240,16 +282,60 @@ namespace KeyboardHeatmap
             sb.AppendLine("<div class=\"daily-table\">");
             foreach (var kv in byDay)
             {
-                double pct = dayMax > 0 ? (double)kv.Value / dayMax * 100 : 0;
+                // Severity is relative to the busiest day in the log: a quiet day
+                // stays green, a middling day reaches yellow, the worst day(s) run
+                // to crimson. The bar's length and colour share the same ratio.
+                double ratio = dayMax > 0 ? (double)kv.Value / dayMax : 0;
+                double pct = ratio * 100;
+                string gradient = DayBarGradient(ratio);
                 sb.AppendLine("<div class=\"day-row\">");
                 sb.AppendLine($"  <span class=\"day-label\">{kv.Key:MMM d}</span>");
                 sb.AppendLine($"  <div class=\"day-bar-wrap\">");
-                sb.AppendLine($"    <div class=\"day-bar\" style=\"width:{pct:F1}%\"></div>");
+                sb.AppendLine($"    <div class=\"day-bar\" style=\"width:{pct:F1}%;background:{gradient}\"></div>");
                 sb.AppendLine($"  </div>");
                 sb.AppendLine($"  <span class=\"day-count\">{kv.Value}</span>");
                 sb.AppendLine("</div>");
             }
             sb.AppendLine("</div>");
+        }
+
+        // Builds a green -> (yellow) -> hot gradient for a daily bar. The hot end
+        // is the severity colour for this day's ratio (0 = green, 0.5 = yellow,
+        // 1 = crimson); when the day is in the upper half the gradient passes
+        // through yellow at the right spot so it never muddies to brown.
+        private static string DayBarGradient(double ratio)
+        {
+            ratio = Math.Max(0, Math.Min(1, ratio));
+            const string green = "#2EA84F";
+            const string yellow = "#F2C200";
+            string end = SeverityColor(ratio);
+
+            if (ratio > 0.5)
+            {
+                double yellowPos = 0.5 / ratio * 100.0; // yellow's spot within this bar
+                return $"linear-gradient(90deg,{green} 0%,{yellow} {yellowPos:F0}%,{end} 100%)";
+            }
+
+            return $"linear-gradient(90deg,{green} 0%,{end} 100%)";
+        }
+
+        // Maps a 0..1 ratio onto a green -> yellow -> crimson scale.
+        private static string SeverityColor(double ratio)
+        {
+            ratio = Math.Max(0, Math.Min(1, ratio));
+            int[] green   = { 46, 168, 79 };   // #2EA84F
+            int[] yellow  = { 242, 194, 0 };   // #F2C200
+            int[] crimson = { 200, 24, 73 };   // #C81849
+
+            int[] a, b;
+            double t;
+            if (ratio < 0.5) { a = green;  b = yellow;  t = ratio / 0.5; }
+            else             { a = yellow; b = crimson; t = (ratio - 0.5) / 0.5; }
+
+            int r  = (int)Math.Round(a[0] + (b[0] - a[0]) * t);
+            int g  = (int)Math.Round(a[1] + (b[1] - a[1]) * t);
+            int bl = (int)Math.Round(a[2] + (b[2] - a[2]) * t);
+            return $"#{r:X2}{g:X2}{bl:X2}";
         }
 
         private static string EscapeHtml(string s)
@@ -316,6 +402,23 @@ h1 {
     color: #666688;
     margin-top: 2px;
 }
+
+/* ── Config warning banner ── */
+.config-warn {
+    background: rgba(186,117,23,0.08);
+    border: 0.5px solid #BA7517;
+    border-left: 3px solid #BA7517;
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.5rem;
+    color: #854F0B;
+}
+
+.config-warn strong { font-size: 13px; }
+.config-warn p { font-size: 12px; margin-top: 2px; color: #7a6a52; }
+.config-warn code { font-family: 'Consolas', 'Courier New', monospace; font-size: 11px; }
+.config-warn ul { margin: 6px 0 0 1.1rem; }
+.config-warn li { font-size: 12px; margin-top: 2px; }
 
 /* ── Section labels ── */
 .section-label {
@@ -393,15 +496,16 @@ h1 {
     justify-content: center;
     width: 52px;
     min-height: 44px;
-    border-radius: 6px;
+    border-radius: 7px;
     border: 0.5px solid #ddddef;
     cursor: default;
-    transition: transform 0.12s;
+    transition: transform 0.12s, box-shadow 0.12s;
     background: #f0f0f8;
     color: #aaaacc;
+    box-shadow: 0 1px 2px rgba(120,60,10,0.06);
 }
 
-.key:hover { transform: scale(1.13); }
+.key:hover { transform: scale(1.13); box-shadow: 0 3px 8px rgba(180,80,20,0.22); }
 
 .klabel { font-size: 11px; font-weight: 500; line-height: 1; }
 .kcount { font-size: 10px; margin-top: 2px; opacity: 0.9; }
@@ -466,7 +570,7 @@ h1 {
 
 .day-bar {
     height: 100%;
-    background: #7F77DD;
+    background: #2EA84F; /* fallback; actual green->hot gradient is set inline per day */
     border-radius: 3px;
     transition: width 0.3s ease;
 }
@@ -492,10 +596,11 @@ h1 {
     .row-badge { color: #555577; }
     .warning-badge { color: #FAC775; }
     .warning-row { border-left-color: #FAC775; background: rgba(250,199,117,0.06); }
+    .config-warn { background: rgba(250,199,117,0.08); border-color: #BA7517; color: #FAC775; }
+    .config-warn p { color: #c9b48f; }
     .key { background: #1a1a2e; border-color: #2e2e4e; color: #555577; }
     .skey { background: #1a1a2e; border-color: #2e2e4e; color: #555577; }
     .day-bar-wrap { background: #2a2a3e; }
-    .day-bar { background: #7F77DD; }
     .day-label { color: #8888aa; }
     .day-count { color: #8888aa; }
 }

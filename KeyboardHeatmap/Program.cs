@@ -89,6 +89,18 @@ namespace KeyboardHeatmap
                 if (e.Kind == LogEntryKind.Filtered) filteredCount++;
 
             Console.WriteLine($"Entries:  {entries.Count} total, {filteredCount} filtered key events");
+
+            var configWarnings = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var e in entries)
+                if (e.Kind == LogEntryKind.ConfigWarning && !string.IsNullOrWhiteSpace(e.Message))
+                    configWarnings.Add(e.Message.Trim());
+
+            if (configWarnings.Count > 0)
+            {
+                Console.WriteLine(configWarnings.Count == 1
+                    ? "Warning:  1 config warning in log — check key names in config.json."
+                    : $"Warning:  {configWarnings.Count} config warnings in log — check key names in config.json.");
+            }
             if (!showDaily)
                 Console.WriteLine("Tip:      Use -v to include the daily filtered event count in the output.");
 

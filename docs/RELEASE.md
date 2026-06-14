@@ -4,9 +4,14 @@ This project uses GitHub releases and git tags for versioned distribution.
 
 ## 1) Update version and changelog
 
-- Update version in `KeyboardRepeatFilter.csproj`:
+- Update the assembly version in `Properties/AssemblyInfo.cs` (this is what the **About** box
+  shows):
+  - `AssemblyVersion`, `AssemblyFileVersion`, and `AssemblyInformationalVersion`
+- Update the matching version in `KeyboardRepeatFilter.csproj`:
   - `<Version>x.y.z</Version>`
-- Add a new section in `CHANGELOG.md` for that version.
+- If `KeyboardHeatmap` changed, bump its version in `KeyboardHeatmap/Properties/AssemblyInfo.cs`
+  (it is versioned independently of the main app).
+- Add a new dated section in `CHANGELOG.md` for that version.
 
 ## 2) Build release artifacts
 
@@ -28,7 +33,7 @@ Example:
 
 ```bash
 git add .
-git commit -m "Release v1.3.0"
+git commit -m "Release 2.0.0"
 git push origin main
 ```
 
@@ -37,15 +42,15 @@ git push origin main
 Example:
 
 ```bash
-git tag -a v1.3.0 -m "Release v1.3.0"
-git push origin v1.3.0
+git tag -a v2.0.0 -m "Release v2.0.0"
+git push origin v2.0.0
 ```
 
 ## 6) Create GitHub release
 
 1. Open the repo on GitHub.
-2. Create a new release from tag `v1.3.0`.
-3. Title example: `G915 Stutter Fix v1.3.0`.
+2. Create a new release from tag `v2.0.0`.
+3. Title example: `G915 Stutter Fix v2.0.0`.
 4. Paste notes from `CHANGELOG.md`.
 5. Attach files from `releases`:
    - `KeyboardRepeatFilter.exe`

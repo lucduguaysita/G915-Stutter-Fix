@@ -11,6 +11,7 @@ namespace KeyboardHeatmap
         // For Filtered entries
         public string KeyName { get; set; }      // e.g. "I", "VK_DELETE"
         public int? KeyCode { get; set; }         // e.g. 73, 46
+        public string Action { get; set; }        // e.g. "filtered" (BlockRepress), "release-held" (BlockRelease)
 
         // For Startup entries
         public string Version { get; set; }
@@ -20,7 +21,10 @@ namespace KeyboardHeatmap
         // For Shutdown entries
         public string ShutdownReason { get; set; }
         public double? UptimeSec { get; set; }
+
+        // For ConfigWarning entries
+        public string Message { get; set; }
     }
 
-    public enum LogEntryKind { Filtered, Startup, Shutdown, Unknown }
+    public enum LogEntryKind { Filtered, Startup, Shutdown, ConfigWarning, Unknown }
 }

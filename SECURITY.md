@@ -6,7 +6,7 @@ Security fixes are provided for the latest release series.
 
 Current supported version:
 
-- `1.2.x`
+- `2.0.x`
 
 Older versions may not receive security updates.
 
@@ -27,12 +27,18 @@ If you do not have a private contact channel configured yet, add one in the repo
 
 This application:
 
-- runs in user mode
+- runs in user mode (no elevation required or requested)
 - does not install kernel drivers
 - does not modify firmware
 - does not inject into other processes
+- does not make any network connections (fully offline / air-gap friendly)
 
-Even with this lower-risk architecture, vulnerabilities may still exist (for example in parsing, logging paths, startup registration, or dependency handling).
+To detect when its keyboard filter is being bypassed by an elevated window, the app performs a
+**read-only** integrity-level query on the foreground process (`OpenProcess` with
+`PROCESS_QUERY_LIMITED_INFORMATION`). It does not read window contents, keystrokes of other
+processes, or any other process memory.
+
+Even with this lower-risk architecture, vulnerabilities may still exist (for example in parsing, logging paths, startup registration, integrity queries, or dependency handling).
 
 ## Disclosure process
 

@@ -9,7 +9,7 @@
     <Description>G915-Stutter-Fix</Description>
     <Copyright>MIT License</Copyright>
     <RepositoryUrl>https://github.com/lucduguaysita/G915-Stutter-Fix</RepositoryUrl>
-    <Version>1.2.0</Version>
+    <Version>2.0.0</Version>
     <Title>G915-Stutter-Fix</Title>
     <AssemblyTitle>G915-Stutter-Fix</AssemblyTitle>
     <ApplicationIcon>app.ico</ApplicationIcon>
@@ -33,6 +33,14 @@
   <ItemGroup>
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
+  <!-- Build KeyboardHeatmap first (without referencing its assembly) so the
+       post-build copy below always has a fresh exe to place next to the app. -->
+  <ItemGroup>
+    <ProjectReference Include="KeyboardHeatmap\KeyboardHeatmap.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <Compile Update="src\VirtualKeys.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -54,6 +62,14 @@
       <Link>config.json</Link>
     </None>
   </ItemGroup>
+  <!-- Copy KeyboardHeatmap.exe next to the app's build output (Debug and
+       Release) so "Generate report" works when running/testing from VS. -->
+  <Target Name="CopyHeatmapToOutput" AfterTargets="Build">
+    <PropertyGroup>
+      <HeatmapExe>$(MSBuildProjectDirectory)\KeyboardHeatmap\bin\$(Configuration)\KeyboardHeatmap.exe</HeatmapExe>
+    </PropertyGroup>
+    <Copy SourceFiles="$(HeatmapExe)" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" Condition="Exists('$(HeatmapExe)')" />
+  </Target>
   <Target Name="RefreshReleasesFolder" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
     <PropertyGroup>
       <ReleasesDir>$(MSBuildProjectDirectory)\releases\</ReleasesDir>

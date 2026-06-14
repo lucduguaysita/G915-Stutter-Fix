@@ -18,10 +18,16 @@ namespace KeyboardHeatmap
             @"^(?<ts>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+) - Shutdown: reason=(?<reason>[^,]+), uptimeSec=(?<uptime>[^,]+), pid=(?<pid>\d+)",
             RegexOptions.Compiled);
 
-        // 2026-04-15 16:53:41.439 - I=73 filtered
-        // 2026-04-15 17:48:11.156 - VK_DELETE=46 filtered
+        // 2026-06-13 18:55:01.123 - ConfigWarning: Unrecognized key name(s) in config (ignored): foo
+        private static readonly Regex ConfigWarningRx = new Regex(
+            @"^(?<ts>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+) - ConfigWarning: (?<msg>.+)$",
+            RegexOptions.Compiled);
+
+        // 2026-04-15 16:53:41.439 - I=73 filtered          (BlockRepress mode)
+        // 2026-04-15 17:48:11.156 - VK_DELETE=46 filtered  (BlockRepress mode)
+        // 2026-05-15 09:01:22.010 - LSHIFT=160 release-held (BlockRelease mode)
         private static readonly Regex FilteredRx = new Regex(
-            @"^(?<ts>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+) - (?<key>[A-Za-z0-9_]+)=(?<code>\d+) filtered",
+            @"^(?<ts>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+) - (?<key>[A-Za-z0-9_]+)=(?<code>\d+) (?<action>filtered|release-held)",
             RegexOptions.Compiled);
 
         public static List<LogEntry> ParseFile(string path)
@@ -53,7 +59,8 @@ namespace KeyboardHeatmap
                     Timestamp = ParseTimestamp(m.Groups["ts"].Value),
                     Kind      = LogEntryKind.Filtered,
                     KeyName   = m.Groups["key"].Value,
-                    KeyCode   = int.Parse(m.Groups["code"].Value)
+                    KeyCode   = int.Parse(m.Groups["code"].Value),
+                    Action    = m.Groups["action"].Value
                 };
             }
 
@@ -81,6 +88,17 @@ namespace KeyboardHeatmap
                     UptimeSec      = double.Parse(m.Groups["uptime"].Value,
                                         System.Globalization.CultureInfo.InvariantCulture),
                     Pid            = int.Parse(m.Groups["pid"].Value)
+                };
+            }
+
+            m = ConfigWarningRx.Match(line);
+            if (m.Success)
+            {
+                return new LogEntry
+                {
+                    Timestamp = ParseTimestamp(m.Groups["ts"].Value),
+                    Kind      = LogEntryKind.ConfigWarning,
+                    Message   = m.Groups["msg"].Value
                 };
             }
 
