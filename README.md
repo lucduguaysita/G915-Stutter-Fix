@@ -87,7 +87,7 @@ see exactly which keys (and which days) are the worst offenders.
 
 ## Keyboard Heatmap
 
-<img width="872" height="815" alt="Keyboard heatmap report" src="https://github.com/user-attachments/assets/5f8ecb43-6f98-474b-add5-14fc1468279d" />
+<img width="880" alt="Keyboard Repeat Filter heatmap report — 2.0 ember theme" src="docs/heatmap.png" />
 
 A diagnostic visualization showing which keys generate filtered/duplicate events, rendered with a
 warm ember intensity ramp (light and dark themes), a "busiest row" flag, summary stat cards, an
