@@ -13,7 +13,7 @@ No drivers. No firmware flashing. No registry surgery. No network access. Close 
 system is exactly as it was. User reports confirm it eliminates the stutter/double-keypress problem
 on affected G915/G915X units — and it's small enough to read end-to-end in a coffee break.
 
-> **Version 2.0.0** — Windows 11 x64 · .NET Framework 4.8 · MIT licensed · 100% offline
+> **Version 2.1.0**, Windows 11 x64 · .NET Framework 4.8 · MIT licensed · 100% offline
 
 ---
 
@@ -23,6 +23,22 @@ on affected G915/G915X units — and it's small enough to read end-to-end in a c
 |---|---|
 | `KeyboardRepeatFilter.exe` | Runs in the system tray and silently filters stutter/duplicate keypresses in real time. |
 | `KeyboardHeatmap.exe` | Companion CLI that reads the filter log and generates a self-contained HTML heatmap of filtered key counts — great for *seeing* which keys misbehave. |
+
+---
+
+## What's new in 2.1.0
+
+- **Restart as administrator.** A new tray menu item (shown only while running unelevated)
+  relaunches the app with administrator rights via a UAC prompt, so the keyboard hook can also
+  filter input for **elevated windows** instead of being bypassed for them (UIPI). The
+  elevated-window notice is now clickable and triggers the same relaunch.
+- **A more readable elevated-window notice.** The popup stays up longer and pauses its
+  auto-dismiss countdown while the pointer is over it, so you can actually read and click it.
+- **A smoother admin handoff.** The single-instance guard now waits briefly for the mutex instead
+  of exiting immediately, so the restart-as-admin handoff no longer trips the singleton and kills
+  the new elevated instance.
+
+See [`CHANGELOG.md`](CHANGELOG.md) for the complete list.
 
 ---
 
@@ -142,6 +158,31 @@ heatmap — no dependencies required. You can run it directly, or launch it from
 > **Tip:** the heatmap is built from the log, so set `"LogLevel": "Trace"` in `config.json` and make
 > sure `LogFilePath` points somewhere writable. If no log exists yet, the tray launcher explains
 > exactly what to do instead of failing silently.
+
+---
+
+## "Unknown publisher" is normal
+
+When you first run `KeyboardRepeatFilter.exe`, Windows may show one or both of these prompts:
+
+- **User Account Control** ("Do you want to allow this app to make changes?") listing
+  **Publisher: Unknown**, with a yellow banner.
+- **SmartScreen** ("Windows protected your PC") with a **Run anyway** option hidden behind
+  **More info**.
+
+This is expected and harmless. The executables are not code-signed, so Windows cannot display a
+verified publisher name. Code-signing certificates cost money and need renewing every year, which
+isn't justified for a tiny, open-source, fully offline utility. Nothing about these warnings
+indicates the app is unsafe.
+
+To run it:
+
+- On the **UAC** prompt, click **Yes**.
+- On the **SmartScreen** prompt, click **More info**, then **Run anyway**.
+
+If you'd rather verify before trusting it: the complete C# source is in the `src` folder, the app
+makes no network access, and you can build the executables yourself from source (see
+[Build Environment](#build-environment)).
 
 ---
 
