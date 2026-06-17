@@ -4,19 +4,6 @@ A reference for all Windows Virtual Key (`VK_*`) codes mapped to their decimal v
 
 ---
 
-## Mouse Buttons
-
-| Dec | Constant |
-|-----|----------|
-| `001` | `VK_LBUTTON` |
-| `002` | `VK_RBUTTON` |
-| `003` | `VK_CANCEL` |
-| `004` | `VK_MBUTTON` |
-| `005` | `VK_XBUTTON1` |
-| `006` | `VK_XBUTTON2` |
-
----
-
 ## Control Keys
 
 | Dec | Constant |

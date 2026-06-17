@@ -8,7 +8,7 @@ The result is clean, stable, predictable typing without stutters or phantom repe
 
 ## What are the two filter modes?
 
-Version 2.0 adds a **Filter mode** choice (right-click the tray icon → **Filter mode**):
+Version 2.0 and later adds a **Filter mode** choice (right-click the tray icon → **Filter mode**):
 
 - **Block double presses** (default) — stops a stutter from registering a key twice, so one tap
   produces one character. This is the classic behavior and is best for everyday typing.
@@ -34,13 +34,14 @@ key codes) still work too. See `docs/USAGE.md` for the full reference.
 
 ## Which operating systems are supported?
 
-This fix is **Windows 11 x64 only**.
+This fix supports **Windows 10/11 x64**. It is developed and tested on Windows 11; the APIs it uses
+are all available on Windows 10, so it runs there too (Windows 10 1903+ ships .NET Framework 4.8;
+older builds may need the 4.8 runtime installed).
 
 It will not run on:
 
 - Linux
 - macOS
-- Windows 10 (maybe, but not tested)
 - Windows on ARM
 
 ## Does this modify drivers or firmware?
@@ -67,6 +68,18 @@ It removes invalid or impossible key sequences before they reach applications, e
 Yes, if the keyboard produces similar invalid HID sequences.
 
 It was built for the G915/G915X, but it may help with other models that exhibit the same behavior.
+
+## Will it catch my movement keys (WASD) in games?
+
+Sometimes. Use the **Protect held keys** filter mode — the ready-made **gaming** profile (Tray →
+Profile → gaming) sets this. It is the mode that keeps a held key down through a chatter bounce,
+which is exactly what movement keys need; the default mode does not help a key you are holding.
+
+But the filter is a user-mode keyboard hook, and some games keep keystrokes away from it no matter
+how it is configured: kernel-level anti-cheat (Vanguard, EAC, BattlEye, FACEIT) can block hooks,
+many games read the device through Raw Input / DirectInput below the hook, and elevated game
+processes bypass a normal-user hook (try **Always run as administrator** for that last case). When
+the keystrokes never reach the hook, no setting can help.
 
 ## Do I need admin rights to run it?
 
@@ -101,7 +114,7 @@ Yes. Right-click the tray icon for the common toggles:
 - **Filter mode** — switch between "Block double presses" and "Protect held keys".
 - **Disable nag popups** — silence the elevated-window popup.
 - **Autostart** — launch automatically when you sign in.
-- **Keyboard Heatmap** — generate the diagnostic report (normal or verbose).
+- **Heatmap** — generate the diagnostic report (normal or verbose).
 
 Every toggle is written back to `config.json`, so the menu and the file always agree.
 

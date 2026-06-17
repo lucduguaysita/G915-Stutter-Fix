@@ -13,7 +13,7 @@ No drivers. No firmware flashing. No registry surgery. No network access. Close 
 system is exactly as it was. User reports confirm it eliminates the stutter/double-keypress problem
 on affected G915/G915X units — and it's small enough to read end-to-end in a coffee break.
 
-> **Version 2.1.0**, Windows 11 x64 · .NET Framework 4.8 · MIT licensed · 100% offline
+> **Version 3.0.0**, Windows 10/11 x64 · .NET Framework 4.8 · MIT licensed · 100% offline
 
 ---
 
@@ -21,8 +21,37 @@ on affected G915/G915X units — and it's small enough to read end-to-end in a c
 
 | Tool | Description |
 |---|---|
-| `KeyboardRepeatFilter.exe` | Runs in the system tray and silently filters stutter/duplicate keypresses in real time. |
+| `KeyboardRepeatFilter.exe` | Runs in the system tray and silently filters stutter/duplicate keypresses (and, optionally, chattering mouse clicks) in real time. |
 | `KeyboardHeatmap.exe` | Companion CLI that reads the filter log and generates a self-contained HTML heatmap of filtered key counts — great for *seeing* which keys misbehave. |
+
+---
+
+## What's new in 3.0.0
+
+- **Mouse-button debouncing.** A chattering mouse switch turns one physical click into a phantom
+  double-click; the same low-level technique that fixes the keyboard now fixes the mouse. An
+  optional `WH_MOUSE_LL` hook drops a button press that arrives within a threshold of that button's
+  previous release, covering the left, right, middle, and both side (X1/X2) buttons.
+- **Off by default, one click to enable.** Keyboard-only users are unaffected. Turn it on from the
+  new **Enable mouse click debounce** tray item (persisted to `config.json`), tune the window with
+  `MouseMinRepeatIntervalMs` (default **50 ms**, below an intentional double-click), and exclude
+  specific buttons with `ExcludedMouseButtons`.
+- **Profiles, with a ready-made Gaming profile.** Keep multiple configs side by side and switch live
+  from **Tray → Profile** (the startup `config.json` is marked **(default)**). A bundled
+  **`gaming.json`** ships tuned for movement: *Protect held keys* mode so a chattering key can't drop
+  your held W/A/S/D, with a tight 12 ms release on **W/A/S/D and crouch (right Ctrl)** while action
+  keys stay protected.
+- **Sticky "Run as administrator."** A new **Always run as administrator** tray toggle (`RunAsAdmin`)
+  relaunches elevated on every launch, so the hook can filter elevated windows without re-choosing it
+  each time.
+- **A richer heatmap.** The report now draws the **modifier row** (Ctrl/Win/Alt/Space/Fn/Menu) and
+  both **Shift** keys, adds a stylized **mouse graphic** with per-button counts, and a new
+  `HeatmapDays` setting limits it to the last *N* days.
+- **Sticky Keys fix.** A chattering **Shift** no longer leaves unbalanced key-ups that spuriously
+  triggered the Windows Sticky Keys prompt (a problem that showed up especially over high-latency
+  RDP).
+
+See [`CHANGELOG.md`](CHANGELOG.md) for the complete list.
 
 ---
 
@@ -83,6 +112,41 @@ excluded by default so legitimate fast input is never touched.
 
 Switch between them live from **Tray → Filter mode**; the choice is saved and applied immediately.
 
+### Mouse-button debouncing
+A worn or chattering mouse switch turns a single physical click into a phantom double-click. The
+same idea that fixes the keyboard fixes the mouse: an optional low-level mouse hook
+(`WH_MOUSE_LL`) drops a button press that arrives within a threshold of that button's previous
+release, so one click stays one click. It covers the left, right, middle, and both side (X1/X2)
+buttons, and is **off by default** so keyboard-only users are unaffected. Turn it on from
+**Tray → Enable mouse click debounce** (saved to `config.json`), tune the window with
+`MouseMinRepeatIntervalMs`, and exclude specific buttons with `ExcludedMouseButtons`. The default
+**50 ms** window sits well below an intentional double-click, so real double-clicks are preserved.
+
+> **Note:** the debounce is **generic, not mouse-specific.** It works at the Windows input layer on
+> any standard pointing device's button events, regardless of make, model, or driver. It is not tied
+> to a particular mouse, and there is nothing to configure per device.
+
+### Profiles (with a ready-made Gaming profile)
+Keep more than one configuration side by side. Drop any number of config `.json` files next to the
+app and switch between them live from **Tray → Profile**. Every file that looks like a config (it
+shares our setting names) appears as a selectable profile; the startup `config.json` is marked
+**(default)**. Selecting one loads it as the live configuration and applies it instantly — great for
+keeping, say, a precise everyday-typing setup and an aggressive gaming setup a click apart.
+
+A **`gaming.json`** profile ships in the box, tuned for movement:
+
+- **Protect held keys** (`BlockRelease`) mode so a chattering key can't drop your held **W/A/S/D**
+  mid-run.
+- Tight **12 ms** per-key release on **W/A/S/D and crouch (right Ctrl)** so stops stay razor-sharp,
+  while tapped action keys keep the full protective threshold.
+- Elevated-window pop-ups off; mouse debouncing left off so it can't swallow rapid clicks.
+
+Activate it from **Tray → Profile → gaming**.
+
+> **Reality check:** see [Gaming and anti-cheat](docs/USAGE.md#gaming-and-anti-cheat) for what a
+> filter can and cannot do in games — kernel-level anti-cheat and Raw Input can keep keystrokes away
+> from any user-mode hook, and no profile changes that.
+
 ### Friendly, forgiving configuration
 `ExcludedKeys` and per-key thresholds accept key **names** exactly as they appear in the log — the
 `VK_` prefix is optional and matching is case-insensitive. Generic modifiers (`Ctrl`, `Shift`,
@@ -101,7 +165,7 @@ see exactly which keys (and which days) are the worst offenders.
 
 ---
 
-## Keyboard Heatmap
+## Heatmap
 
 <img width="880" alt="Keyboard Repeat Filter heatmap report — 2.0 ember theme" src="docs/heatmap.png" />
 
@@ -140,14 +204,14 @@ success, `KeyboardHeatmap.exe` opens it for you automatically.
 
 1. Build the solution in `Release` mode (or download a release).
 2. Open the `releases` folder after the build completes.
-3. Ensure it contains `KeyboardRepeatFilter.exe`, `KeyboardHeatmap.exe`, `Newtonsoft.Json.dll`, and
-   `config.json`.
+3. Ensure it contains `KeyboardRepeatFilter.exe`, `KeyboardHeatmap.exe`, `Newtonsoft.Json.dll`,
+   `config.json`, and the bundled `gaming.json` profile.
 4. Copy those files to a writable folder of your choice (for example `C:\Utils\KeyboardRepeatFilter`).
 5. Run `KeyboardRepeatFilter.exe`.
 6. Confirm the tray icon appears and type normally — the stutter should be gone.
 
-Right-click the tray icon to switch **Filter mode**, toggle the notice popup, enable
-**Autostart**, or launch the heatmap.
+Right-click the tray icon to switch **Profile**, switch **Filter mode**, toggle **mouse-button
+debouncing**, toggle the notice popup, enable **Autostart**, or launch the heatmap.
 
 #### "Unknown publisher" is normal
 
@@ -172,7 +236,7 @@ source (see [Build Environment](#build-environment)).
 
 `KeyboardHeatmap.exe` parses `KeyboardRepeatFilter.log` and produces a single self-contained `.html`
 heatmap — no dependencies required. You can run it directly, or launch it from
-**Tray → Keyboard Heatmap → Generate report**. (Logging must be enabled — see below.)
+**Tray → Heatmap → Generate report**. (Logging must be enabled — see below.)
 
 > **Tip:** the heatmap is built from the log, so set `"LogLevel": "Trace"` in `config.json` and make
 > sure `LogFilePath` points somewhere writable. If no log exists yet, the tray launcher explains
@@ -187,14 +251,19 @@ Everything is controlled by `config.json` next to the executable. Full reference
 |---|---|---|
 | `LogLevel` | `Info` | `Trace` logs every filtered key (needed for the heatmap). |
 | `LogFilePath` | `C:/Temp/KeyboardRepeatFilter.log` | Where the log is written. |
+| `HeatmapDays` | `all` | Heatmap window: `all`, or a number of days back from now to chart (older entries skipped). |
 | `FilterMode` | `BlockRepress` | `BlockRepress` (stop double presses) or `BlockRelease` (protect held keys). |
 | `ShowElevatedWindowNotice` | `true` | Show the brief popup when an admin window is focused. |
+| `RunAsAdmin` | `false` | Relaunch elevated on every launch (UAC prompt each time). Toggle from the tray. |
 | `MinRepeatIntervalMs` | `28.0` | Repeats faster than this are treated as stutter. |
 | `ExcludedKeys` | `["Back", "Return"]` | Keys never filtered, by name or number. |
 | `PerKeyMinRepeatIntervalMs` | `{}` | Per-key threshold overrides, by name or number. |
+| `FilterMouseButtons` | `false` | Enable debouncing of chattering mouse buttons. |
+| `MouseMinRepeatIntervalMs` | `50.0` | Mouse clicks faster than this are treated as chatter. |
+| `ExcludedMouseButtons` | `[]` | Mouse buttons never filtered (`Left`, `Right`, `Middle`, `X1`, `X2`). |
 
-The **Filter mode** and **Disable nag popups** tray toggles write straight back to this file, so the
-GUI and the config file never disagree.
+The **Filter mode**, **Enable mouse click debounce**, and **Disable nag popups** tray toggles write
+straight back to this file, so the GUI and the config file never disagree.
 
 ---
 

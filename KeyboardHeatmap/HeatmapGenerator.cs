@@ -11,15 +11,24 @@ namespace KeyboardHeatmap
     /// </summary>
     public static class HeatmapGenerator
     {
-        // QWERTY rows (letter keys only — matches G915 PCB matrix rows)
-        private static readonly string[][] KeyRows = new[]
+        // Specific virtual-key codes drawn on the keyboard chrome (the modifier row
+        // plus the two Shift keys) so they appear on the keyboard instead of the
+        // special-key grid. Keyed by code because the log records the side-specific
+        // VK (e.g. LCONTROL=162) next to the name.
+        private const int VkSpace = 0x20, VkLWin = 0x5B, VkApps = 0x5D,
+                          VkLShift = 0xA0, VkRShift = 0xA1, VkLCtrl = 0xA2, VkRCtrl = 0xA3,
+                          VkLAlt = 0xA4, VkRAlt = 0xA5;
+
+        private static readonly HashSet<int> ChromeVks = new HashSet<int>
         {
-            new[] { "Q","W","E","R","T","Y","U","I","O","P" },
-            new[] { "A","S","D","F","G","H","J","K","L" },
-            new[] { "Z","X","C","V","B","N","M" }
+            VkSpace, VkLWin, VkApps, VkLShift, VkRShift, VkLCtrl, VkRCtrl, VkLAlt, VkRAlt
         };
 
-        private static readonly string[] RowLabels = { "Row 1", "Row 2", "Row 3" };
+        private static readonly string[] RowLabels = { "Row 1", "Row 2", "Row 3", "Row 4" };
+
+        // Mouse filtered events are logged as "Mouse_<Button>"; this prefix routes
+        // them to the dedicated mouse graphic instead of the special-key grid.
+        private const string MousePrefix = "Mouse_";
 
         // Ember ramp — cool to hot (5 stops). Each stop is fill / text / border,
         // with the text colour chosen for contrast against its fill so key labels
@@ -58,31 +67,45 @@ namespace KeyboardHeatmap
 
             var letterCounts  = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
             var specialCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            var mouseCounts   = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            var chromeCounts  = new Dictionary<int, int>(); // modifier row + Shift keys, by VK code
 
             foreach (var e in filtered)
             {
                 if (e.KeyName == null) continue;
 
+                if (e.KeyName.StartsWith(MousePrefix, StringComparison.OrdinalIgnoreCase))
+                    Increment(mouseCounts, e.KeyName.Substring(MousePrefix.Length));
+                // Modifier/shift/space keys drawn on the keyboard chrome (matched by
+                // side-specific VK code), kept out of the special-key grid.
+                else if (e.KeyCode.HasValue && ChromeVks.Contains(e.KeyCode.Value))
+                    Increment(chromeCounts, e.KeyCode.Value);
                 // Single letter = letter key; anything else = special key
-                if (e.KeyName.Length == 1 && char.IsLetter(e.KeyName[0]))
+                else if (e.KeyName.Length == 1 && char.IsLetter(e.KeyName[0]))
                     Increment(letterCounts, e.KeyName.ToUpperInvariant());
                 else
                     Increment(specialCounts, e.KeyName);
             }
 
+            int maxMouseCount = mouseCounts.Count > 0 ? mouseCounts.Values.Max() : 1;
+
             int totalFiltered = filtered.Count;
             int maxLetterCount = letterCounts.Count > 0 ? letterCounts.Values.Max() : 1;
+            int maxChromeCount = chromeCounts.Count > 0 ? chromeCounts.Values.Max() : 0;
+            // One shared intensity scale for the whole keyboard (letters + chrome).
+            int maxKeyboardCount = Math.Max(1, Math.Max(maxLetterCount, maxChromeCount));
 
-            // Per-row filtered totals, so we can flag whichever row captured the
-            // most key events (nothing is flagged when there are no events).
-            var rowTotals = new int[KeyRows.Length];
-            for (int ri = 0; ri < KeyRows.Length; ri++)
-            {
-                foreach (string key in KeyRows[ri])
-                {
-                    if (letterCounts.TryGetValue(key, out int c)) rowTotals[ri] += c;
-                }
-            }
+            // Build the key layout and per-row totals so we can flag whichever row
+            // captured the most events (nothing is flagged when there are none).
+            var kbRows = BuildKeyboardRows();
+            int CountFor(KbKey k) =>
+                k.Letter != null ? (letterCounts.TryGetValue(k.Letter, out int lc) ? lc : 0)
+              : k.Vk >= 0        ? (chromeCounts.TryGetValue(k.Vk, out int cc) ? cc : 0)
+              : 0;
+
+            var rowTotals = new int[kbRows.Length];
+            for (int ri = 0; ri < kbRows.Length; ri++)
+                foreach (var k in kbRows[ri]) rowTotals[ri] += CountFor(k);
             int maxRowTotal = rowTotals.Max();
 
             string topKey = letterCounts.Count > 0
@@ -99,7 +122,7 @@ namespace KeyboardHeatmap
                 ? filtered.Max(e => e.Timestamp).ToString("MMM d, yyyy")
                 : "—";
 
-            int uniqueKeys = letterCounts.Count + specialCounts.Count;
+            int uniqueKeys = letterCounts.Count + specialCounts.Count + mouseCounts.Count + chromeCounts.Count;
 
             // ── Build HTML ─────────────────────────────────────────────────────────
             var sb = new StringBuilder();
@@ -149,7 +172,7 @@ namespace KeyboardHeatmap
             sb.AppendLine("</div>");
 
             // Legend
-            sb.AppendLine("<p class=\"section-label\">Letter keys — color intensity = filter count &nbsp;|&nbsp; row labels show PCB matrix row</p>");
+            sb.AppendLine("<p class=\"section-label\">Keys — color intensity = filter count &nbsp;|&nbsp; row labels show PCB matrix row</p>");
             sb.AppendLine("<div class=\"legend\">");
             sb.AppendLine("<span class=\"legend-text\">0</span>");
             sb.AppendLine("<div class=\"legend-bar\">");
@@ -159,15 +182,15 @@ namespace KeyboardHeatmap
                 sb.AppendLine($"<span style=\"background:{fill}\"></span>");
             }
             sb.AppendLine("</div>");
-            sb.AppendLine($"<span class=\"legend-text\">{maxLetterCount}</span>");
+            sb.AppendLine($"<span class=\"legend-text\">{maxKeyboardCount}</span>");
             sb.AppendLine("<span class=\"legend-unit\">filtered events</span>");
             sb.AppendLine("</div>");
 
             // Keyboard rows
             sb.AppendLine("<div class=\"keyboard\">");
-            int[] offsets = { 0, 12, 24 }; // px left-padding per row
+            int[] offsets = { 0, 12, 0, 0 }; // px left-padding per row (3 & 4 anchor left)
 
-            for (int ri = 0; ri < KeyRows.Length; ri++)
+            for (int ri = 0; ri < kbRows.Length; ri++)
             {
                 bool isWarningRow = rowTotals[ri] > 0 && rowTotals[ri] == maxRowTotal;
                 string rowClass = isWarningRow ? "kb-row-wrap warning-row" : "kb-row-wrap";
@@ -179,15 +202,15 @@ namespace KeyboardHeatmap
                 sb.AppendLine($"<span class=\"{badgeClass}\"{badgeTitle}>{label}</span>");
                 sb.AppendLine($"<div class=\"kb-row\" style=\"padding-left:{offsets[ri]}px\">");
 
-                foreach (string key in KeyRows[ri])
+                foreach (var k in kbRows[ri])
                 {
-                    int count = letterCounts.ContainsKey(key) ? letterCounts[key] : 0;
-                    string[] colors = GetColors(count, maxLetterCount, dark: false);
-                    string tooltip = $"{key}: {count} filtered event{(count != 1 ? "s" : "")}";
+                    int count = CountFor(k);
+                    string[] colors = GetColors(count, maxKeyboardCount, dark: false);
+                    string tooltip = $"{k.Tip}: {count} filtered event{(count != 1 ? "s" : "")}";
 
-                    sb.AppendLine($"<div class=\"key\" title=\"{tooltip}\" " +
-                                  $"style=\"background:{colors[0]};border-color:{colors[2]};color:{colors[1]}\">");
-                    sb.AppendLine($"  <span class=\"klabel\">{key}</span>");
+                    sb.AppendLine($"<div class=\"key\" title=\"{EscapeHtml(tooltip)}\" data-count=\"{count}\" " +
+                                  $"style=\"width:{k.Width}px;background:{colors[0]};border-color:{colors[2]};color:{colors[1]}\">");
+                    sb.AppendLine($"  <span class=\"klabel\">{EscapeHtml(k.Label)}</span>");
                     if (count > 0)
                         sb.AppendLine($"  <span class=\"kcount\">{count}</span>");
                     sb.AppendLine("</div>");
@@ -223,6 +246,13 @@ namespace KeyboardHeatmap
                 sb.AppendLine("</div>"); // special-grid
             }
 
+            // Mouse buttons (only when the mouse filter has caught anything)
+            if (mouseCounts.Count > 0)
+            {
+                sb.AppendLine("<p class=\"section-label\">Mouse buttons — color intensity = filter count</p>");
+                AppendMouse(sb, mouseCounts, maxMouseCount);
+            }
+
             // Per-day chart data table (opt-in via -v flag)
             if (showDaily)
             {
@@ -232,7 +262,7 @@ namespace KeyboardHeatmap
 
             sb.AppendLine("</div>"); // page
             sb.AppendLine("<script>");
-            sb.AppendLine(GetDarkModeScript(letterCounts, specialCounts, maxLetterCount));
+            sb.AppendLine(GetDarkModeScript(letterCounts, specialCounts, maxLetterCount, maxMouseCount, maxKeyboardCount));
             sb.AppendLine("</script>");
             sb.AppendLine("</body>");
             sb.AppendLine("</html>");
@@ -248,6 +278,56 @@ namespace KeyboardHeatmap
             else dict[key] = 1;
         }
 
+        private static void Increment(Dictionary<int, int> dict, int key)
+        {
+            if (dict.ContainsKey(key)) dict[key]++;
+            else dict[key] = 1;
+        }
+
+        // One key on the rendered keyboard. A letter key looks up its count by
+        // letter name; a "chrome" key (modifier/Shift/Space) looks up by VK code;
+        // Fn has neither (no VK is generated) and always shows zero.
+        private sealed class KbKey
+        {
+            public string Label;   // text on the cap
+            public string Tip;     // tooltip name (disambiguates left/right)
+            public string Letter;  // letter-count key, or null
+            public int Vk;         // chrome VK code, or -1
+            public int Width;      // px
+
+            public KbKey(string label, string letter, int vk, int width, string tip = null)
+            {
+                Label = label; Letter = letter; Vk = vk; Width = width; Tip = tip ?? label;
+            }
+        }
+
+        // The four rendered rows: three QWERTY letter rows (Shift keys bracketing
+        // row 3) and a bottom modifier row.
+        private static KbKey[][] BuildKeyboardRows()
+        {
+            KbKey Letter(string s) => new KbKey(s, s, -1, 52);
+            KbKey Chrome(string label, int vk, int width, string tip) => new KbKey(label, null, vk, width, tip);
+
+            return new[]
+            {
+                new[] { Letter("Q"), Letter("W"), Letter("E"), Letter("R"), Letter("T"),
+                        Letter("Y"), Letter("U"), Letter("I"), Letter("O"), Letter("P") },
+                new[] { Letter("A"), Letter("S"), Letter("D"), Letter("F"), Letter("G"),
+                        Letter("H"), Letter("J"), Letter("K"), Letter("L") },
+                new[] { Chrome("Shift", VkLShift, 86, "Left Shift"),
+                        Letter("Z"), Letter("X"), Letter("C"), Letter("V"), Letter("B"), Letter("N"), Letter("M"),
+                        Chrome("Shift", VkRShift, 86, "Right Shift") },
+                new[] { Chrome("Ctrl", VkLCtrl, 60, "Left Ctrl"),
+                        Chrome("Win", VkLWin, 54, "Windows"),
+                        Chrome("Alt", VkLAlt, 54, "Left Alt"),
+                        Chrome("Space", VkSpace, 196, "Space"),
+                        Chrome("Alt", VkRAlt, 54, "Right Alt"),
+                        Chrome("Fn", -1, 48, "Fn (no key event)"),
+                        Chrome("Menu", VkApps, 54, "Menu (Apps)"),
+                        Chrome("Ctrl", VkRCtrl, 60, "Right Ctrl") }
+            };
+        }
+
         /// <summary>Returns [fill, text, border] for the given count relative to max.</summary>
         private static string[] GetColors(int count, int max, bool dark)
         {
@@ -259,6 +339,76 @@ namespace KeyboardHeatmap
             int idx = Math.Min((int)Math.Floor((double)count / max * 5), 4);
             return dark ? DarkRamp[idx] : LightRamp[idx];
         }
+
+        // Renders a simple, stylish top-down mouse SVG with each button tinted by
+        // its filter count and the count printed on it. Light-mode colours are
+        // inline; the dark-mode script repaints the .mbtn groups to match the keys.
+        private static void AppendMouse(StringBuilder sb, Dictionary<string, int> mouseCounts, int max)
+        {
+            int Count(string name) => mouseCounts.TryGetValue(name, out int c) ? c : 0;
+            int cLeft = Count("Left"), cRight = Count("Right"), cMid = Count("Middle"),
+                cX1 = Count("X1"), cX2 = Count("X2");
+
+            sb.AppendLine("<div class=\"mouse-wrap\">");
+            sb.AppendLine("<svg class=\"mouse-svg\" viewBox=\"0 0 200 300\" width=\"176\" height=\"264\" " +
+                          "role=\"img\" aria-label=\"Mouse button filter counts\">");
+
+            // Body silhouette (neutral; adapts to theme via CSS).
+            sb.AppendLine("<path class=\"mouse-body\" d=\"M100,16 C61,16 36,46 36,96 L36,206 " +
+                          "C36,250 62,282 100,282 C138,282 164,250 164,206 L164,96 C164,46 139,16 100,16 Z\" />");
+
+            // Left and right primary buttons.
+            AppendMouseRegion(sb, $"Left button: {cLeft} filtered event{Plural(cLeft)}", cLeft, max,
+                "<path d=\"M100,20 C64,20 40,48 40,95 L40,118 L100,118 Z\" style=\"fill:{F};stroke:{B};stroke-width:1.5\" />",
+                new[] { ("mcount", 68, 74, cLeft.ToString()), ("mlabel", 68, 96, "L") });
+
+            AppendMouseRegion(sb, $"Right button: {cRight} filtered event{Plural(cRight)}", cRight, max,
+                "<path d=\"M100,20 C136,20 160,48 160,95 L160,118 L100,118 Z\" style=\"fill:{F};stroke:{B};stroke-width:1.5\" />",
+                new[] { ("mcount", 132, 74, cRight.ToString()), ("mlabel", 132, 96, "R") });
+
+            // Seam between the buttons, drawn over them but under the wheel.
+            sb.AppendLine("<line class=\"mouse-seam\" x1=\"100\" y1=\"24\" x2=\"100\" y2=\"116\" />");
+
+            // Scroll wheel = middle button.
+            AppendMouseRegion(sb, $"Middle button: {cMid} filtered event{Plural(cMid)}", cMid, max,
+                "<rect x=\"91\" y=\"34\" width=\"18\" height=\"44\" rx=\"9\" style=\"fill:{F};stroke:{B};stroke-width:1.5\" />",
+                new[] { ("mcount-sm", 100, 56, cMid.ToString()) });
+
+            // Side (thumb) buttons.
+            AppendMouseRegion(sb, $"X1 (back): {cX1} filtered event{Plural(cX1)}", cX1, max,
+                "<rect x=\"22\" y=\"136\" width=\"24\" height=\"22\" rx=\"5\" style=\"fill:{F};stroke:{B};stroke-width:1.5\" />",
+                new[] { ("mcount-sm", 34, 147, cX1.ToString()) });
+            sb.AppendLine("<text class=\"mside-label\" x=\"52\" y=\"147\">X1</text>");
+
+            AppendMouseRegion(sb, $"X2 (forward): {cX2} filtered event{Plural(cX2)}", cX2, max,
+                "<rect x=\"22\" y=\"162\" width=\"24\" height=\"22\" rx=\"5\" style=\"fill:{F};stroke:{B};stroke-width:1.5\" />",
+                new[] { ("mcount-sm", 34, 173, cX2.ToString()) });
+            sb.AppendLine("<text class=\"mside-label\" x=\"52\" y=\"173\">X2</text>");
+
+            sb.AppendLine("</svg>");
+            sb.AppendLine("</div>"); // mouse-wrap
+        }
+
+        // Emits one <g class="mbtn"> region: a tinted shape plus its text labels.
+        // The shape template uses {F} (fill) and {B} (border); texts are
+        // (cssClass, x, y, content) and all share the ramp's text colour.
+        private static void AppendMouseRegion(StringBuilder sb, string tooltip, int count, int max,
+            string shapeTemplate, (string cls, int x, int y, string text)[] texts)
+        {
+            string[] colors = GetColors(count, max, dark: false);
+            string shape = shapeTemplate.Replace("{F}", colors[0]).Replace("{B}", colors[2]);
+
+            sb.AppendLine($"<g class=\"mbtn\" data-count=\"{count}\">");
+            sb.AppendLine($"  <title>{EscapeHtml(tooltip)}</title>");
+            sb.AppendLine("  " + shape);
+            foreach (var t in texts)
+            {
+                sb.AppendLine($"  <text class=\"{t.cls}\" x=\"{t.x}\" y=\"{t.y}\" style=\"fill:{colors[1]}\">{EscapeHtml(t.text)}</text>");
+            }
+            sb.AppendLine("</g>");
+        }
+
+        private static string Plural(int n) => n != 1 ? "s" : "";
 
         private static void AppendStat(StringBuilder sb, string value, string label)
         {
@@ -499,6 +649,7 @@ h1 {
     border-radius: 7px;
     border: 0.5px solid #ddddef;
     cursor: default;
+    flex-shrink: 0;
     transition: transform 0.12s, box-shadow 0.12s;
     background: #f0f0f8;
     color: #aaaacc;
@@ -537,6 +688,17 @@ h1 {
 
 .skname { font-size: 10px; font-weight: 500; }
 .skcount { font-size: 10px; margin-top: 2px; }
+
+/* ── Mouse graphic ── */
+.mouse-wrap { display: flex; justify-content: center; margin: 0.25rem 0 0.75rem; }
+.mouse-body { fill: #f0f0f8; stroke: #d0d0e4; stroke-width: 2; }
+.mouse-seam { stroke: #d0d0e4; stroke-width: 2; }
+.mbtn { cursor: default; }
+.mbtn path, .mbtn rect { transition: fill 0.12s; }
+.mcount { font-size: 16px; font-weight: 600; text-anchor: middle; dominant-baseline: middle; }
+.mcount-sm { font-size: 9px; font-weight: 600; text-anchor: middle; dominant-baseline: middle; }
+.mlabel { font-size: 9px; text-anchor: middle; dominant-baseline: middle; opacity: 0.75; }
+.mside-label { font-size: 9px; fill: #999ab0; dominant-baseline: middle; }
 
 /* ── Daily table ── */
 .daily-table {
@@ -603,6 +765,9 @@ h1 {
     .day-bar-wrap { background: #2a2a3e; }
     .day-label { color: #8888aa; }
     .day-count { color: #8888aa; }
+    .mouse-body { fill: #1a1a2e; stroke: #2e2e4e; }
+    .mouse-seam { stroke: #2e2e4e; }
+    .mside-label { fill: #555577; }
 }
 
 @media (max-width: 600px) {
@@ -618,7 +783,9 @@ h1 {
         private static string GetDarkModeScript(
             Dictionary<string, int> letterCounts,
             Dictionary<string, int> specialCounts,
-            int maxLetterCount)
+            int maxLetterCount,
+            int maxMouseCount,
+            int maxKeyboardCount)
         {
             // Build JS arrays for dark-mode ramp application
             var sb = new StringBuilder();
@@ -635,6 +802,13 @@ h1 {
             foreach (var stop in DarkRamp)
                 sb.AppendLine($"    ['{stop[0]}','{stop[1]}','{stop[2]}'],");
             sb.AppendLine("  ];");
+
+            // The legend bar is rendered server-side with the light ramp; repaint
+            // its stops with the dark ramp so the scale matches the recoloured keys.
+            sb.AppendLine("  var legendStops = document.querySelectorAll('.legend-bar span');");
+            sb.AppendLine("  for (var li = 0; li < legendStops.length && li < darkRamp.length; li++) {");
+            sb.AppendLine("    legendStops[li].style.background = darkRamp[li][0];");
+            sb.AppendLine("  }");
 
             sb.AppendLine($"  var maxCount = {maxLetterCount};");
 
@@ -654,18 +828,13 @@ h1 {
             sb.AppendLine("    for (var i = 0; i < spans.length; i++) spans[i].style.color = r[1];");
             sb.AppendLine("  }");
 
-            // Letter key counts as JS object
-            sb.Append("  var lc = {");
-            foreach (var kv in letterCounts)
-                sb.Append($"'{kv.Key}':{kv.Value},");
-            sb.AppendLine("};");
-
+            // Keyboard keys carry their count in data-count, so a single pass
+            // repaints letters and chrome (modifier/Shift/Space) keys alike.
+            sb.AppendLine($"  var maxKb = {Math.Max(1, maxKeyboardCount)};");
             sb.AppendLine("  var keys = document.querySelectorAll('.key');");
             sb.AppendLine("  keys.forEach(function(el) {");
-            sb.AppendLine("    var label = el.querySelector('.klabel');");
-            sb.AppendLine("    if (!label) return;");
-            sb.AppendLine("    var k = label.textContent.trim();");
-            sb.AppendLine("    applyColors(el, lc[k] || 0, maxCount);");
+            sb.AppendLine("    var c = parseInt(el.getAttribute('data-count'), 10) || 0;");
+            sb.AppendLine("    applyColors(el, c, maxKb);");
             sb.AppendLine("  });");
 
             // Special key counts
@@ -684,6 +853,19 @@ h1 {
             sb.AppendLine("    var cnt = sc[k] || 0;");
             sb.AppendLine($"    var scaled = Math.round(cnt / maxSp * {maxLetterCount} * 0.25);");
             sb.AppendLine("    applyColors(el, scaled, maxCount);");
+            sb.AppendLine("  });");
+
+            // Mouse button groups: repaint the shape + its text(s) with the dark ramp.
+            sb.AppendLine($"  var maxMouse = {Math.Max(1, maxMouseCount)};");
+            sb.AppendLine("  var mbtns = document.querySelectorAll('.mbtn');");
+            sb.AppendLine("  mbtns.forEach(function(g) {");
+            sb.AppendLine("    var c = parseInt(g.getAttribute('data-count'), 10) || 0;");
+            sb.AppendLine("    var shape = g.querySelector('path, rect');");
+            sb.AppendLine("    var fill, stroke, tcol;");
+            sb.AppendLine("    if (c === 0) { fill = '#1a1a2e'; stroke = '#2e2e4e'; tcol = '#555577'; }");
+            sb.AppendLine("    else { var idx = Math.min(Math.floor(c / maxMouse * 5), 4); var r = darkRamp[idx]; fill = r[0]; stroke = r[2]; tcol = r[1]; }");
+            sb.AppendLine("    if (shape) { shape.style.fill = fill; shape.style.stroke = stroke; }");
+            sb.AppendLine("    g.querySelectorAll('text').forEach(function(t) { t.style.fill = tcol; });");
             sb.AppendLine("  });");
 
             sb.AppendLine("})();");

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -10,14 +11,19 @@ using System.Security.Principal;
 using System.Threading;
 using System.Windows.Forms;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace KeyboardRepeatFilter
 {
     internal static class Program
     {
         private static KeyboardHookFilter _filter;
+        private static MouseHookFilter _mouseFilter;
         private static NotifyIcon _notifyIcon;
         private static FilterConfig _config;
+        // The config file currently in effect; saves are written back here so tray
+        // toggles persist into whichever profile is active. Defaults to config.json.
+        private static string _activeConfigPath;
         private static DateTime _startedAtUtc;
         private static bool _shutdownLogged;
         private static Mutex _mutex;
@@ -65,15 +71,39 @@ namespace KeyboardRepeatFilter
             Application.SetCompatibleTextRenderingDefault(false);
 
             _config = LoadConfig();
+            _activeConfigPath = ConfigFilePath;
             _startedAtUtc = DateTime.UtcNow;
             RegisterGlobalExceptionHandlers();
             Application.ApplicationExit += (_, __) => LogShutdown("ApplicationExit");
+
+            // Sticky elevation: if the user asked to always run as administrator and
+            // we are not elevated yet, relaunch elevated before doing any work. The
+            // elevated instance re-enters Main, finds itself elevated, and continues
+            // normally. Done here (before any UI/hook is created) so there is nothing
+            // to tear down on the unelevated instance.
+            if (_config.RunAsAdmin && !IsElevated())
+            {
+                LogLifecycle("Elevating", "RunAsAdmin is set; relaunching with administrator rights at startup");
+                if (TryStartElevatedProcess())
+                {
+                    // Release the singleton so the elevated instance (which waits for
+                    // the mutex) can take over, then stand down.
+                    try { _mutex.ReleaseMutex(); } catch { /* not owned / already released */ }
+                    return;
+                }
+
+                // UAC declined or failed: run unelevated this session; the preference
+                // stays set and will prompt again next launch.
+                LogLifecycle("ElevationDeclined", "continuing unelevated; RunAsAdmin remains set for next launch");
+            }
 
             LogLifecycle("Startup",
                 $"version={Assembly.GetExecutingAssembly().GetName().Version}, pid={Process.GetCurrentProcess().Id}, minRepeatIntervalMs={_config.MinRepeatIntervalMs}");
 
             _filter = new KeyboardHookFilter(_config);
             _filter.Start();
+
+            StartMouseFilter();
 
             // Build tray menu
             var contextMenu = new ContextMenu();
@@ -90,14 +120,31 @@ namespace KeyboardRepeatFilter
             };
             contextMenu.MenuItems.Add(startupItem);
 
-            // --- Restart as administrator ---
-            // Only offered while running unelevated: a medium-integrity hook is
-            // bypassed (UIPI) for elevated windows, so relaunching elevated is the
-            // only way to filter their keystrokes. Hidden once already elevated.
-            if (!IsElevated())
+            // --- Run as administrator (sticky preference, persisted to config.json) ---
+            // A medium-integrity hook is bypassed (UIPI) for elevated windows, so
+            // running elevated is the only way to filter their keystrokes. When
+            // checked, the app relaunches elevated now (if not already) and
+            // auto-elevates on every future launch. Shown in both states so it can be
+            // switched back off while elevated.
+            var adminItem = new MenuItem("Always run as administrator")
             {
-                contextMenu.MenuItems.Add(new MenuItem("Restart as administrator", (s, e) => RestartAsAdmin()));
-            }
+                Checked = _config.RunAsAdmin
+            };
+            adminItem.Click += (s, e) =>
+            {
+                _config.RunAsAdmin = !_config.RunAsAdmin;
+                adminItem.Checked = _config.RunAsAdmin;
+                SaveConfig();
+
+                // Honor it immediately: if just turned on while unelevated, relaunch
+                // now (a UAC prompt appears). Turning it off takes effect next launch;
+                // we do not drop privileges mid-session.
+                if (_config.RunAsAdmin && !IsElevated())
+                {
+                    RestartAsAdmin();
+                }
+            };
+            contextMenu.MenuItems.Add(adminItem);
 
             // --- Filter mode (radio choice, persisted to config.json) ---
             bool isReleaseMode = string.Equals(_config.FilterMode, "BlockRelease", StringComparison.OrdinalIgnoreCase);
@@ -109,6 +156,27 @@ namespace KeyboardRepeatFilter
             filterModeMenu.MenuItems.Add(repressItem);
             filterModeMenu.MenuItems.Add(releaseItem);
             contextMenu.MenuItems.Add(filterModeMenu);
+
+            // --- Mouse-button debouncing toggle (persisted to config.json) ---
+            var mouseItem = new MenuItem("Enable mouse click debounce")
+            {
+                Checked = _config.FilterMouseButtons
+            };
+            mouseItem.Click += (s, e) =>
+            {
+                _config.FilterMouseButtons = !_config.FilterMouseButtons;
+                mouseItem.Checked = _config.FilterMouseButtons;
+                SaveConfig();
+                if (_config.FilterMouseButtons)
+                {
+                    StartMouseFilter();
+                }
+                else
+                {
+                    StopMouseFilter();
+                }
+            };
+            contextMenu.MenuItems.Add(mouseItem);
 
             // --- Toggle the elevated-window popup (persisted to config.json) ---
             // Labelled as a "disable" action, so a checkmark means popups are off.
@@ -124,8 +192,42 @@ namespace KeyboardRepeatFilter
             };
             contextMenu.MenuItems.Add(noticeItem);
 
-            // --- Keyboard Heatmap launchers ---
-            var heatmapMenu = new MenuItem("Keyboard Heatmap");
+            // --- Profiles: activate another matching config file from this folder ---
+            // Any *.json next to the app that looks like one of our config files is
+            // offered as a profile. Selecting one loads it as the live config and
+            // applies it immediately; later tray toggles save back into whichever
+            // profile is active. The list is built at startup.
+            var profileMenu = new MenuItem("Profile");
+            var profileItems = new List<MenuItem>();
+            foreach (var pf in FindProfileFiles())
+            {
+                string filePath = pf.Path;
+                // config.json is the startup default; flag it so in the menu.
+                string displayName = PathsEqual(filePath, ConfigFilePath) ? "(default) " + pf.Name : pf.Name;
+                var item = new MenuItem(displayName) { RadioCheck = true, Checked = PathsEqual(filePath, _activeConfigPath) };
+                item.Click += (s, e) =>
+                {
+                    if (!ActivateProfile(filePath)) return;
+
+                    foreach (var mi in profileItems) mi.Checked = false;
+                    item.Checked = true;
+
+                    // Reflect the freshly loaded settings in the other toggles.
+                    bool rel = string.Equals(_config.FilterMode, "BlockRelease", StringComparison.OrdinalIgnoreCase);
+                    repressItem.Checked = !rel;
+                    releaseItem.Checked = rel;
+                    mouseItem.Checked = _config.FilterMouseButtons;
+                    noticeItem.Checked = !_config.ShowElevatedWindowNotice;
+                    adminItem.Checked = _config.RunAsAdmin;
+                };
+                profileItems.Add(item);
+                profileMenu.MenuItems.Add(item);
+            }
+            profileMenu.Enabled = profileItems.Count > 0;
+            contextMenu.MenuItems.Add(profileMenu);
+
+            // --- Heatmap launchers ---
+            var heatmapMenu = new MenuItem("Heatmap");
             heatmapMenu.MenuItems.Add(new MenuItem("Generate report", (s, e) => LaunchHeatmap(verbose: false)));
             heatmapMenu.MenuItems.Add(new MenuItem("Generate report (verbose)", (s, e) => LaunchHeatmap(verbose: true)));
             contextMenu.MenuItems.Add(heatmapMenu);
@@ -182,16 +284,12 @@ namespace KeyboardRepeatFilter
             }
         }
 
-        // Relaunches the app elevated (UAC) so the keyboard hook can filter input
-        // for administrator windows, then stands the current instance down so the
-        // new one is not blocked by the single-instance mutex.
-        private static void RestartAsAdmin()
+        // Launches an elevated copy of this app via the UAC "runas" verb. Returns
+        // true if the elevated process was started (the caller should stand down so
+        // the singleton mutex is freed), false if the user declined the prompt or it
+        // failed (the caller keeps running unelevated).
+        private static bool TryStartElevatedProcess()
         {
-            if (IsElevated())
-            {
-                return;
-            }
-
             var psi = new ProcessStartInfo
             {
                 FileName = Application.ExecutablePath,
@@ -203,16 +301,34 @@ namespace KeyboardRepeatFilter
             try
             {
                 Process.Start(psi);
+                return true;
             }
             catch (System.ComponentModel.Win32Exception)
             {
-                // User declined the UAC prompt (ERROR_CANCELLED, 1223). Keep running
-                // unelevated rather than exiting.
-                return;
+                // User declined the UAC prompt (ERROR_CANCELLED, 1223).
+                return false;
             }
             catch (Exception ex)
             {
                 LogLifecycle("ElevationError", ex.Message);
+                return false;
+            }
+        }
+
+        // Relaunches the app elevated (UAC) so the keyboard hook can filter input
+        // for administrator windows, then stands the current instance down so the
+        // new one is not blocked by the single-instance mutex.
+        private static void RestartAsAdmin()
+        {
+            if (IsElevated())
+            {
+                return;
+            }
+
+            if (!TryStartElevatedProcess())
+            {
+                // User declined the UAC prompt or it failed. Keep running unelevated
+                // rather than exiting.
                 return;
             }
 
@@ -223,6 +339,7 @@ namespace KeyboardRepeatFilter
             try { _toast?.Close(); } catch { /* ignore */ }
             _notifyIcon.Visible = false;
             _filter?.Stop();
+            StopMouseFilter();
             // The mutex is released by the tail of Main once Application.Run returns;
             // the elevated instance waits (see Main) for that release before starting.
             Application.Exit();
@@ -234,6 +351,7 @@ namespace KeyboardRepeatFilter
             try { _toast?.Close(); } catch { /* ignore */ }
             _notifyIcon.Visible = false;
             _filter.Stop();
+            StopMouseFilter();
             LogShutdown("UserExit");
             _warningIcon?.Dispose();
             _normalIcon?.Dispose();
@@ -269,6 +387,44 @@ namespace KeyboardRepeatFilter
             catch (Exception ex)
             {
                 LogLifecycle("FilterRestartError", ex.Message);
+            }
+        }
+
+        // Starts the low-level mouse hook when mouse debouncing is enabled. A no-op
+        // when disabled or already running, so it is safe to call from both startup
+        // and the tray toggle.
+        private static void StartMouseFilter()
+        {
+            if (!_config.FilterMouseButtons || _mouseFilter != null)
+            {
+                return;
+            }
+
+            try
+            {
+                _mouseFilter = new MouseHookFilter(_config);
+                _mouseFilter.Start();
+            }
+            catch (Exception ex)
+            {
+                _mouseFilter = null;
+                LogLifecycle("MouseFilterStartError", ex.Message);
+            }
+        }
+
+        private static void StopMouseFilter()
+        {
+            try
+            {
+                _mouseFilter?.Stop();
+            }
+            catch (Exception ex)
+            {
+                LogLifecycle("MouseFilterStopError", ex.Message);
+            }
+            finally
+            {
+                _mouseFilter = null;
             }
         }
 
@@ -410,7 +566,7 @@ namespace KeyboardRepeatFilter
                     "  1. Set \"LogLevel\": \"Trace\" in config.json so filtered keys are recorded.\r\n" +
                     "  2. Check that \"LogFilePath\" in config.json points to a valid, writable path.\r\n" +
                     "  3. Restart the app, type for a while so events are logged, then try again.",
-                    "Keyboard Heatmap",
+                    "Heatmap",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
                 return;
@@ -559,6 +715,92 @@ namespace KeyboardRepeatFilter
             }
         }
 
+        // Property names that identify a KeyboardRepeatFilter config file. A *.json
+        // in the app folder is treated as a profile when it shares at least two.
+        private static readonly HashSet<string> ConfigSignatureKeys =
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "LogLevel", "LogFilePath", "FilterMode", "ShowElevatedWindowNotice", "RunAsAdmin",
+                "MinRepeatIntervalMs", "ExcludedKeys", "ExcludedVkCodes", "PerKeyMinRepeatIntervalMs",
+                "FilterMouseButtons", "MouseMinRepeatIntervalMs", "ExcludedMouseButtons", "HeatmapDays"
+            };
+
+        // Every *.json in the app folder that looks like one of our config files,
+        // as (full path, display name) pairs.
+        private static List<(string Path, string Name)> FindProfileFiles()
+        {
+            var list = new List<(string, string)>();
+            try
+            {
+                foreach (var path in Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.json"))
+                {
+                    if (LooksLikeConfig(path))
+                        list.Add((path, Path.GetFileNameWithoutExtension(path)));
+                }
+            }
+            catch (Exception ex)
+            {
+                LogLifecycle("ProfileScanError", ex.Message);
+            }
+            return list;
+        }
+
+        private static bool LooksLikeConfig(string path)
+        {
+            try
+            {
+                if (!(JToken.Parse(File.ReadAllText(path)) is JObject obj))
+                    return false;
+
+                int matches = 0;
+                foreach (var prop in obj.Properties())
+                    if (ConfigSignatureKeys.Contains(prop.Name)) matches++;
+
+                return matches >= 2;
+            }
+            catch
+            {
+                return false; // unreadable or not JSON => not a profile
+            }
+        }
+
+        // Loads the given config file as the live configuration, makes it the target
+        // for subsequent saves, and restarts the filters. Returns false on failure.
+        private static bool ActivateProfile(string path)
+        {
+            FilterConfig cfg;
+            try
+            {
+                cfg = JsonConvert.DeserializeObject<FilterConfig>(File.ReadAllText(path));
+            }
+            catch (Exception ex)
+            {
+                LogLifecycle("ProfileLoadError", $"file={Path.GetFileName(path)}, {ex.Message}");
+                MessageBox.Show(
+                    "Could not load profile:\r\n" + Path.GetFileName(path) + "\r\n\r\n" + ex.Message,
+                    "Keyboard Repeat Filter", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (cfg == null)
+                return false;
+
+            _config = cfg;
+            _activeConfigPath = path;
+            RestartFilter();
+            // Re-evaluate the mouse hook against the new profile's settings.
+            StopMouseFilter();
+            StartMouseFilter();
+            LogLifecycle("ProfileActivated", $"file={Path.GetFileName(path)}");
+            return true;
+        }
+
+        private static bool PathsEqual(string a, string b)
+        {
+            try { return string.Equals(Path.GetFullPath(a), Path.GetFullPath(b), StringComparison.OrdinalIgnoreCase); }
+            catch { return string.Equals(a, b, StringComparison.OrdinalIgnoreCase); }
+        }
+
         private static void SaveConfig()
         {
             try
@@ -568,7 +810,7 @@ namespace KeyboardRepeatFilter
                     Formatting = Formatting.Indented,
                     NullValueHandling = NullValueHandling.Ignore
                 };
-                File.WriteAllText(ConfigFilePath, JsonConvert.SerializeObject(_config, settings));
+                File.WriteAllText(_activeConfigPath ?? ConfigFilePath, JsonConvert.SerializeObject(_config, settings));
             }
             catch (Exception ex)
             {

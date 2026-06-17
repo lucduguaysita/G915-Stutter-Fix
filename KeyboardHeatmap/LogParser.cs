@@ -30,6 +30,11 @@ namespace KeyboardHeatmap
             @"^(?<ts>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+) - (?<key>[A-Za-z0-9_]+)=(?<code>\d+) (?<action>filtered|release-held)",
             RegexOptions.Compiled);
 
+        // 2026-06-17 12:56:36.884 - Mouse_Left filtered   (mouse buttons have no VK code)
+        private static readonly Regex MouseFilteredRx = new Regex(
+            @"^(?<ts>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+) - Mouse_(?<button>[A-Za-z0-9]+) (?<action>filtered)",
+            RegexOptions.Compiled);
+
         public static List<LogEntry> ParseFile(string path)
         {
             var entries = new List<LogEntry>();
@@ -60,6 +65,20 @@ namespace KeyboardHeatmap
                     Kind      = LogEntryKind.Filtered,
                     KeyName   = m.Groups["key"].Value,
                     KeyCode   = int.Parse(m.Groups["code"].Value),
+                    Action    = m.Groups["action"].Value
+                };
+            }
+
+            m = MouseFilteredRx.Match(line);
+            if (m.Success)
+            {
+                // Keep the "Mouse_" prefix on KeyName so the heatmap can route these
+                // to the mouse graphic instead of the keyboard/special-key buckets.
+                return new LogEntry
+                {
+                    Timestamp = ParseTimestamp(m.Groups["ts"].Value),
+                    Kind      = LogEntryKind.Filtered,
+                    KeyName   = "Mouse_" + m.Groups["button"].Value,
                     Action    = m.Groups["action"].Value
                 };
             }

@@ -1,0 +1,23 @@
+{
+  "LogLevel": "Trace",
+  "LogFilePath": "C:/Temp/KeyboardRepeatFilter.log",
+  "HeatmapDays": "all",
+  "FilterMode": "BlockRelease",
+  "ShowElevatedWindowNotice": false,
+  "RunAsAdmin": false,
+  "MinRepeatIntervalMs": 28.0,
+  "ExcludedKeys": [
+    "Back",
+    "Return"
+  ],
+  "PerKeyMinRepeatIntervalMs": {
+    "W": 12.0,
+    "A": 12.0,
+    "S": 12.0,
+    "D": 12.0,
+    "RCONTROL": 12.0
+  },
+  "FilterMouseButtons": false,
+  "MouseMinRepeatIntervalMs": 50.0,
+  "ExcludedMouseButtons": []
+}

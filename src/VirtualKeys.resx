@@ -281,4 +281,9 @@
   <data name="FD" xml:space="preserve"><value>VK_PA1</value></data>
   <data name="FE" xml:space="preserve"><value>VK_OEM_CLEAR</value></data>
 
+  <!-- 0xFF is not an assigned virtual key; keyboards (e.g. the G915) report it
+       for phantom / unmappable events. Named here so it shows in the log and
+       heatmap instead of a bare "=255". -->
+  <data name="FF" xml:space="preserve"><value>VK_PHANTOM</value></data>
+
 </root>

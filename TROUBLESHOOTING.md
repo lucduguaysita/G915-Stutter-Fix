@@ -2,7 +2,7 @@
 
 ## App does not start
 
-- Confirm you are on Windows 11 x64.
+- Confirm you are on Windows 10/11 x64.
 - Run `KeyboardRepeatFilter.exe` from the `releases` folder.
 - Ensure these files are together in `releases`:
   - `KeyboardRepeatFilter.exe`

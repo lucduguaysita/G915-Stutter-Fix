@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace KeyboardHeatmap
@@ -40,6 +41,7 @@ namespace KeyboardHeatmap
             string outputPath = positional.Count >= 2 ? positional[1] : null;
 
             // ── Read config.json for defaults ──────────────────────────────────────
+            string heatmapDaysRaw = null;
             string configPath = Path.Combine(Directory.GetCurrentDirectory(), "config.json");
             if (File.Exists(configPath))
             {
@@ -56,6 +58,11 @@ namespace KeyboardHeatmap
                             Path.GetDirectoryName(Path.GetFullPath(configLog)),
                             "KeyboardHeatmap.html");
                 }
+
+                // HeatmapDays may be a quoted string ("all") or a bare number (7).
+                var daysMatch = Regex.Match(configText, @"""HeatmapDays""\s*:\s*""?(?<v>[^"",}\s]+)""?");
+                if (daysMatch.Success)
+                    heatmapDaysRaw = daysMatch.Groups["v"].Value;
             }
 
             if (logPath == null)    logPath    = "KeyboardRepeatFilter.log";
@@ -82,6 +89,16 @@ namespace KeyboardHeatmap
             {
                 Console.Error.WriteLine($"Error parsing log file: {ex.Message}");
                 return 2;
+            }
+
+            // ── Optional day window (config: HeatmapDays) ──────────────────────────
+            int? windowDays = ParseHeatmapDays(heatmapDaysRaw);
+            if (windowDays.HasValue)
+            {
+                DateTime cutoff = DateTime.Now.AddDays(-windowDays.Value);
+                int before = entries.Count;
+                entries = entries.Where(e => e.Timestamp >= cutoff).ToList();
+                Console.WriteLine($"Window:   last {windowDays.Value} day(s); kept {entries.Count} of {before} log entries");
             }
 
             int filteredCount = 0;
@@ -134,6 +151,23 @@ namespace KeyboardHeatmap
             TryOpenBrowser(outputPath);
 
             return 0;
+        }
+
+        // Returns the day window from the config value, or null for "all"/unset/
+        // unrecognized (charts the entire log). Only positive integers limit it.
+        private static int? ParseHeatmapDays(string raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+                return null;
+
+            raw = raw.Trim();
+            if (raw.Equals("all", StringComparison.OrdinalIgnoreCase))
+                return null;
+
+            if (int.TryParse(raw, out int days) && days > 0)
+                return days;
+
+            return null;
         }
 
         private static void TryOpenBrowser(string htmlPath)

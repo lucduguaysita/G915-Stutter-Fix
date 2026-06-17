@@ -35,6 +35,11 @@ namespace KeyboardRepeatFilter
         private readonly FilterConfig _config;
         private readonly long[] _lastUpTicks = new long[256];
         private readonly bool[] _isPressed = new bool[256];
+        // BlockRepress-mode state: when a bounce key-down is swallowed, its matching
+        // key-up must be swallowed too, otherwise the OS is left with an unmatched
+        // key-up. For modifiers (Shift especially) that unbalanced stream can arm
+        // Windows accessibility shortcuts such as Sticky Keys.
+        private readonly bool[] _swallowNextUp = new bool[256];
         private readonly bool[] _excludedKeys = new bool[256];
         private readonly double[] _thresholdTicksByVk = new double[256];
         private readonly ManualResetEventSlim _startedSignal = new ManualResetEventSlim(false);
@@ -261,14 +266,28 @@ namespace KeyboardRepeatFilter
                 if (!_isPressed[vk] && (now - _lastUpTicks[vk]) < _thresholdTicksByVk[vk])
                 {
                     LogFiltered(vk, "filtered");
-                    // Filter this key press as it's a bounce.
+                    // Bounce key-down: swallow it, and remember to swallow the
+                    // matching key-up too so the OS does not receive an unbalanced
+                    // (down, up, up) stream that can arm Sticky Keys for modifiers.
+                    _swallowNextUp[vk] = true;
                     return true;
                 }
 
                 _isPressed[vk] = true;
+                // A genuine press cancels any pending up-swallow so its own release
+                // is never mistaken for a bounce key-up.
+                _swallowNextUp[vk] = false;
             }
             else if (message == WmKeyUp || message == WmSysKeyUp)
             {
+                if (_swallowNextUp[vk])
+                {
+                    // This is the key-up that pairs with a bounce key-down we already
+                    // dropped; swallow it to keep the event stream balanced.
+                    _swallowNextUp[vk] = false;
+                    return true;
+                }
+
                 // Always update the last-up time on a key-up event. This is crucial
                 // for the filter to work correctly after a key-down was filtered.
                 _lastUpTicks[vk] = now;
@@ -308,6 +327,15 @@ namespace KeyboardRepeatFilter
                     {
                         // Already deferring an up for this key; keep withholding.
                         return true;
+                    }
+
+                    if (!_isPressed[vk])
+                    {
+                        // We never observed the matching key-down (e.g. the key was
+                        // held across a filter restart or an elevated-window bypass).
+                        // Let the up pass untouched rather than deferring and later
+                        // injecting an unmatched key-up.
+                        return false;
                     }
 
                     // Defer the key-up and wait to see whether a bounce down

@@ -1,6 +1,59 @@
-one # Changelog
+# Changelog
 
 All notable changes to this project are documented in this file.
+
+## [3.0.0] - 2026-06-17
+
+### Added
+- **Mouse-button debouncing**: a new low-level mouse hook (`WH_MOUSE_LL`) drops a
+  button press that arrives within a threshold of that button's previous release,
+  suppressing the phantom double-click produced by a chattering mouse switch. It
+  covers the left, right, middle, and both side (X1/X2) buttons, mirroring the
+  keyboard filter's `BlockRepress` behavior.
+  - Off by default, so keyboard-only setups are unaffected. Enable it from the new
+    **"Enable mouse click debounce"** tray menu item, which persists to `config.json`.
+  - New config settings: `FilterMouseButtons` (default `false`),
+    `MouseMinRepeatIntervalMs` (default `50.0`, kept below an intentional
+    double-click so real double-clicks are preserved), and `ExcludedMouseButtons`
+    (button names never filtered: `Left`, `Right`, `Middle`, `X1`, `X2`).
+  - Filtered clicks are logged as `Mouse_<Button> filtered` when `LogLevel` is `Trace`.
+- **Profiles**: keep multiple configurations side by side. Any `*.json` next to the app
+  that matches the config signature appears under a new **Profile** tray submenu (the
+  startup `config.json` is marked **(default)**); selecting one loads and applies it
+  live, and later tray toggles save back into whichever profile is active.
+- **Bundled `gaming.json` profile** tuned for movement: `BlockRelease` mode so a
+  chattering key can't drop held W/A/S/D mid-run, a tight 12 ms per-key release on
+  W/A/S/D and crouch (right Ctrl) for crisp stops, action keys left at the protective
+  default, and pop-ups and mouse debouncing off.
+- **Sticky "Run as administrator"**: new `RunAsAdmin` config and an **"Always run as
+  administrator"** tray toggle. When on, the app relaunches elevated on every launch
+  (a UAC prompt each time) so the hook can filter elevated windows. Replaces the
+  one-shot "Restart as administrator" menu item.
+- **Heatmap — mouse graphic**: filtered mouse-button events are now parsed and drawn as
+  a stylized mouse with the count on each button (left, right, middle, X1, X2) instead
+  of being ignored.
+- **Heatmap — modifier row**: the keyboard graphic gains a bottom modifier row (Ctrl,
+  Win, Alt, Space, Alt, Fn, Menu, Ctrl) plus both Shift keys on row 3, matched by
+  side-specific VK code and tinted on one shared intensity scale with the letters.
+- **Heatmap — day window**: new `HeatmapDays` config (`all`, or a number of days). When
+  set, the report charts only entries from that many days back from when it is run.
+- **`VK_PHANTOM` name** for virtual-key `0xFF` (255) — the phantom/unmappable code some
+  keyboards emit — so it shows by name in the log and heatmap instead of a bare `=255`.
+
+### Changed
+- Renamed the tray **Keyboard Heatmap** submenu to **Heatmap** (it now shows mouse data
+  too).
+- Now documented as supporting **Windows 10/11 x64** (previously stated Windows 11 only);
+  the APIs used are all available on Windows 10, so no code change was required.
+
+### Fixed
+- **Spurious Sticky Keys activation.** In `BlockRepress` mode a swallowed bounce
+  key-down left the matching key-up unbalanced, which could arm Windows Sticky Keys
+  (notably for Shift, and especially over high-latency RDP, where input arrives in
+  bursts). The paired key-up is now swallowed too so the event stream stays balanced;
+  `BlockRelease` likewise no longer re-injects an unmatched key-up.
+- **Heatmap legend in dark mode** now repaints to match the dark key colors; it
+  previously showed the light "white-to-crimson" ramp while the keys used the dark ramp.
 
 ## [2.1.0] - 2026-06-14
 

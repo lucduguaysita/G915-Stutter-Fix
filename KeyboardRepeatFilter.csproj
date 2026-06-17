@@ -9,7 +9,7 @@
     <Description>G915-Stutter-Fix</Description>
     <Copyright>MIT License</Copyright>
     <RepositoryUrl>https://github.com/lucduguaysita/G915-Stutter-Fix</RepositoryUrl>
-    <Version>2.1.0</Version>
+    <Version>3.0.0</Version>
     <Title>G915-Stutter-Fix</Title>
     <AssemblyTitle>G915-Stutter-Fix</AssemblyTitle>
     <ApplicationIcon>app.ico</ApplicationIcon>
@@ -61,6 +61,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>config.json</Link>
     </None>
+    <None Update="src\gaming.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>gaming.json</Link>
+    </None>
   </ItemGroup>
   <!-- Copy KeyboardHeatmap.exe next to the app's build output (Debug and
        Release) so "Generate report" works when running/testing from VS. -->
@@ -79,6 +83,7 @@
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ReleasesDir)" />
     <Copy SourceFiles="$(TargetDir)Newtonsoft.Json.dll" DestinationFolder="$(ReleasesDir)" Condition="Exists('$(TargetDir)Newtonsoft.Json.dll')" />
     <Copy SourceFiles="$(TargetDir)config.json" DestinationFolder="$(ReleasesDir)" Condition="Exists('$(TargetDir)config.json')" />
+    <Copy SourceFiles="$(TargetDir)gaming.json" DestinationFolder="$(ReleasesDir)" Condition="Exists('$(TargetDir)gaming.json')" />
     <Copy SourceFiles="$(MSBuildProjectDirectory)\KeyboardHeatmap\bin\Release\KeyboardHeatmap.exe" DestinationFolder="$(ReleasesDir)" Condition="Exists('$(MSBuildProjectDirectory)\KeyboardHeatmap\bin\Release\KeyboardHeatmap.exe')" />
   </Target>
 </Project>
