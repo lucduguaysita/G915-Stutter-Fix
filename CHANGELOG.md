@@ -54,6 +54,10 @@ All notable changes to this project are documented in this file.
   `BlockRelease` likewise no longer re-injects an unmatched key-up.
 - **Heatmap legend in dark mode** now repaints to match the dark key colors; it
   previously showed the light "white-to-crimson" ramp while the keys used the dark ramp.
+- **Dismissable elevated-window toast.** The corner notice now has a close (x) button that
+  clears it without relaunching elevated. Previously clicking the toast only triggered the
+  "run as administrator" action, so there was no way to dismiss it short of waiting out the
+  timer.
 
 ## [2.1.0] - 2026-06-14
 
