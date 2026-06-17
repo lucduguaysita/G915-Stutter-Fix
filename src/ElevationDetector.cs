@@ -9,7 +9,7 @@ namespace KeyboardRepeatFilter
     /// higher Windows integrity level than this one. A low-level keyboard hook
     /// installed from a medium-integrity process is silently skipped for input
     /// going to elevated ("Run as administrator") windows (UIPI), so while such a
-    /// window is focused the filter simply cannot see — or fix — its keystrokes.
+    /// window is focused the filter simply cannot see, or fix, its keystrokes.
     /// This lets the app surface that state instead of appearing broken.
     /// </summary>
     internal static class ElevationDetector

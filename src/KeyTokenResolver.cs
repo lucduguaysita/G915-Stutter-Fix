@@ -12,8 +12,8 @@ namespace KeyboardRepeatFilter
     /// (e.g. "Back", "Return", "I", "LCONTROL"). Name matching is
     /// case-insensitive and the "VK_" prefix is optional.
     ///
-    /// A generic modifier name (Ctrl / Shift / Alt) expands to every variant —
-    /// generic, left and right — so excluding "Ctrl" covers both Control keys
+    /// A generic modifier name (Ctrl / Shift / Alt) expands to every variant -
+    /// generic, left and right, so excluding "Ctrl" covers both Control keys
     /// regardless of which code the keyboard reports. Use the specific name
     /// (e.g. "LCONTROL") to target just one side.
     ///

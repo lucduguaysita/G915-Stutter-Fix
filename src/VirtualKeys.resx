@@ -64,7 +64,7 @@
   <data name="2D" xml:space="preserve"><value>VK_INSERT</value></data>
   <data name="2E" xml:space="preserve"><value>VK_DELETE</value></data>
 
-  <!-- 0–9 -->
+  <!-- 0-9 -->
   <data name="30" xml:space="preserve"><value>0</value></data>
   <data name="31" xml:space="preserve"><value>1</value></data>
   <data name="32" xml:space="preserve"><value>2</value></data>
@@ -76,7 +76,7 @@
   <data name="38" xml:space="preserve"><value>8</value></data>
   <data name="39" xml:space="preserve"><value>9</value></data>
 
-  <!-- A–Z -->
+  <!-- A-Z -->
   <data name="41" xml:space="preserve"><value>A</value></data>
   <data name="42" xml:space="preserve"><value>B</value></data>
   <data name="43" xml:space="preserve"><value>C</value></data>

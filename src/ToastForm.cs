@@ -31,15 +31,39 @@ namespace KeyboardRepeatFilter
 
             var panel = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(38, 34, 27) };
             var accent = new Panel { Dock = DockStyle.Left, Width = 4, BackColor = Color.FromArgb(250, 199, 117) };
+
+            // Title row as its own container: the title fills the left, the close
+            // button docks to the right. No overlapping siblings, so the button
+            // always paints (an overlay over the fill panel did not render reliably).
+            var titleBar = new Panel { Dock = DockStyle.Top, Height = 28, BackColor = Color.FromArgb(38, 34, 27) };
             var titleLbl = new Label
             {
                 Text = title,
-                Dock = DockStyle.Top,
-                Height = 28,
+                Dock = DockStyle.Fill,
                 ForeColor = Color.FromArgb(250, 199, 117),
                 Font = _titleFont,
-                Padding = new Padding(14, 9, 12, 0)
+                Padding = new Padding(14, 9, 0, 0)
             };
+            // Explicit dismiss: closes the toast only, never runs the click action,
+            // so the notice can always be cleared without triggering an elevation
+            // relaunch (or waiting out the timer).
+            var closeLbl = new Label
+            {
+                Text = "×",
+                Dock = DockStyle.Right,
+                Width = 30,
+                TextAlign = ContentAlignment.MiddleCenter,
+                ForeColor = Color.FromArgb(150, 145, 135),
+                BackColor = Color.FromArgb(38, 34, 27),
+                Font = new Font("Segoe UI", 12f, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            closeLbl.Click += (s, e) => Close();
+            closeLbl.MouseEnter += (s, e) => closeLbl.ForeColor = Color.FromArgb(250, 199, 117);
+            closeLbl.MouseLeave += (s, e) => closeLbl.ForeColor = Color.FromArgb(150, 145, 135);
+            titleBar.Controls.Add(titleLbl); // Dock.Fill, added first so it takes only the leftover
+            titleBar.Controls.Add(closeLbl); // Dock.Right, added last so it reserves its edge
+
             var bodyLbl = new Label
             {
                 Text = message,
@@ -49,9 +73,9 @@ namespace KeyboardRepeatFilter
                 Padding = new Padding(14, 2, 12, 10)
             };
 
-            panel.Controls.Add(bodyLbl);
-            panel.Controls.Add(titleLbl);
-            panel.Controls.Add(accent);
+            panel.Controls.Add(bodyLbl);  // Dock.Fill
+            panel.Controls.Add(titleBar); // Dock.Top
+            panel.Controls.Add(accent);   // Dock.Left
             Controls.Add(panel);
             Padding = new Padding(1); // lets the BackColor show as a 1px border
 
@@ -68,11 +92,12 @@ namespace KeyboardRepeatFilter
             };
             Click += dismiss;
             panel.Click += dismiss;
+            titleBar.Click += dismiss;
             titleLbl.Click += dismiss;
             bodyLbl.Click += dismiss;
             if (onClick != null)
             {
-                Cursor = panel.Cursor = titleLbl.Cursor = bodyLbl.Cursor = Cursors.Hand;
+                Cursor = panel.Cursor = titleBar.Cursor = titleLbl.Cursor = bodyLbl.Cursor = Cursors.Hand;
             }
 
             // Keep the toast up while the user is reading or about to click it: pause
@@ -87,7 +112,7 @@ namespace KeyboardRepeatFilter
                     _life.Start();
                 }
             };
-            foreach (Control c in new Control[] { this, panel, accent, titleLbl, bodyLbl })
+            foreach (Control c in new Control[] { this, panel, accent, titleBar, titleLbl, bodyLbl, closeLbl })
             {
                 c.MouseEnter += pause;
                 c.MouseLeave += resume;

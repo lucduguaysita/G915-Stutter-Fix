@@ -67,7 +67,7 @@ A reference for all Windows Virtual Key (`VK_*`) codes mapped to their decimal v
 
 ## Alphanumeric Keys
 
-### Digits (0–9)
+### Digits (0-9)
 
 | Dec | Key |
 |-----|-----|
@@ -82,7 +82,7 @@ A reference for all Windows Virtual Key (`VK_*`) codes mapped to their decimal v
 | `056` | `8` |
 | `057` | `9` |
 
-### Letters (A–Z)
+### Letters (A-Z)
 
 | Dec | Key | Dec | Key | Dec | Key |
 |-----|-----|-----|-----|-----|-----|
@@ -292,4 +292,4 @@ A reference for all Windows Virtual Key (`VK_*`) codes mapped to their decimal v
 
 ---
 
-*Source: Windows Virtual Key Codes — `winuser.h`*
+*Source: Windows Virtual Key Codes, `winuser.h`*

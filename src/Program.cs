@@ -482,8 +482,8 @@ namespace KeyboardRepeatFilter
             // moving the pointer away restarts it, so it stays as long as it is needed.
             _toast = new ToastForm(
                 "Keyboard Repeat Filter",
-                "Paused while an administrator window is active. Click here to run as administrator, or switch back to resume.",
-                15000,
+                "Paused while an administrator window is active. Click here to run as administrator, or click the close button.",
+                10000,
                 RestartAsAdmin);
             _toast.FormClosed += (_, __) =>
             {

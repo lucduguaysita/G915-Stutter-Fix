@@ -10,14 +10,14 @@ The result is clean, stable, predictable typing without stutters or phantom repe
 
 Version 2.0 and later adds a **Filter mode** choice (right-click the tray icon → **Filter mode**):
 
-- **Block double presses** (default) — stops a stutter from registering a key twice, so one tap
+- **Block double presses** (default), stops a stutter from registering a key twice, so one tap
   produces one character. This is the classic behavior and is best for everyday typing.
-- **Protect held keys (Ctrl, Shift)** — instead of blocking the duplicate press, it suppresses the
+- **Protect held keys (Ctrl, Shift)**: instead of blocking the duplicate press, it suppresses the
   phantom *release*, so a key you are holding stays held through a bounce. This is best when the
   stutter keeps breaking held-modifier shortcuts (`Ctrl`+something) or game movement keys. The
   trade-off is that each key release is delayed by a few milliseconds.
 
-Your choice is saved to `config.json` and applied immediately — no restart needed.
+Your choice is saved to `config.json` and applied immediately, no restart needed.
 
 ## How do I stop a specific key from being filtered, or filter one key more aggressively?
 
@@ -71,7 +71,7 @@ It was built for the G915/G915X, but it may help with other models that exhibit 
 
 ## Will it catch my movement keys (WASD) in games?
 
-Sometimes. Use the **Protect held keys** filter mode — the ready-made **gaming** profile (Tray →
+Sometimes. Use the **Protect held keys** filter mode, the ready-made **gaming** profile (Tray →
 Profile → gaming) sets this. It is the mode that keeps a held key down through a chatter bounce,
 which is exactly what movement keys need; the default mode does not help a key you are holding.
 
@@ -90,7 +90,7 @@ is the safe, recommended way to use it.
 
 There is one caveat, and the app is honest about it: Windows security forbids a normal-user keyboard
 filter from touching input that goes to a window running **as administrator** (an elevated terminal,
-installer, etc.). While such a window is focused, filtering is simply inactive there — see the next
+installer, etc.). While such a window is focused, filtering is simply inactive there, see the next
 question.
 
 ## Why did the tray icon turn yellow?
@@ -105,16 +105,16 @@ normal and filtering resumes. Each switch is recorded in the log (`HookBypass` /
 
 A brief popup also appears each time you focus an elevated window. If you find it chatty, turn it off
 with **Tray → Disable nag popups** (or set `"ShowElevatedWindowNotice": false` in `config.json`). The
-icon and log still work — only the popup is suppressed.
+icon and log still work, only the popup is suppressed.
 
 ## Can I change settings without editing config.json?
 
 Yes. Right-click the tray icon for the common toggles:
 
-- **Filter mode** — switch between "Block double presses" and "Protect held keys".
-- **Disable nag popups** — silence the elevated-window popup.
-- **Autostart** — launch automatically when you sign in.
-- **Heatmap** — generate the diagnostic report (normal or verbose).
+- **Filter mode**: switch between "Block double presses" and "Protect held keys".
+- **Disable nag popups**: silence the elevated-window popup.
+- **Autostart**: launch automatically when you sign in.
+- **Heatmap**: generate the diagnostic report (normal or verbose).
 
 Every toggle is written back to `config.json`, so the menu and the file always agree.
 

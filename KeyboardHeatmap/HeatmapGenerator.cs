@@ -30,7 +30,7 @@ namespace KeyboardHeatmap
         // them to the dedicated mouse graphic instead of the special-key grid.
         private const string MousePrefix = "Mouse_";
 
-        // Ember ramp — cool to hot (5 stops). Each stop is fill / text / border,
+        // Ember ramp, cool to hot (5 stops). Each stop is fill / text / border,
         // with the text colour chosen for contrast against its fill so key labels
         // stay readable at every intensity.
         // Light mode: pale amber -> amber -> orange -> red -> crimson
@@ -110,17 +110,17 @@ namespace KeyboardHeatmap
 
             string topKey = letterCounts.Count > 0
                 ? letterCounts.OrderByDescending(kv => kv.Value).First().Key
-                : "—";
+                : "-";
             int topKeyCount = letterCounts.Count > 0
                 ? letterCounts.OrderByDescending(kv => kv.Value).First().Value
                 : 0;
 
             string dateFrom = filtered.Count > 0
                 ? filtered.Min(e => e.Timestamp).ToString("MMM d, yyyy")
-                : "—";
+                : "-";
             string dateTo = filtered.Count > 0
                 ? filtered.Max(e => e.Timestamp).ToString("MMM d, yyyy")
-                : "—";
+                : "-";
 
             int uniqueKeys = letterCounts.Count + specialCounts.Count + mouseCounts.Count + chromeCounts.Count;
 
@@ -132,7 +132,7 @@ namespace KeyboardHeatmap
             sb.AppendLine("<head>");
             sb.AppendLine("<meta charset=\"UTF-8\">");
             sb.AppendLine("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
-            sb.AppendLine("<title>Keyboard Repeat Filter — Heatmap</title>");
+            sb.AppendLine("<title>Keyboard Repeat Filter Heatmap</title>");
             sb.AppendLine("<style>");
             sb.AppendLine(GetCss());
             sb.AppendLine("</style>");
@@ -141,8 +141,8 @@ namespace KeyboardHeatmap
             sb.AppendLine("<div class=\"page\">");
 
             // Header
-            sb.AppendLine("<h1>Keyboard Repeat Filter — Heatmap</h1>");
-            sb.AppendLine($"<p class=\"subtitle\">Double-typed key events intercepted by KeyboardRepeatFilter &nbsp;|&nbsp; {dateFrom} – {dateTo}</p>");
+            sb.AppendLine("<h1>Keyboard Repeat Filter Heatmap</h1>");
+            sb.AppendLine($"<p class=\"subtitle\">Double-typed key events intercepted by KeyboardRepeatFilter &nbsp;|&nbsp; {dateFrom} to {dateTo}</p>");
 
             // Config warning banner
             if (configWarnings.Count > 0)
@@ -153,7 +153,7 @@ namespace KeyboardHeatmap
 
                 sb.AppendLine("<div class=\"config-warn\">");
                 sb.AppendLine($"  <strong>{heading}</strong>");
-                sb.AppendLine("  <p>Check the key names in <code>config.json</code> — unrecognized entries are ignored.</p>");
+                sb.AppendLine("  <p>Check the key names in <code>config.json</code>, unrecognized entries are ignored.</p>");
                 sb.AppendLine("  <ul>");
                 foreach (var msg in configWarnings)
                 {
@@ -166,13 +166,13 @@ namespace KeyboardHeatmap
             // Stat cards
             sb.AppendLine("<div class=\"stats\">");
             AppendStat(sb, totalFiltered.ToString(), "Total filtered events");
-            AppendStat(sb, topKeyCount > 0 ? $"{topKey} ({topKeyCount}×)" : "—", "Most filtered key");
+            AppendStat(sb, topKeyCount > 0 ? $"{topKey} ({topKeyCount}×)" : "-", "Most filtered key");
             AppendStat(sb, uniqueKeys.ToString(), "Unique keys affected");
             AppendStat(sb, $"{dateTo}", "Last event");
             sb.AppendLine("</div>");
 
             // Legend
-            sb.AppendLine("<p class=\"section-label\">Keys — color intensity = filter count &nbsp;|&nbsp; row labels show PCB matrix row</p>");
+            sb.AppendLine("<p class=\"section-label\">Keys, color intensity = filter count &nbsp;|&nbsp; row labels show PCB matrix row</p>");
             sb.AppendLine("<div class=\"legend\">");
             sb.AppendLine("<span class=\"legend-text\">0</span>");
             sb.AppendLine("<div class=\"legend-bar\">");
@@ -249,7 +249,7 @@ namespace KeyboardHeatmap
             // Mouse buttons (only when the mouse filter has caught anything)
             if (mouseCounts.Count > 0)
             {
-                sb.AppendLine("<p class=\"section-label\">Mouse buttons — color intensity = filter count</p>");
+                sb.AppendLine("<p class=\"section-label\">Mouse buttons, color intensity = filter count</p>");
                 AppendMouse(sb, mouseCounts, maxMouseCount);
             }
 

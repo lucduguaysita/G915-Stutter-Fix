@@ -4,9 +4,9 @@
   "HeatmapDays": "all",
   "FilterMode": "BlockRepress",
   "ShowElevatedWindowNotice": true,
-  "RunAsAdmin": true,
+  "RunAsAdmin": false,
   "MinRepeatIntervalMs": 28.0,
-  "FilterMouseButtons": true,
+  "FilterMouseButtons": false,
   "MouseMinRepeatIntervalMs": 50.0,
   "ExcludedMouseButtons": [],
   "ExcludedKeys": [

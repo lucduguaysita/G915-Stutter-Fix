@@ -60,7 +60,7 @@ namespace KeyboardRepeatFilter
 
         // Keys that are never filtered. Each entry may be a key NAME or a decimal
         // virtual-key code. Names match the values shown in the log, are
-        // case-insensitive, and the "VK_" prefix is optional — e.g. "Back",
+        // case-insensitive, and the "VK_" prefix is optional, e.g. "Back",
         // "Return", "I", "Volume_Down". Numbers are decimal VK codes (e.g. 8 =
         // Backspace). A generic modifier ("Ctrl", "Shift", "Alt") excludes both
         // the left and right keys; use "LCONTROL"/"RCONTROL" to target one side.
@@ -71,7 +71,7 @@ namespace KeyboardRepeatFilter
         public int[] ExcludedVkCodes { get; set; }
 
         // Per-key threshold overrides (milliseconds). Each key may be a name or a
-        // decimal VK code, following the same rules as ExcludedKeys — e.g.
+        // decimal VK code, following the same rules as ExcludedKeys, e.g.
         // { "I": 40.0 } or { "73": 40.0 }.
         public Dictionary<string, double> PerKeyMinRepeatIntervalMs { get; set; } = new Dictionary<string, double>();
     }

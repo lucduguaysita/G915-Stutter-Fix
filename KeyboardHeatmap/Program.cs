@@ -7,13 +7,13 @@ using System.Text.RegularExpressions;
 namespace KeyboardHeatmap
 {
     /// <summary>
-    /// KeyboardHeatmap — parses a KeyboardRepeatFilter log and produces an HTML heatmap.
+    /// KeyboardHeatmap, parses a KeyboardRepeatFilter log and produces an HTML heatmap.
     ///
     /// Usage:
     ///   KeyboardHeatmap.exe [logFile] [outputFile]
     ///
-    ///   logFile    — path to KeyboardRepeatFilter.log  (default: KeyboardRepeatFilter.log in current dir)
-    ///   outputFile — path for the generated HTML file   (default: KeyboardHeatmap.html in current dir)
+    ///   logFile   , path to KeyboardRepeatFilter.log  (default: KeyboardRepeatFilter.log in current dir)
+    ///   outputFile, path for the generated HTML file   (default: KeyboardHeatmap.html in current dir)
     ///
     /// If a config.json exists in the current directory it is read for defaults:
     ///   { "LogFilePath": "C:/Temp/KeyboardRepeatFilter.log" }
@@ -46,7 +46,7 @@ namespace KeyboardHeatmap
             if (File.Exists(configPath))
             {
                 string configText = File.ReadAllText(configPath);
-                // Simple regex-based read — no external JSON dependency required
+                // Simple regex-based read, no external JSON dependency required
                 var match = Regex.Match(configText, @"""LogFilePath""\s*:\s*""([^""]+)""");
                 if (match.Success)
                 {
@@ -115,8 +115,8 @@ namespace KeyboardHeatmap
             if (configWarnings.Count > 0)
             {
                 Console.WriteLine(configWarnings.Count == 1
-                    ? "Warning:  1 config warning in log — check key names in config.json."
-                    : $"Warning:  {configWarnings.Count} config warnings in log — check key names in config.json.");
+                    ? "Warning:  1 config warning in log, check key names in config.json."
+                    : $"Warning:  {configWarnings.Count} config warnings in log, check key names in config.json.");
             }
             if (!showDaily)
                 Console.WriteLine("Tip:      Use -v to include the daily filtered event count in the output.");
@@ -183,7 +183,7 @@ namespace KeyboardHeatmap
             }
             catch
             {
-                // Non-fatal — user can open manually
+                // Non-fatal, user can open manually
             }
         }
     }

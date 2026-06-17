@@ -57,26 +57,26 @@ Your `releases` folder should contain:
 "PerKeyMinRepeatIntervalMs": { "I": 40.0 }
 ```
 
-- **Use the name as it appears in the log.** With `"LogLevel": "Trace"`, each filtered key is logged like `VK_LCONTROL=162 filtered`. The part before the `=` is a valid name to put in the config — the log and the config share one lookup table, so anything you see logged you can paste back (with or without the `VK_`).
+- **Use the name as it appears in the log.** With `"LogLevel": "Trace"`, each filtered key is logged like `VK_LCONTROL=162 filtered`. The part before the `=` is a valid name to put in the config, the log and the config share one lookup table, so anything you see logged you can paste back (with or without the `VK_`).
 - The **`VK_` prefix is optional** and matching is **case-insensitive**: `VK_BACK`, `Back`, and `back` are equivalent. Letter and digit keys are their bare character: `"I"`, `"A"`.
-- **Numeric codes still work** as a fallback — `8` is the same as `"Back"`. Any whole number is treated as a decimal virtual-key code.
+- **Numeric codes still work** as a fallback, `8` is the same as `"Back"`. Any whole number is treated as a decimal virtual-key code.
 
 #### Ctrl / Shift / Alt
 
 A generic modifier name covers **both** sides automatically: putting `"Ctrl"` (or `"Control"`) in `ExcludedKeys` excludes left *and* right Control (and the generic code). The same applies to `"Shift"` and `"Alt"` (alias for `Menu`). This is usually what you want, since keyboards differ in whether they report the generic or the left/right-specific code.
 
-To target just **one** side, use the specific name instead: `"LCONTROL"`/`"RCONTROL"`, `"LSHIFT"`/`"RSHIFT"`, `"LMENU"`/`"RMENU"`. The same expansion applies to `PerKeyMinRepeatIntervalMs` — a generic modifier sets the threshold for both sides.
+To target just **one** side, use the specific name instead: `"LCONTROL"`/`"RCONTROL"`, `"LSHIFT"`/`"RSHIFT"`, `"LMENU"`/`"RMENU"`. The same expansion applies to `PerKeyMinRepeatIntervalMs`, a generic modifier sets the threshold for both sides.
 
-> **Note:** Because plain numbers are read as virtual-key codes, the number keys `0`–`9` can't be referenced by their bare character (`"0"` means VK code 0, not the `0` key). Use their VK code (`48`–`57`) for those.
+> **Note:** Because plain numbers are read as virtual-key codes, the number keys `0`-`9` can't be referenced by their bare character (`"0"` means VK code 0, not the `0` key). Use their VK code (`48`-`57`) for those.
 
 If a name can't be recognized, it is ignored and a `ConfigWarning` line is written to the log so you can spot the typo.
 
 ### `FilterMode`
 
-- **`BlockRepress`** (default) — the original behavior. The spurious key-up is
+- **`BlockRepress`** (default), the original behavior. The spurious key-up is
   allowed through and the duplicate key-down that follows it is blocked. Best for
   character keys: it stops `aa` when you only pressed `a` once.
-- **`BlockRelease`** — the spurious key-up is withheld instead. If a bounce
+- **`BlockRelease`**: the spurious key-up is withheld instead. If a bounce
   key-down follows within `MinRepeatIntervalMs`, both are dropped so the key stays
   logically held; otherwise the genuine key-up is re-emitted once the window
   elapses. Best for held modifiers (`Ctrl`/`Shift`) and game movement keys, where a
@@ -128,7 +128,7 @@ A ready-made **`gaming.json`** profile ships next to the app. Activate it from
   isn't a bounce), so a low value keeps stops crisp. 12 ms still absorbs the typical sub-22 ms
   chatter; lower it further for a tighter stop, or raise it if chatter starts leaking through.
 - **Action keys stay protected.** Tapped keys (E, abilities, numbers) keep the default 28 ms, which
-  gives stronger protection against one tap registering twice — exactly what a tap key wants.
+  gives stronger protection against one tap registering twice, exactly what a tap key wants.
 - **Pop-ups off** (`ShowElevatedWindowNotice: false`) and **mouse debouncing off** so it cannot
   swallow rapid intentional clicks.
 
@@ -143,7 +143,7 @@ let keystrokes reach it:
 - **Raw Input / DirectInput**: many games read the device directly, below the hook chain, so the
   filter never sees those keys.
 - **Elevated game or anti-cheat process**: Windows (UIPI) bypasses a normal-user hook for a
-  higher-privilege window. For this case only, running the app elevated can help — enable
+  higher-privilege window. For this case only, running the app elevated can help, enable
   **Tray → Always run as administrator** before launching the game.
 
 If the keystrokes never reach the hook, no profile or threshold will catch them. That is a Windows
@@ -153,32 +153,32 @@ security/architecture limit, not a bug.
 
 Right-click the tray icon for these options:
 
-- **Always run as administrator** — when checked, the app relaunches elevated immediately (if not
+- **Always run as administrator**: when checked, the app relaunches elevated immediately (if not
   already) and auto-elevates on every future launch, so the hook can also filter input for
   administrator windows (which Windows otherwise bypasses; see below). Persisted as `RunAsAdmin` in
   `config.json`. A UAC consent prompt appears on each unelevated launch; unchecking it takes effect
   on the next launch.
-- **Filter mode** — choose **Block double presses** (`BlockRepress`) or **Protect held keys**
+- **Filter mode**: choose **Block double presses** (`BlockRepress`) or **Protect held keys**
   (`BlockRelease`). The active mode shows a checkmark. Switching takes effect immediately and is
   saved to `config.json`.
-- **Enable mouse click debounce** — when checked, debounces chattering mouse buttons (equivalent to
+- **Enable mouse click debounce**: when checked, debounces chattering mouse buttons (equivalent to
   `"FilterMouseButtons": true`). Toggling it starts or stops the mouse hook immediately and is saved
   to `config.json`.
-- **Profile** — lists every `*.json` file next to the app that looks like a config (it shares at
+- **Profile**: lists every `*.json` file next to the app that looks like a config (it shares at
   least two of our setting names). Selecting one loads it as the live configuration and applies it
   immediately; a checkmark shows the active one. To add a profile, drop another config file (e.g.
   `gaming.json`) in the app folder and restart. While a profile is active, the other tray toggles
   save back into **that** file. The active choice is per-session: on the next launch the app starts
   from `config.json` again.
-- **Disable nag popups** — when checked, suppresses the brief popup shown when an administrator
+- **Disable nag popups**: when checked, suppresses the brief popup shown when an administrator
   window is focused (equivalent to `"ShowElevatedWindowNotice": false`). The tray icon and log are
   unaffected.
-- **Autostart** — launch automatically when you sign in.
-- **Heatmap → Generate report / Generate report (verbose)** — runs `KeyboardHeatmap.exe`
+- **Autostart**: launch automatically when you sign in.
+- **Heatmap → Generate report / Generate report (verbose)**: runs `KeyboardHeatmap.exe`
   against your current log and opens the HTML report; the verbose option adds the daily-activity
   chart. If no log exists yet, a message explains how to enable logging.
-- **About…** — version and project information.
-- **Exit** — stop filtering and close the app.
+- **About…**: version and project information.
+- **Exit**: stop filtering and close the app.
 
 Every toggle persists to `config.json`, so the menu and the file never disagree.
 
@@ -186,7 +186,7 @@ Every toggle persists to `config.json`, so the menu and the file never disagree.
 
 Windows does not allow a normal-user keyboard filter to see or modify input going to a window running
 **as administrator** (this is User Interface Privilege Isolation, a security feature). While such a
-window is focused, filtering is inactive for it — and the app makes that state visible instead of
+window is focused, filtering is inactive for it, and the app makes that state visible instead of
 appearing broken:
 
 - the **tray icon turns yellow**, with a tooltip explaining what is happening;
@@ -250,5 +250,5 @@ be anything to chart.
   the same intensity ramp.
 - **Daily filtered event count** (with `-v`) shows one bar per day, colored from green (a quiet day)
   through yellow to crimson (the busiest day in the log), relative to your own data.
-- A **config-warning banner** appears if the log contains `ConfigWarning` entries — i.e. an
+- A **config-warning banner** appears if the log contains `ConfigWarning` entries, i.e. an
   unrecognized key name in `config.json` that you should fix.

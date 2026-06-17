@@ -3,7 +3,7 @@
 **A tiny, user-mode keyboard filter that makes a stuttering keyboard feel brand new again.**
 
 Some Logitech G915/G915X units (and other keyboards with the same defect) emit *impossible* HID
-sequences — phantom key repeats and double-presses that arrive faster than any human could ever
+sequences, phantom key repeats and double-presses that arrive faster than any human could ever
 type. The result is maddening: `thiss becomess thiis`, a held `Ctrl` that randomly lets go
 mid-shortcut, a game character that won't keep walking. `G915-Stutter-Fix` sits quietly in your
 system tray, watches the keyboard at the lowest user-mode level Windows allows, and silently drops
@@ -11,7 +11,7 @@ those invalid events *before* they ever reach your applications.
 
 No drivers. No firmware flashing. No registry surgery. No network access. Close the app and your
 system is exactly as it was. User reports confirm it eliminates the stutter/double-keypress problem
-on affected G915/G915X units — and it's small enough to read end-to-end in a coffee break.
+on affected G915/G915X units, and it's small enough to read end-to-end in a coffee break.
 
 > **Version 3.0.0**, Windows 10/11 x64 · .NET Framework 4.8 · MIT licensed · 100% offline
 
@@ -22,7 +22,7 @@ on affected G915/G915X units — and it's small enough to read end-to-end in a c
 | Tool | Description |
 |---|---|
 | `KeyboardRepeatFilter.exe` | Runs in the system tray and silently filters stutter/duplicate keypresses (and, optionally, chattering mouse clicks) in real time. |
-| `KeyboardHeatmap.exe` | Companion CLI that reads the filter log and generates a self-contained HTML heatmap of filtered key counts — great for *seeing* which keys misbehave. |
+| `KeyboardHeatmap.exe` | Companion CLI that reads the filter log and generates a self-contained HTML heatmap of filtered key counts, great for *seeing* which keys misbehave. |
 
 ---
 
@@ -86,7 +86,7 @@ Version 2.0 is a substantial upgrade over the 1.x line. Highlights:
   in your config.
 - **It tells you when it can't help.** When you focus a window running **as administrator**,
   Windows forbids a normal-user filter from touching its input. Instead of looking broken, the
-  app turns its tray icon yellow, shows a brief (non-focus-stealing) notice, and logs it — then
+  app turns its tray icon yellow, shows a brief (non-focus-stealing) notice, and logs it, then
   silently recovers when you switch back.
 - **Everything important is one click away.** Filter mode, the notice popup, and autostart are all
   toggles in the tray menu, and every choice persists to `config.json`.
@@ -99,14 +99,14 @@ See [`CHANGELOG.md`](CHANGELOG.md) for the complete list.
 
 ### Real-time stutter filtering
 A low-level keyboard hook (`WH_KEYBOARD_LL`) inspects every key event and discards repeats that
-arrive faster than a configurable threshold (default **28 ms** — below the biomechanical limit of a
+arrive faster than a configurable threshold (default **28 ms**, below the biomechanical limit of a
 real double-tap). Filtering is per-key configurable and certain keys (Backspace, Enter, volume) are
 excluded by default so legitimate fast input is never touched.
 
 ### Two filter modes
-- **Block double presses** (`BlockRepress`, default) — blocks the spurious *re-press*, so one tap
+- **Block double presses** (`BlockRepress`, default), blocks the spurious *re-press*, so one tap
   produces one character. Ideal for normal typing.
-- **Protect held keys** (`BlockRelease`) — withholds the spurious *release*, so a held modifier or
+- **Protect held keys** (`BlockRelease`), withholds the spurious *release*, so a held modifier or
   movement key stays down through a bounce. Ideal for `Ctrl`/`Shift` shortcuts and gaming, at the
   cost of a few milliseconds of release latency.
 
@@ -130,7 +130,7 @@ buttons, and is **off by default** so keyboard-only users are unaffected. Turn i
 Keep more than one configuration side by side. Drop any number of config `.json` files next to the
 app and switch between them live from **Tray → Profile**. Every file that looks like a config (it
 shares our setting names) appears as a selectable profile; the startup `config.json` is marked
-**(default)**. Selecting one loads it as the live configuration and applies it instantly — great for
+**(default)**. Selecting one loads it as the live configuration and applies it instantly, great for
 keeping, say, a precise everyday-typing setup and an aggressive gaming setup a click apart.
 
 A **`gaming.json`** profile ships in the box, tuned for movement:
@@ -144,11 +144,11 @@ A **`gaming.json`** profile ships in the box, tuned for movement:
 Activate it from **Tray → Profile → gaming**.
 
 > **Reality check:** see [Gaming and anti-cheat](docs/USAGE.md#gaming-and-anti-cheat) for what a
-> filter can and cannot do in games — kernel-level anti-cheat and Raw Input can keep keystrokes away
+> filter can and cannot do in games, kernel-level anti-cheat and Raw Input can keep keystrokes away
 > from any user-mode hook, and no profile changes that.
 
 ### Friendly, forgiving configuration
-`ExcludedKeys` and per-key thresholds accept key **names** exactly as they appear in the log — the
+`ExcludedKeys` and per-key thresholds accept key **names** exactly as they appear in the log, the
 `VK_` prefix is optional and matching is case-insensitive. Generic modifiers (`Ctrl`, `Shift`,
 `Alt`) expand to both the left and right keys. Raw numeric virtual-key codes still work as an escape
 hatch, and unrecognized names are reported in the log rather than failing silently.
@@ -156,7 +156,7 @@ hatch, and unrecognized names are reported in the log rather than failing silent
 ### Elevated-window awareness
 Windows security (UIPI) prevents a normal-user hook from filtering input to **administrator**
 windows. The app detects this state, turns the tray icon **yellow** with a plain-language tooltip,
-shows a brief focus-safe corner notice (toggleable), and records it in the log — recovering
+shows a brief focus-safe corner notice (toggleable), and records it in the log, recovering
 automatically when a normal window regains focus.
 
 ### Diagnostic heatmap
@@ -167,7 +167,7 @@ see exactly which keys (and which days) are the worst offenders.
 
 ## Heatmap
 
-<img width="880" alt="Keyboard Repeat Filter heatmap report — 2.0 ember theme" src="docs/heatmap.png" />
+<img width="880" alt="Keyboard Repeat Filter heatmap report, 2.0 ember theme" src="docs/heatmap.png" />
 
 A diagnostic visualization showing which keys generate filtered/duplicate events, rendered with a
 warm ember intensity ramp (light and dark themes), a "busiest row" flag, summary stat cards, an
@@ -193,7 +193,7 @@ KeyboardHeatmap.exe "C:\temp\KeyboardRepeatFilter.log"
 KeyboardHeatmap.exe -v
 ```
 
-The report is a single `.html` file with no external dependencies — open it in any browser. On
+The report is a single `.html` file with no external dependencies, open it in any browser. On
 success, `KeyboardHeatmap.exe` opens it for you automatically.
 
 ---
@@ -208,7 +208,7 @@ success, `KeyboardHeatmap.exe` opens it for you automatically.
    `config.json`, and the bundled `gaming.json` profile.
 4. Copy those files to a writable folder of your choice (for example `C:\Utils\KeyboardRepeatFilter`).
 5. Run `KeyboardRepeatFilter.exe`.
-6. Confirm the tray icon appears and type normally — the stutter should be gone.
+6. Confirm the tray icon appears and type normally, the stutter should be gone.
 
 Right-click the tray icon to switch **Profile**, switch **Filter mode**, toggle **mouse-button
 debouncing**, toggle the notice popup, enable **Autostart**, or launch the heatmap.
@@ -235,8 +235,8 @@ source (see [Build Environment](#build-environment)).
 ### KeyboardHeatmap
 
 `KeyboardHeatmap.exe` parses `KeyboardRepeatFilter.log` and produces a single self-contained `.html`
-heatmap — no dependencies required. You can run it directly, or launch it from
-**Tray → Heatmap → Generate report**. (Logging must be enabled — see below.)
+heatmap, no dependencies required. You can run it directly, or launch it from
+**Tray → Heatmap → Generate report**. (Logging must be enabled, see below.)
 
 > **Tip:** the heatmap is built from the log, so set `"LogLevel": "Trace"` in `config.json` and make
 > sure `LogFilePath` points somewhere writable. If no log exists yet, the tray launcher explains
@@ -288,5 +288,5 @@ straight back to this file, so the GUI and the config file never disagree.
 
 ## License
 
-Released under the **MIT License** — full reuse, modification, and redistribution permitted. The
+Released under the **MIT License**, full reuse, modification, and redistribution permitted. The
 complete C# source is in the `src` folder.

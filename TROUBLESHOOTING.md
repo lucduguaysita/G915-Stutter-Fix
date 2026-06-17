@@ -20,7 +20,7 @@
 ## The tray icon turned yellow
 
 The icon goes yellow (and its tooltip reads "paused for this admin window") while
-the window you are using belongs to an app running **as administrator** — for
+the window you are using belongs to an app running **as administrator**, for
 example an elevated terminal, installer, or a game launched with elevated rights.
 
 This is a Windows security rule, not a bug: a keyboard filter running as a normal
