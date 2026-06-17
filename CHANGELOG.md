@@ -29,16 +29,16 @@ All notable changes to this project are documented in this file.
   administrator"** tray toggle. When on, the app relaunches elevated on every launch
   (a UAC prompt each time) so the hook can filter elevated windows. Replaces the
   one-shot "Restart as administrator" menu item.
-- **Heatmap — mouse graphic**: filtered mouse-button events are now parsed and drawn as
+- **Heatmap mouse graphic**: filtered mouse-button events are now parsed and drawn as
   a stylized mouse with the count on each button (left, right, middle, X1, X2) instead
   of being ignored.
-- **Heatmap — modifier row**: the keyboard graphic gains a bottom modifier row (Ctrl,
+- **Heatmap modifier row**: the keyboard graphic gains a bottom modifier row (Ctrl,
   Win, Alt, Space, Alt, Fn, Menu, Ctrl) plus both Shift keys on row 3, matched by
   side-specific VK code and tinted on one shared intensity scale with the letters.
-- **Heatmap — day window**: new `HeatmapDays` config (`all`, or a number of days). When
+- **Heatmap day window**: new `HeatmapDays` config (`all`, or a number of days). When
   set, the report charts only entries from that many days back from when it is run.
-- **`VK_PHANTOM` name** for virtual-key `0xFF` (255) — the phantom/unmappable code some
-  keyboards emit — so it shows by name in the log and heatmap instead of a bare `=255`.
+- **`VK_PHANTOM` name** for virtual-key `0xFF` (255), the phantom/unmappable code some
+  keyboards emit, so it shows by name in the log and heatmap instead of a bare `=255`.
 
 ### Changed
 - Renamed the tray **Keyboard Heatmap** submenu to **Heatmap** (it now shows mouse data
