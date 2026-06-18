@@ -19,6 +19,21 @@ Version 2.0 and later adds a **Filter mode** choice (right-click the tray icon �
 
 Your choice is saved to `config.json` and applied immediately, no restart needed.
 
+## My Shift/Ctrl/Alt sometimes doesn't register and the wrong action fires (gaming/MMO)
+
+This is a known limitation of the default **Block double presses** mode, not a misuse on your part.
+That mode drops a key-down that arrives within the threshold (28 ms) of that same key's last
+release. It cannot tell a hardware stutter apart from a genuine, fast re-press of the *same* key. If
+you release a modifier and re-tap it very quickly (common when cycling MMO binds), that real
+re-press can land inside the window and get dropped, so your bind fires *without* the modifier.
+
+The fix is to switch to **Protect held keys** (Tray → **Filter mode** → **Protect held keys**). It is
+not an either/or trade: it still removes the same stutters and double-presses, it just suppresses the
+phantom *release* instead of the duplicate *press*, so a held or quickly re-pressed Ctrl/Shift/Alt
+stays registered through a bounce. The only cost is a few milliseconds of release latency, which is
+unnoticeable in normal use. In 3.0 the bundled **gaming** profile (Tray → Profile → gaming) already
+sets this mode for you.
+
 ## How do I stop a specific key from being filtered, or filter one key more aggressively?
 
 Edit `config.json`. As of 2.0 you can use **key names** instead of numbers:
