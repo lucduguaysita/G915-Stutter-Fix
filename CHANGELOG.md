@@ -2,6 +2,19 @@
 
 All notable changes to this project are documented in this file.
 
+## [3.0.2] - 2026-06-19
+
+### Fixed
+- **`BlockRelease` mode broke ordinary key handling.** The 3.0.1 game fix re-emitted the
+  deferred key-up by scan code with `wVk = 0`, which made Windows re-derive the virtual
+  key from the scan code (plus NumLock, layout, and the extended-key flag). That
+  derivation does not reliably reproduce the original key, so modifiers and numpad keys
+  stuck down at the OS level: Alt+Tab reversed (stuck Shift), Escape acted like a window
+  switch (stuck Alt), and the numpad stopped working, especially on AZERTY. The release
+  is now sent by virtual key again (so the OS releases exactly the key that was pressed)
+  while still carrying the captured hardware scan code in `wScan` so scan-code readers
+  (DirectInput / Raw Input, including World of Warcraft) still see a clean release.
+
 ## [3.0.1] - 2026-06-19
 
 ### Added

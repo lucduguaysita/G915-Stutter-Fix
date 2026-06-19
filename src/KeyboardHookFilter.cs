@@ -26,11 +26,6 @@ namespace KeyboardRepeatFilter
         private const uint InputKeyboard = 1;
         private const uint KeyeventfExtendedkey = 0x0001;
         private const uint KeyeventfKeyup = 0x0002;
-        // Re-emit the deferred key-up by scan code, not virtual key. Games (and
-        // anything reading via DirectInput / Raw Input) match key-ups to key-downs
-        // by hardware scan code; a VK-only synthetic up carries scan code 0 and is
-        // ignored by them, leaving the key logically stuck in-game.
-        private const uint KeyeventfScancode = 0x0008;
         // MapVirtualKey translation: virtual key -> scan code. Used as a fallback
         // when the captured hardware scan code is unexpectedly 0.
         private const uint MapvkVkToVsc = 0;
@@ -402,18 +397,25 @@ namespace KeyboardRepeatFilter
 
         private void InjectKeyUp(int vk, bool extended, uint scanCode)
         {
-            // Re-emit the release by hardware scan code so scan-code readers
-            // (DirectInput / Raw Input, used by most games) match it to their
-            // key-down. Fall back to mapping the VK if the captured scan code is
-            // unexpectedly 0. The extended-key bit must accompany the scan code so
-            // keys such as right Ctrl/Alt and the arrow cluster release correctly.
+            // Re-emit the release by virtual key so the OS releases exactly the key
+            // that was pressed. Injecting by scan code alone (wVk = 0) makes Windows
+            // re-derive the VK from the scan code + NumLock + layout, which does not
+            // reliably reproduce the original key: numpad keys share base scan codes
+            // with the arrow cluster, and modifiers (Shift/Alt) can stick down,
+            // breaking Alt+Tab/Escape and the numpad.
+            //
+            // We still populate wScan with the captured hardware scan code (the field
+            // the previous version left at 0) so scan-code readers used by games
+            // (DirectInput / Raw Input, including World of Warcraft) see a clean
+            // release matched to their key-down. The extended-key bit accompanies it
+            // so keys such as right Ctrl/Alt and the arrow cluster release correctly.
             ushort scan = (ushort)scanCode;
             if (scan == 0)
             {
                 scan = (ushort)MapVirtualKey((uint)vk, MapvkVkToVsc);
             }
 
-            uint flags = KeyeventfKeyup | KeyeventfScancode | (extended ? KeyeventfExtendedkey : 0u);
+            uint flags = KeyeventfKeyup | (extended ? KeyeventfExtendedkey : 0u);
 
             var input = new Input
             {
@@ -422,7 +424,7 @@ namespace KeyboardRepeatFilter
                 {
                     ki = new KeybdInput
                     {
-                        wVk = 0,
+                        wVk = (ushort)vk,
                         wScan = scan,
                         dwFlags = flags,
                         time = 0,
