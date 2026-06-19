@@ -26,6 +26,14 @@ namespace KeyboardRepeatFilter
         private const uint InputKeyboard = 1;
         private const uint KeyeventfExtendedkey = 0x0001;
         private const uint KeyeventfKeyup = 0x0002;
+        // Re-emit the deferred key-up by scan code, not virtual key. Games (and
+        // anything reading via DirectInput / Raw Input) match key-ups to key-downs
+        // by hardware scan code; a VK-only synthetic up carries scan code 0 and is
+        // ignored by them, leaving the key logically stuck in-game.
+        private const uint KeyeventfScancode = 0x0008;
+        // MapVirtualKey translation: virtual key -> scan code. Used as a fallback
+        // when the captured hardware scan code is unexpectedly 0.
+        private const uint MapvkVkToVsc = 0;
 
         // Marker stamped into dwExtraInfo on key-ups we inject ourselves, so the
         // hook can recognise and ignore its own synthetic events ("RFLT").
@@ -49,6 +57,7 @@ namespace KeyboardRepeatFilter
         private readonly object _sync = new object();
         private readonly bool[] _pendingUp = new bool[256];
         private readonly bool[] _pendingExtended = new bool[256];
+        private readonly uint[] _pendingScan = new uint[256];
         private readonly int[] _thresholdMsByVk = new int[256];
         private readonly Timer[] _releaseTimers = new Timer[256];
         private bool _blockRelease;
@@ -241,7 +250,7 @@ namespace KeyboardRepeatFilter
                 if (vk >= 0 && vk < 256 && !_excludedKeys[vk])
                 {
                     bool filter = _blockRelease
-                        ? HandleBlockRelease(vk, message, kb.flags)
+                        ? HandleBlockRelease(vk, message, kb.flags, kb.scanCode)
                         : HandleBlockRepress(vk, message);
 
                     if (filter)
@@ -301,7 +310,7 @@ namespace KeyboardRepeatFilter
         // key-down follows within the threshold, drop both so the key stays
         // logically held; otherwise a timer re-emits the genuine key-up.
         // Returns true when the event should be swallowed.
-        private bool HandleBlockRelease(int vk, int message, uint flags)
+        private bool HandleBlockRelease(int vk, int message, uint flags, uint scanCode)
         {
             lock (_sync)
             {
@@ -342,6 +351,7 @@ namespace KeyboardRepeatFilter
                     // follows within the threshold.
                     _pendingUp[vk] = true;
                     _pendingExtended[vk] = (flags & LlkhfExtended) != 0;
+                    _pendingScan[vk] = scanCode;
                     EnsureTimer(vk).Change(_thresholdMsByVk[vk], Timeout.Infinite);
                     return true;
                 }
@@ -370,6 +380,7 @@ namespace KeyboardRepeatFilter
         {
             var vk = (int)state;
             bool extended;
+            uint scanCode;
 
             lock (_sync)
             {
@@ -382,14 +393,28 @@ namespace KeyboardRepeatFilter
                 _pendingUp[vk] = false;
                 _isPressed[vk] = false;
                 extended = _pendingExtended[vk];
+                scanCode = _pendingScan[vk];
             }
 
             // No bounce arrived within the window: emit the genuine key-up now.
-            InjectKeyUp(vk, extended);
+            InjectKeyUp(vk, extended, scanCode);
         }
 
-        private void InjectKeyUp(int vk, bool extended)
+        private void InjectKeyUp(int vk, bool extended, uint scanCode)
         {
+            // Re-emit the release by hardware scan code so scan-code readers
+            // (DirectInput / Raw Input, used by most games) match it to their
+            // key-down. Fall back to mapping the VK if the captured scan code is
+            // unexpectedly 0. The extended-key bit must accompany the scan code so
+            // keys such as right Ctrl/Alt and the arrow cluster release correctly.
+            ushort scan = (ushort)scanCode;
+            if (scan == 0)
+            {
+                scan = (ushort)MapVirtualKey((uint)vk, MapvkVkToVsc);
+            }
+
+            uint flags = KeyeventfKeyup | KeyeventfScancode | (extended ? KeyeventfExtendedkey : 0u);
+
             var input = new Input
             {
                 type = InputKeyboard,
@@ -397,9 +422,9 @@ namespace KeyboardRepeatFilter
                 {
                     ki = new KeybdInput
                     {
-                        wVk = (ushort)vk,
-                        wScan = 0,
-                        dwFlags = KeyeventfKeyup | (extended ? KeyeventfExtendedkey : 0u),
+                        wVk = 0,
+                        wScan = scan,
+                        dwFlags = flags,
                         time = 0,
                         dwExtraInfo = (IntPtr)InjectedMarkerValue
                     }
@@ -545,5 +570,8 @@ namespace KeyboardRepeatFilter
 
         [DllImport("user32.dll", SetLastError = true)]
         private static extern uint SendInput(uint nInputs, Input[] pInputs, int cbSize);
+
+        [DllImport("user32.dll")]
+        private static extern uint MapVirtualKey(uint uCode, uint uMapType);
     }
 }
