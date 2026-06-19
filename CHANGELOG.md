@@ -2,6 +2,24 @@
 
 All notable changes to this project are documented in this file.
 
+## [3.0.1] - 2026-06-19
+
+### Added
+- **Bundled `WoW.json` profile** for World of Warcraft, tuned for both AZERTY and
+  QWERTY layouts: `BlockRelease` mode with a tight 12 ms per-key release on the
+  movement keys (Z/Q and W/A plus shared S/D), Space (jump), left Shift, and right
+  Ctrl, so held and rapidly tapped game keys stay responsive. Pop-ups and mouse
+  debouncing are off. Appears as **WoW** in the Profile tray submenu.
+
+### Fixed
+- **Held game keys broke in `BlockRelease` mode.** The deferred key-up was re-emitted
+  by virtual key with scan code 0, so games reading input by hardware scan code
+  (DirectInput / Raw Input, including World of Warcraft) never saw a clean release and
+  the key desynced in-game (e.g. Space or AZERTY Z stopped working). The synthetic
+  key-up is now sent by scan code (`KEYEVENTF_SCANCODE`), captured from the original
+  key-down and preserving the extended-key flag, so it is indistinguishable from a real
+  hardware release. Falls back to `MapVirtualKey` if the captured scan code is 0.
+
 ## [3.0.0] - 2026-06-17
 
 ### Added

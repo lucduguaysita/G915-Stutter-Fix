@@ -13,7 +13,7 @@ No drivers. No firmware flashing. No registry surgery. No network access. Close 
 system is exactly as it was. User reports confirm it eliminates the stutter/double-keypress problem
 on affected G915/G915X units, and it's small enough to read end-to-end in a coffee break.
 
-> **Version 3.0.0**, Windows 10/11 x64 · .NET Framework 4.8 · MIT licensed · 100% offline
+> **Version 3.0.1**, Windows 10/11 x64 · .NET Framework 4.8 · MIT licensed · 100% offline
 
 ---
 
@@ -23,6 +23,23 @@ on affected G915/G915X units, and it's small enough to read end-to-end in a coff
 |---|---|
 | `KeyboardRepeatFilter.exe` | Runs in the system tray and silently filters stutter/duplicate keypresses (and, optionally, chattering mouse clicks) in real time. |
 | `KeyboardHeatmap.exe` | Companion CLI that reads the filter log and generates a self-contained HTML heatmap of filtered key counts, great for *seeing* which keys misbehave. |
+
+---
+
+## What's new in 3.0.1
+
+- **Held game keys fixed in *Protect held keys* mode.** This mode re-emits a withheld key-up
+  itself, but it sent the release by virtual key with no scan code. Games that read the keyboard by
+  hardware scan code (DirectInput/Raw Input, **World of Warcraft** included) never saw a clean
+  release, so a key like **Space** (jump) or **Z** on an AZERTY layout would desync and stop working.
+  The synthetic release is now sent by scan code, captured from the real key-down and keeping the
+  extended-key flag, so games treat it exactly like a physical key-up.
+- **Bundled `WoW.json` profile.** A ready-made World of Warcraft profile that works on both **AZERTY
+  and QWERTY** layouts: *Protect held keys* mode with a tight 12 ms release on the movement keys
+  (**Z/Q** and **W/A** plus shared **S/D**), **Space**, left **Shift**, and right **Ctrl**. Switch to
+  it live from **Tray → Profile → WoW**.
+
+See [`CHANGELOG.md`](CHANGELOG.md) for the complete list.
 
 ---
 
