@@ -264,6 +264,35 @@ then **Run anyway**. If you'd rather verify before trusting it, the complete C# 
 `src` folder, the app makes no network access, and you can build the executables yourself from
 source (see [Build Environment](#build-environment)).
 
+#### Antivirus false positives
+
+Some antivirus products (BitDefender has been reported) may flag or quarantine the executables. This
+is a **false positive**, and it comes from two harmless facts about the app, not from anything
+malicious:
+
+- The executables are **not code-signed** (see "Unknown publisher" above), so they carry no
+  publisher reputation that a scanner can trust.
+- The app is, by design, a **low-level keyboard hook** (`WH_KEYBOARD_LL`). That is the same Windows
+  API a keylogger would use, so heuristic/behavioral engines flag the *technique* even though this
+  app only discards stutter events and never records or transmits keystrokes (see
+  [Is this safe?](FAQ.md) in the FAQ).
+
+The release itself scans clean. On VirusTotal, the v3.0.2 download is reported as
+[**0 / 92** security vendors flagging it](https://www.virustotal.com/gui/url/12238663a35da5da28a291dbdea3077d420a0a644a08136c470507a846e0fa49/detection):
+
+> No security vendors flagged this URL as malicious.
+
+If your antivirus quarantines it, you can:
+
+1. **Verify it yourself** by uploading the release `.zip` (or the URL) to
+   [VirusTotal](https://www.virustotal.com).
+2. **Add an exclusion** for the folder you run it from (for example
+   `C:\Utils\KeyboardRepeatFilter`) in your antivirus settings.
+3. **Report the false positive** to your vendor so it gets whitelisted. BitDefender users can submit
+   the sample at the
+   [BitDefender false-positive form](https://www.bitdefender.com/consumer/support/answer/29358/).
+4. **Build it yourself** from the `src` folder if you'd rather not run a prebuilt binary at all.
+
 ### KeyboardHeatmap
 
 `KeyboardHeatmap.exe` parses `KeyboardRepeatFilter.log` and produces a single self-contained `.html`

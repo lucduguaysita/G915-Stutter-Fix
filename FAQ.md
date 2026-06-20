@@ -8,7 +8,7 @@ The result is clean, stable, predictable typing without stutters or phantom repe
 
 ## What are the two filter modes?
 
-Version 2.0 and later adds a **Filter mode** choice (right-click the tray icon → **Filter mode**):
+The app offers a **Filter mode** choice (right-click the tray icon → **Filter mode**):
 
 - **Block double presses** (default), stops a stutter from registering a key twice, so one tap
   produces one character. This is the classic behavior and is best for everyday typing.
@@ -36,7 +36,7 @@ sets this mode for you.
 
 ## How do I stop a specific key from being filtered, or filter one key more aggressively?
 
-Edit `config.json`. As of 2.0 you can use **key names** instead of numbers:
+Edit `config.json`. You can use **key names** instead of numbers:
 
 ```json
 "ExcludedKeys": ["Back", "Return", "Volume_Down", "Volume_Up"],
@@ -148,6 +148,29 @@ It simply listens to keyboard events and discards invalid ones.
 This is not a keylogger, only duplicated key are log in c:\temp.
 There is no phone home, no update checks, no network connectivity is required.
 It works perfectly in a air-gapped environment.
+
+## My antivirus (e.g. BitDefender) flagged or blocked the executable. Is it infected?
+
+No. This is a **false positive**, and it has two harmless causes:
+
+- The executables are **not code-signed**, so they have no publisher reputation for a scanner to
+  trust (this is the same reason Windows shows "Unknown publisher").
+- The app is, by design, a **low-level keyboard hook** (`WH_KEYBOARD_LL`), the very same Windows API
+  a keylogger would use. Heuristic and behavioral engines flag the *technique*, even though this app
+  only discards stutter events and never records or transmits what you type.
+
+The release scans clean: on VirusTotal the v3.0.2 download is reported as
+[**0 / 92** security vendors flagging it](https://www.virustotal.com/gui/url/12238663a35da5da28a291dbdea3077d420a0a644a08136c470507a846e0fa49/detection)
+("No security vendors flagged this URL as malicious").
+
+If your antivirus quarantines it, you have a few options:
+
+1. **Verify it** by uploading the release `.zip` (or the download URL) to
+   [VirusTotal](https://www.virustotal.com).
+2. **Add a folder exclusion** for wherever you run it (for example `C:\Utils\KeyboardRepeatFilter`).
+3. **Report the false positive** to your vendor so it gets whitelisted. BitDefender users can submit
+   the sample at <https://www.bitdefender.com/consumer/support/answer/29358/>.
+4. **Build it yourself** from the `src` folder if you would rather not trust a prebuilt binary.
 
 ## Why is `Newtonsoft.Json.dll` included?
 
