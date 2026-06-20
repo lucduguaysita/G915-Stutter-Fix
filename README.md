@@ -13,7 +13,7 @@ No drivers. No firmware flashing. No registry surgery. No network access. Close 
 system is exactly as it was. User reports confirm it eliminates the stutter/double-keypress problem
 on affected G915/G915X units, and it's small enough to read end-to-end in a coffee break.
 
-> **Version 3.0.1**, Windows 10/11 x64 · .NET Framework 4.8 · MIT licensed · 100% offline
+> **Version 3.0.2**, Windows 10/11 x64 · .NET Framework 4.8 · MIT licensed · 100% offline
 
 ---
 
@@ -23,6 +23,21 @@ on affected G915/G915X units, and it's small enough to read end-to-end in a coff
 |---|---|
 | `KeyboardRepeatFilter.exe` | Runs in the system tray and silently filters stutter/duplicate keypresses (and, optionally, chattering mouse clicks) in real time. |
 | `KeyboardHeatmap.exe` | Companion CLI that reads the filter log and generates a self-contained HTML heatmap of filtered key counts, great for *seeing* which keys misbehave. |
+
+---
+
+## What's new in 3.0.2
+
+- **Fixed key handling broken by 3.0.1 in *Protect held keys* mode.** The 3.0.1 release sent the
+  re-emitted key-up by scan code alone, which made Windows re-derive the key from the scan code plus
+  NumLock, layout, and the extended-key flag. That guess did not always match the original key, so
+  keys stuck down at the system level: **Alt+Tab reversed**, **Escape** acted like a window switch,
+  and the **numpad** stopped working (worst on AZERTY). The release is now sent by the original
+  virtual key again, while still carrying the captured hardware scan code, so the system releases the
+  exact key that was pressed **and** games reading by scan code (DirectInput/Raw Input, **World of
+  Warcraft** included) still see a clean release.
+
+See [`CHANGELOG.md`](CHANGELOG.md) for the complete list.
 
 ---
 
