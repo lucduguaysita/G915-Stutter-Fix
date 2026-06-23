@@ -7,6 +7,16 @@ namespace KeyboardRepeatFilter
         public string LogLevel { get; set; } = "Info";
         public string LogFilePath { get; set; } = "C:\\Temp\\KeyboardRepeatFilter.log";
 
+        // Optional profile to load automatically at startup instead of staying on
+        // config.json. The value is a profile file name in the application folder,
+        // with or without the ".json" extension, e.g. "WoW" or "WoW.json". When set
+        // and the file exists, the app boots straight into that profile (its tray
+        // toggles, filter mode, and RunAsAdmin all take effect from launch); later
+        // tray edits save back into the activated profile, not config.json. Empty or
+        // missing means start on config.json as before. Only read from config.json;
+        // it is not chained from within an activated profile.
+        public string DefaultProfile { get; set; }
+
         // Heatmap time window. "all" (default) charts the entire log; otherwise a
         // positive number of days, counted back from the moment the heatmap is run,
         // so older log entries are skipped. Read by KeyboardHeatmap; the main app
@@ -38,6 +48,25 @@ namespace KeyboardRepeatFilter
         public bool RunAsAdmin { get; set; } = false;
 
         public double MinRepeatIntervalMs { get; set; } = 28.0;
+
+        // Opt-in safeguard for hardware tokens that "type" at machine speed, such as
+        // a YubiKey emitting a one-time password. Those devices send dozens of real
+        // key events only milliseconds apart, so any repeated character (common in
+        // YubiKey modhex OTPs, e.g. "uu") looks exactly like a stutter, gets dropped,
+        // and the code fails to authenticate. When true, the filter recognises a
+        // sustained burst of key-downs far faster than a human can type and suspends
+        // filtering for its duration so the repeats pass through. Off by default and
+        // exposed only in config (no tray item): a normal keyboard never reaches the
+        // burst threshold, so leaving it off preserves the original behaviour exactly,
+        // and only the rare user who types secrets with such a device needs it.
+        public bool BurstBypass { get; set; } = false;
+
+        // When true (default), the app makes a single best-effort request to the
+        // GitHub releases API at startup to see whether a newer version exists (no
+        // data is sent, nothing is downloaded). Set to false to keep the app fully
+        // offline: the check is skipped entirely and the About box reports it as
+        // disabled. The only outbound network access the app ever makes is this check.
+        public bool CheckForUpdates { get; set; } = true;
 
         // Master switch for mouse-button debouncing. When true, a separate
         // low-level mouse hook drops a button-down that arrives within
