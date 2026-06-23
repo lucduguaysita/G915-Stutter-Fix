@@ -36,12 +36,14 @@ Your `releases` folder should contain:
 |---|---|---|
 | `LogLevel` | `Info` | Set to `Trace` to log every filtered event to `LogFilePath`. |
 | `LogFilePath` | `C:/Temp/KeyboardRepeatFilter.log` | Where the filter/lifecycle log is written. |
+| `DefaultProfile` | _(none)_ | Profile file name loaded automatically at startup (with or without `.json`). Normally set for you by selecting a profile in the tray **Profile** menu; empty starts on `config.json`. |
 | `HeatmapDays` | `all` | Heatmap time window: `all` charts the whole log; a positive number charts only entries from that many days back from when the heatmap is run. |
 | `FilterMode` | `BlockRepress` | Master switch for how a stutter is filtered (see below). |
 | `ShowElevatedWindowNotice` | `true` | Show a brief corner popup when focus moves to an admin window (where filtering is inactive). Set `false` to suppress only the popup; the tray icon still turns yellow and the event is still logged. |
 | `RunAsAdmin` | `false` | When `true`, the app relaunches itself elevated on every launch if not already elevated (a UAC prompt appears each time). Toggle from the tray menu. |
 | `MinRepeatIntervalMs` | `28.0` | Repeats faster than this many milliseconds are treated as stutter. |
-| `ExcludedKeys` | `["Back", "Return"]` | Keys that are never filtered. Names or numeric codes (see below). |
+| `BurstBypass` | `false` | Opt-in. When `true`, the filter detects machine-speed input (a hardware token such as a YubiKey typing a one-time password) and suspends filtering for that burst, so repeated characters are not dropped. Leave `false` unless you authenticate with such a device; a normal keyboard never reaches the burst threshold. There is no tray toggle, set it here. |
+| `ExcludedKeys` | `["Back", "Return"]` | Keys that are never filtered. Names or numeric codes (see below). **CapsLock is always excluded** regardless of this list, so its toggle state can never desync. |
 | `ExcludedVkCodes` | _(none)_ | Legacy numeric-only form of `ExcludedKeys`; still honored and merged. |
 | `PerKeyMinRepeatIntervalMs` | `{}` | Per-key threshold overrides, keyed by key name or numeric code. |
 | `FilterMouseButtons` | `false` | Master switch for mouse-button debouncing (see below). |
@@ -111,6 +113,22 @@ the left, right, middle, and both side (X1/X2) buttons.
 > **Note:** like the keyboard hook, the mouse hook is bypassed for windows running as administrator
 > (UIPI) unless the app itself is elevated.
 
+## Hardware tokens (YubiKey and similar)
+
+A security key that "types" a one-time password (a YubiKey tap or hold) sends its characters at
+machine speed, far faster than human typing. Because those codes often contain repeated characters
+(for example two `u`s in a row), the filter can mistake the repeat for a stutter and drop it,
+corrupting the code so authentication fails. If you use such a device, set `"BurstBypass": true` in
+`config.json`. The filter then notices the machine-speed burst and stops filtering for its duration,
+so every character (repeats included) passes through. It is off by default and there is no tray
+toggle, since a normal keyboard never reaches the burst threshold.
+
+One honest limit: the bypass needs a couple of keystrokes to confirm a burst, so a duplicate in the
+very first one or two characters of a code can still be dropped on rare occasions. Because tokens
+generate a fresh code on every tap, simply tapping again resolves it. A guaranteed, per-device fix
+would require identifying the token as a distinct input device, which is a larger change not yet
+implemented.
+
 ## Gaming and anti-cheat
 
 For games, use the **Protect held keys** filter mode (`"FilterMode": "BlockRelease"`). It is the only
@@ -168,17 +186,34 @@ Right-click the tray icon for these options:
   least two of our setting names). Selecting one loads it as the live configuration and applies it
   immediately; a checkmark shows the active one. To add a profile, drop another config file (e.g.
   `gaming.json`) in the app folder and restart. While a profile is active, the other tray toggles
-  save back into **that** file. The active choice is per-session: on the next launch the app starts
-  from `config.json` again.
+  save back into **that** file. **Selecting a profile also makes it the startup default**: the choice
+  is written to `config.json` (as `"DefaultProfile"`), so the next launch, including Windows sign-in via
+  **Autostart**, comes up on that profile, with its filter mode and even `RunAsAdmin` in effect from the
+  start. The checkmark therefore marks both the active profile and the one that loads at startup. Select
+  **(default) config** to clear the startup default and go back to starting on `config.json`. If a saved
+  default profile file later goes missing, the app logs it and falls back to `config.json`.
 - **Disable nag popups**: when checked, suppresses the brief popup shown when an administrator
-  window is focused (equivalent to `"ShowElevatedWindowNotice": false`). The tray icon and log are
-  unaffected.
+  window is focused (equivalent to `"ShowElevatedWindowNotice": false`). It also suppresses the
+  "newer version available" toast (see below). The tray icon and log are unaffected.
 - **Autostart**: launch automatically when you sign in.
 - **Heatmap → Generate report / Generate report (verbose)**: runs `KeyboardHeatmap.exe`
   against your current log and opens the HTML report; the verbose option adds the daily-activity
   chart. If no log exists yet, a message explains how to enable logging.
-- **About…**: version and project information.
+- **About…**: version and project information, plus a line reporting the update status: "You are
+  running the latest version", "A newer version (vX.Y.Z) is available", "Could not check for updates"
+  (offline), or "Checking for updates..." if the startup check has not finished yet. It only reads the
+  cached result, so it opens instantly and never waits on the network. When a newer release is
+  available the Yes button opens the GitHub releases page; otherwise it opens the project page.
 - **Exit**: stop filtering and close the app.
+
+### Update check
+
+On startup the app makes a single best-effort request to the GitHub releases API to see whether a
+newer version has been published. If one has, and you have **not** disabled nag popups, a brief toast
+appears; click it to open the releases page, or just let it dismiss. If you disabled nag popups, no
+toast appears, but the **About** box still tells you a newer version is available. The check sends no
+data, never downloads or installs anything, and fails silently (offline, rate-limited, etc.), so the
+app works exactly the same with no network access.
 
 Every toggle persists to `config.json`, so the menu and the file never disagree.
 

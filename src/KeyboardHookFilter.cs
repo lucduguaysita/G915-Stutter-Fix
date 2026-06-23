@@ -18,6 +18,13 @@ namespace KeyboardRepeatFilter
         private const int WmSysKeyUp = 0x0105;
         private const uint WmQuit = 0x0012;
 
+        // CapsLock virtual-key code. CapsLock is a toggle key: withholding or
+        // swallowing one of its events (which either filter mode can do) leaves the
+        // OS toggle state and the keyboard LED out of sync until the app restarts.
+        // It is never a key you "repeat", so we exclude it from filtering outright,
+        // unconditionally and with no config switch.
+        private const int VkCapital = 0x14;
+
         // Low-level keyboard hook flag: the key is an extended key (right Ctrl/Alt,
         // arrows, etc.). Preserved when we re-inject a deferred key-up.
         private const uint LlkhfExtended = 0x01;
@@ -34,6 +41,15 @@ namespace KeyboardRepeatFilter
         // hook can recognise and ignore its own synthetic events ("RFLT").
         private const long InjectedMarkerValue = 0x52464C54;
         private static readonly UIntPtr InjectedMarker = (UIntPtr)InjectedMarkerValue;
+
+        // Burst-bypass tuning (only consulted when FilterConfig.BurstBypass is on). A
+        // gap shorter than this between consecutive key-downs of any key counts as
+        // machine-speed; this many such gaps in a row switches the bypass on. Three
+        // keys inside ~50ms (two sub-25ms gaps) is roughly 3600 WPM, far beyond any
+        // human yet comfortably slower than a hardware token, so a normal keyboard
+        // never trips it while a YubiKey engages it within the first few characters.
+        private const double BurstGapMs = 25.0;
+        private const int BurstMinStreak = 2;
 
         private readonly FilterConfig _config;
         private readonly long[] _lastUpTicks = new long[256];
@@ -57,6 +73,15 @@ namespace KeyboardRepeatFilter
         private readonly Timer[] _releaseTimers = new Timer[256];
         private bool _blockRelease;
 
+        // Burst-bypass state (opt-in). While a machine-speed stream of key-downs is in
+        // progress, filtering is suspended so a hardware token's repeated characters
+        // are not dropped. All inert when _burstBypass is false.
+        private bool _burstBypass;
+        private long _burstGapTicks;
+        private long _lastDownTicks;
+        private int _rapidStreak;
+        private bool _inBurst;
+
         private Thread _messageThread;
         private HookProcDelegate _hookProc;
         private IntPtr _hookId = IntPtr.Zero;
@@ -71,6 +96,12 @@ namespace KeyboardRepeatFilter
         public void Start()
         {
             _blockRelease = string.Equals(_config.FilterMode, "BlockRelease", StringComparison.OrdinalIgnoreCase);
+
+            _burstBypass = _config.BurstBypass;
+            _burstGapTicks = (long)(Stopwatch.Frequency * BurstGapMs / 1000.0);
+            _lastDownTicks = 0;
+            _rapidStreak = 0;
+            _inBurst = false;
 
             var defaultThresholdTicks = Stopwatch.Frequency * _config.MinRepeatIntervalMs / 1000.0;
             var defaultThresholdMs = Math.Max(1, (int)Math.Ceiling(_config.MinRepeatIntervalMs));
@@ -144,6 +175,10 @@ namespace KeyboardRepeatFilter
                     }
                 }
             }
+
+            // CapsLock is always excluded, regardless of config, so its toggle
+            // state can never be desynced by a swallowed or deferred event.
+            _excludedKeys[VkCapital] = true;
 
             if (unresolved.Count > 0)
             {
@@ -242,21 +277,68 @@ namespace KeyboardRepeatFilter
                     return CallNextHookEx(_hookId, nCode, wParam, lParam);
                 }
 
-                if (vk >= 0 && vk < 256 && !_excludedKeys[vk])
+                if (vk >= 0 && vk < 256)
                 {
-                    bool filter = _blockRelease
-                        ? HandleBlockRelease(vk, message, kb.flags, kb.scanCode)
-                        : HandleBlockRepress(vk, message);
-
-                    if (filter)
+                    // Track input rate first (across all keys, even excluded ones) so
+                    // the burst decision reflects the real device speed.
+                    if (_burstBypass)
                     {
-                        return new IntPtr(1);
+                        UpdateBurstState(message);
+                    }
+
+                    if (!_excludedKeys[vk])
+                    {
+                        bool filter = _blockRelease
+                            ? HandleBlockRelease(vk, message, kb.flags, kb.scanCode)
+                            : HandleBlockRepress(vk, message);
+
+                        if (filter)
+                        {
+                            return new IntPtr(1);
+                        }
                     }
                 }
             }
 
             return CallNextHookEx(_hookId, nCode, wParam, lParam);
         }
+
+        // Recognises machine-speed input (hardware tokens such as a YubiKey) by the
+        // rate of incoming key-downs. _inBurst is set while keystrokes arrive far
+        // faster than a human can type and cleared as soon as the pace drops back to
+        // human speed. Only called when burst bypass is enabled.
+        private void UpdateBurstState(int message)
+        {
+            if (message != WmKeyDown && message != WmSysKeyDown)
+            {
+                return;
+            }
+
+            long now = Stopwatch.GetTimestamp();
+            long gap = now - _lastDownTicks;
+
+            // A single fast gap is exactly what a lone stutter looks like, so the
+            // streak must build over several consecutive fast gaps before we treat
+            // the stream as a machine burst; one slow gap ends it.
+            if (_lastDownTicks != 0 && gap < _burstGapTicks)
+            {
+                if (_rapidStreak < BurstMinStreak)
+                {
+                    _rapidStreak++;
+                }
+            }
+            else
+            {
+                _rapidStreak = 0;
+            }
+
+            _lastDownTicks = now;
+            _inBurst = _rapidStreak >= BurstMinStreak;
+        }
+
+        // True while an opt-in burst bypass is active: filtering is suspended so a
+        // hardware token's repeated characters are not dropped.
+        private bool BurstActive() => _burstBypass && _inBurst;
 
         // Original behaviour: let the spurious key-up through and block the
         // duplicate key-down that follows it within the threshold.
@@ -267,7 +349,7 @@ namespace KeyboardRepeatFilter
 
             if (message == WmKeyDown || message == WmSysKeyDown)
             {
-                if (!_isPressed[vk] && (now - _lastUpTicks[vk]) < _thresholdTicksByVk[vk])
+                if (!_isPressed[vk] && (now - _lastUpTicks[vk]) < _thresholdTicksByVk[vk] && !BurstActive())
                 {
                     LogFiltered(vk, "filtered");
                     // Bounce key-down: swallow it, and remember to swallow the
@@ -277,6 +359,8 @@ namespace KeyboardRepeatFilter
                     return true;
                 }
 
+                // Either a genuine press, or a fast repeat during a machine-speed
+                // burst that we deliberately let through: record it as pressed.
                 _isPressed[vk] = true;
                 // A genuine press cancels any pending up-swallow so its own release
                 // is never mistaken for a bounce key-up.
@@ -309,6 +393,24 @@ namespace KeyboardRepeatFilter
         {
             lock (_sync)
             {
+                if (BurstActive())
+                {
+                    // Machine-speed burst (e.g. a hardware token): defer and swallow
+                    // nothing so every character, repeats included, passes through.
+                    if (message == WmKeyDown || message == WmSysKeyDown)
+                    {
+                        if (_pendingUp[vk]) CancelPendingUp(vk);
+                        _isPressed[vk] = true;
+                    }
+                    else if (message == WmKeyUp || message == WmSysKeyUp)
+                    {
+                        if (_pendingUp[vk]) CancelPendingUp(vk);
+                        _isPressed[vk] = false;
+                    }
+
+                    return false;
+                }
+
                 if (message == WmKeyDown || message == WmSysKeyDown)
                 {
                     if (_pendingUp[vk])

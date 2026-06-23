@@ -2,6 +2,38 @@
 
 All notable changes to this project are documented in this file.
 
+## [3.1.0] - 2026-06-23
+
+### Added
+- **Startup profile, set from the tray.** Selecting a profile in **Tray → Profile** now also makes it
+  the startup default: the choice is saved to `config.json` (`"DefaultProfile"`), so the next launch,
+  including Windows sign-in via Autostart, comes up on that profile instead of `config.json`. The
+  profile's filter mode and `RunAsAdmin` take effect from launch. The profile checkmark marks both the
+  active and the startup profile; selecting **(default) config** clears the default. A saved profile
+  that later goes missing is logged and falls back to `config.json`. Backed by a new `DefaultProfile`
+  config field (also editable by hand).
+
+- **Burst bypass for hardware tokens (`BurstBypass`, opt-in, off by default).** A security key that
+  types a one-time password (a YubiKey tap or hold) sends characters at machine speed, and repeated
+  characters in the code (such as two `u`s) were being dropped as stutters, breaking authentication.
+  Setting `"BurstBypass": true` in `config.json` makes the filter recognise a sustained burst of
+  key-downs far faster than any human can type and suspend filtering for its duration, so repeats
+  pass through. There is no tray toggle: a normal keyboard never reaches the burst threshold, so with
+  the flag off (the default) behaviour is unchanged. A duplicate in the first one or two characters of
+  a code can still rarely be dropped; tapping the token again generates a fresh code.
+- **Update check.** On startup the app makes a single best-effort request to the GitHub releases
+  API to see whether a newer version is published. If one is, users who have nag popups enabled get
+  a brief toast (click it to open the releases page); users who disabled nag popups are not toasted.
+  Either way, the **About** box notes when a newer version is available and its Yes button then opens
+  the releases page. No data is sent, nothing is downloaded or installed, and any failure (offline,
+  rate limit, etc.) is silent: the app is fully usable without the check.
+
+### Fixed
+- **CapsLock could desync.** CapsLock is a toggle key, so a swallowed or deferred event (which both
+  filter modes can produce) could leave the OS toggle state and the keyboard LED inverted until the
+  app was restarted. CapsLock is now always excluded from filtering, in every mode, with no config
+  switch.
+
 ## [3.0.2] - 2026-06-19
 
 ### Fixed

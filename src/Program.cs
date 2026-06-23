@@ -35,6 +35,18 @@ namespace KeyboardRepeatFilter
         private static uint _lastToastPid;
         private static ToastForm _toast;
 
+        // Result of the startup update check, set on a background thread and read on
+        // the UI thread (volatile so the read sees the write). Null until the check
+        // finishes; afterwards it carries an explicit status (up to date, newer
+        // available, or could-not-check). _updateCheckComplete flips true once the
+        // background check finishes, whatever the outcome. The UI only ever reads
+        // these cached fields, so it never blocks on the network, even in an airtight
+        // (offline) environment where the check runs until its timeout.
+        private static volatile UpdateChecker.Result _updateResult;
+        private static volatile bool _updateCheckComplete;
+        private static bool _updateToastShown;
+        private static System.Windows.Forms.Timer _updateToastTimer;
+
         private const string TooltipNormal = "Keyboard Repeat Filter";
         private const string TooltipBypassed = "Keyboard Repeat Filter - paused for this admin window";
 
@@ -73,6 +85,12 @@ namespace KeyboardRepeatFilter
             _config = LoadConfig();
             _activeConfigPath = ConfigFilePath;
             _startedAtUtc = DateTime.UtcNow;
+
+            // Honor a configured default profile before anything observes the config:
+            // this runs ahead of the elevation check and the hook creation so the
+            // profile's RunAsAdmin and filter settings take effect from launch, and
+            // the tray menu builds against the profile that is actually live.
+            ApplyDefaultProfileAtStartup();
             RegisterGlobalExceptionHandlers();
             Application.ApplicationExit += (_, __) => LogShutdown("ApplicationExit");
 
@@ -202,7 +220,8 @@ namespace KeyboardRepeatFilter
             foreach (var pf in FindProfileFiles())
             {
                 string filePath = pf.Path;
-                // config.json is the startup default; flag it so in the menu.
+                // config.json is the base config; selecting it clears any startup
+                // default. Flag it in the menu so that role is clear.
                 string displayName = PathsEqual(filePath, ConfigFilePath) ? "(default) " + pf.Name : pf.Name;
                 var item = new MenuItem(displayName) { RadioCheck = true, Checked = PathsEqual(filePath, _activeConfigPath) };
                 item.Click += (s, e) =>
@@ -211,6 +230,12 @@ namespace KeyboardRepeatFilter
 
                     foreach (var mi in profileItems) mi.Checked = false;
                     item.Checked = true;
+
+                    // Selecting a profile also makes it the startup default: record it
+                    // in config.json so the next launch (including Windows sign-in via
+                    // Autostart) comes up on it. Selecting config.json clears the
+                    // default so the app starts on config.json again.
+                    PersistDefaultProfile(PathsEqual(filePath, ConfigFilePath) ? null : Path.GetFileName(filePath));
 
                     // Reflect the freshly loaded settings in the other toggles.
                     bool rel = string.Equals(_config.FilterMode, "BlockRelease", StringComparison.OrdinalIgnoreCase);
@@ -258,6 +283,8 @@ namespace KeyboardRepeatFilter
             _bypassTimer.Tick += (_, __) => UpdateBypassIndicator();
             _bypassTimer.Start();
             UpdateBypassIndicator();
+
+            StartUpdateCheck();
 
             Application.Run();
 
@@ -336,6 +363,7 @@ namespace KeyboardRepeatFilter
             // over without tripping the "already running" guard.
             LogLifecycle("Elevating", "relaunching with administrator rights at user request");
             _bypassTimer?.Stop();
+            _updateToastTimer?.Stop();
             try { _toast?.Close(); } catch { /* ignore */ }
             _notifyIcon.Visible = false;
             _filter?.Stop();
@@ -348,6 +376,7 @@ namespace KeyboardRepeatFilter
         private static void OnExit(object sender, EventArgs e)
         {
             _bypassTimer?.Stop();
+            _updateToastTimer?.Stop();
             try { _toast?.Close(); } catch { /* ignore */ }
             _notifyIcon.Visible = false;
             _filter.Stop();
@@ -493,6 +522,99 @@ namespace KeyboardRepeatFilter
             _toast.Show(); // non-activating; does not take focus
         }
 
+        // Starts the best-effort "newer version available" check. The network call
+        // runs on a background thread so it never delays the tray icon or blocks the
+        // UI; a short UI timer then surfaces the result (a toast) once it completes.
+        private static void StartUpdateCheck()
+        {
+            var current = Assembly.GetExecutingAssembly().GetName().Version;
+
+            var thread = new Thread(() =>
+            {
+                var result = UpdateChecker.CheckForNewer(current);
+                _updateResult = result;
+                _updateCheckComplete = true;
+                if (result.Status == UpdateChecker.Status.UpdateAvailable)
+                {
+                    LogLifecycle("UpdateAvailable", $"latest={result.Tag}, current={current}");
+                }
+            })
+            {
+                IsBackground = true,
+                Name = "KeyboardRepeatFilter.UpdateCheck"
+            };
+            thread.Start();
+
+            // Poll the result on the UI thread, then stop. Polling a volatile flag
+            // keeps the check entirely off the UI thread with no cross-thread UI
+            // marshalling, matching how _bypassTimer already drives tray updates.
+            _updateToastTimer = new System.Windows.Forms.Timer { Interval = 1000 };
+            _updateToastTimer.Tick += (_, __) =>
+            {
+                if (!_updateCheckComplete)
+                {
+                    return;
+                }
+
+                _updateToastTimer.Stop();
+                MaybeShowUpdateToast();
+            };
+            _updateToastTimer.Start();
+        }
+
+        // Shows a one-time toast when a newer release was found, but only for users
+        // who have not disabled nag popups. Those who have stay undisturbed; the
+        // About box still tells them a new version is available.
+        private static void MaybeShowUpdateToast()
+        {
+            var update = _updateResult;
+            if (update == null || update.Status != UpdateChecker.Status.UpdateAvailable || _updateToastShown)
+            {
+                return;
+            }
+
+            if (_config != null && !_config.ShowElevatedWindowNotice)
+            {
+                return; // "do not nag" is set: no toast; the About box carries the news.
+            }
+
+            _updateToastShown = true;
+
+            try { _toast?.Close(); }
+            catch { /* a previous toast may already be gone */ }
+
+            _toast = new ToastForm(
+                "Keyboard Repeat Filter",
+                $"A newer version ({update.Tag}) is available. Click to open the releases page.",
+                10000,
+                () => OpenUrl(update.Url));
+            _toast.FormClosed += (_, __) =>
+            {
+                _toast?.Dispose();
+                _toast = null;
+            };
+            _toast.Show(); // non-activating; does not take focus
+        }
+
+        // Opens a URL in the default browser, staying resilient if the shell launch
+        // is unavailable (the tray app must never crash on a failed launch).
+        private static void OpenUrl(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                return;
+            }
+
+            try
+            {
+                Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
+            }
+            catch
+            {
+                // Keep tray app resilient if shell launch is unavailable.
+            }
+        }
+
         // Builds a yellow-tinted copy of the tray icon used to flag the bypass
         // state. The tint keeps the icon's shape (transparency is preserved) while
         // shifting its colours toward amber.
@@ -600,13 +722,43 @@ namespace KeyboardRepeatFilter
             var version = assembly.GetName().Version?.ToString() ?? "unknown";
             var repoUrl = "https://github.com/lucduguaysita/G915-Stutter-Fix";
 
+            // Reflect the startup update check here for everyone, including users who
+            // disabled the toast. This only reads the cached result, so it never waits
+            // on the network: if the background check has not finished (or is still
+            // timing out in an airtight environment), it simply says so.
+            var update = _updateResult;
+            string updateLine;
+            string targetUrl = repoUrl;
+
+            if (!_updateCheckComplete || update == null)
+            {
+                updateLine = "Checking for updates...\r\n\r\n";
+            }
+            else if (update.Status == UpdateChecker.Status.UpdateAvailable)
+            {
+                updateLine = $"A newer version ({update.Tag}) is available.\r\n\r\n";
+                targetUrl = update.Url;
+            }
+            else if (update.Status == UpdateChecker.Status.UpToDate)
+            {
+                updateLine = "You are running the latest version.\r\n\r\n";
+            }
+            else
+            {
+                updateLine = "Could not check for updates (no connection?).\r\n\r\n";
+            }
+
+            bool updateAvailable = update != null && update.Status == UpdateChecker.Status.UpdateAvailable;
+            string prompt = updateAvailable ? "Open the GitHub releases page?" : "Open the GitHub project page?";
+
             var aboutText =
                 "G915 Stutter Fix\r\n" +
                 $"Version: {version}\r\n\r\n" +
+                updateLine +
                 "User-mode keyboard event filter for invalid HID repeats.\r\n\r\n" +
                 $"Project: {repoUrl}\r\n" +
                 "License: MIT\r\n\r\n" +
-                "Open the GitHub project page?";
+                prompt;
 
             var result = MessageBox.Show(
                 aboutText,
@@ -616,18 +768,7 @@ namespace KeyboardRepeatFilter
 
             if (result == DialogResult.Yes)
             {
-                try
-                {
-                    Process.Start(new ProcessStartInfo
-                    {
-                        FileName = repoUrl,
-                        UseShellExecute = true
-                    });
-                }
-                catch
-                {
-                    // Keep tray app resilient if shell launch is unavailable.
-                }
+                OpenUrl(targetUrl);
             }
         }
 
@@ -713,6 +854,123 @@ namespace KeyboardRepeatFilter
                 // Consider adding logging here for diagnostics.
                 return new FilterConfig();
             }
+        }
+
+        // Records which profile should load at startup by writing DefaultProfile
+        // into config.json. It always targets config.json, because that is the only
+        // file consulted for the startup default at launch. Pass a profile file name
+        // to set it, or null to clear it so the app starts on config.json again.
+        private static void PersistDefaultProfile(string profileFileName)
+        {
+            string value = string.IsNullOrWhiteSpace(profileFileName) ? null : profileFileName;
+
+            // When config.json is itself the active save target, fold the change into
+            // the normal save so the in-memory config and the file stay in step (a
+            // later SaveConfig would otherwise rewrite config.json from _config and
+            // clobber a direct edit here).
+            if (PathsEqual(_activeConfigPath, ConfigFilePath))
+            {
+                _config.DefaultProfile = value;
+                SaveConfig();
+                LogLifecycle("DefaultProfileSaved", value ?? "cleared (start on config.json)");
+                return;
+            }
+
+            // A profile is active, so config.json is not the save target. Edit only
+            // its DefaultProfile on disk, preserving config.json's own settings and
+            // leaving the active profile file untouched.
+            try
+            {
+                var path = ConfigFilePath;
+                var obj = File.Exists(path)
+                    ? JToken.Parse(File.ReadAllText(path)) as JObject ?? new JObject()
+                    : new JObject();
+
+                if (value == null)
+                {
+                    obj.Remove("DefaultProfile");
+                }
+                else
+                {
+                    obj["DefaultProfile"] = value;
+                }
+
+                File.WriteAllText(path, obj.ToString(Formatting.Indented));
+                LogLifecycle("DefaultProfileSaved", value ?? "cleared (start on config.json)");
+            }
+            catch (Exception ex)
+            {
+                LogLifecycle("DefaultProfileSaveError", ex.Message);
+            }
+        }
+
+        // Loads the profile named in config.json's DefaultProfile (if any) as the
+        // live configuration at startup, so the app comes up on that profile instead
+        // of config.json. No-op when DefaultProfile is unset, points back at
+        // config.json, or names a file that is missing/unreadable; in those cases the
+        // app stays on the already-loaded config.json. Runs before the hook is
+        // created, so no filter restart is needed here.
+        private static void ApplyDefaultProfileAtStartup()
+        {
+            var name = _config?.DefaultProfile;
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return;
+            }
+
+            string path = ResolveProfilePath(name);
+            if (path == null)
+            {
+                LogLifecycle("DefaultProfileMissing", $"DefaultProfile='{name}' was not found; staying on config.json");
+                return;
+            }
+
+            if (PathsEqual(path, ConfigFilePath))
+            {
+                return; // DefaultProfile points at config.json: nothing to switch.
+            }
+
+            try
+            {
+                var cfg = JsonConvert.DeserializeObject<FilterConfig>(File.ReadAllText(path));
+                if (cfg == null)
+                {
+                    LogLifecycle("DefaultProfileLoadError", $"file={Path.GetFileName(path)} deserialized to null; staying on config.json");
+                    return;
+                }
+
+                _config = cfg;
+                _activeConfigPath = path;
+                LogLifecycle("DefaultProfileActivated", $"file={Path.GetFileName(path)}");
+            }
+            catch (Exception ex)
+            {
+                LogLifecycle("DefaultProfileLoadError", $"file={Path.GetFileName(path)}, {ex.Message}; staying on config.json");
+            }
+        }
+
+        // Resolves a DefaultProfile value to a full path in the app folder, accepting
+        // the name with or without the ".json" extension (e.g. "WoW" or "WoW.json").
+        // Returns null when no matching file exists.
+        private static string ResolveProfilePath(string name)
+        {
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            string direct = Path.Combine(baseDir, name);
+            if (File.Exists(direct))
+            {
+                return direct;
+            }
+
+            if (!name.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+            {
+                string withExt = Path.Combine(baseDir, name + ".json");
+                if (File.Exists(withExt))
+                {
+                    return withExt;
+                }
+            }
+
+            return null;
         }
 
         // Property names that identify a KeyboardRepeatFilter config file. A *.json

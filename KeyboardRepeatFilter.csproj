@@ -12,7 +12,7 @@
     <!-- Single source of truth for the version: AssemblyVersion, FileVersion, and
          InformationalVersion are generated from this by the SDK (GenerateAssemblyInfo,
          default on), so bumping it here flows to the built exe automatically. -->
-    <Version>3.0.2</Version>
+    <Version>3.1.0</Version>
     <Title>G915-Stutter-Fix</Title>
     <AssemblyTitle>G915-Stutter-Fix</AssemblyTitle>
     <ApplicationIcon>app.ico</ApplicationIcon>
