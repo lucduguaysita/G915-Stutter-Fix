@@ -8,6 +8,7 @@
   "RunAsAdmin": false,
   "MinRepeatIntervalMs": 28.0,
   "BurstBypass": false,
+  "CheckForUpdates": true,
   "FilterMouseButtons": false,
   "MouseMinRepeatIntervalMs": 50.0,
   "ExcludedMouseButtons": [],

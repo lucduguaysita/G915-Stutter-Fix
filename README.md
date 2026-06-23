@@ -9,11 +9,12 @@ mid-shortcut, a game character that won't keep walking. `G915-Stutter-Fix` sits 
 system tray, watches the keyboard at the lowest user-mode level Windows allows, and silently drops
 those invalid events *before* they ever reach your applications.
 
-No drivers. No firmware flashing. No registry surgery. No network access. Close the app and your
-system is exactly as it was. User reports confirm it eliminates the stutter/double-keypress problem
-on affected G915/G915X units, and it's small enough to read end-to-end in a coffee break.
+No drivers. No firmware flashing. No registry surgery. The only thing it ever sends over the network
+is an optional version check at startup, which you can disable to keep it fully offline. Close the
+app and your system is exactly as it was. User reports confirm it eliminates the stutter/double-keypress
+problem on affected G915/G915X units, and it's small enough to read end-to-end in a coffee break.
 
-> **Version 3.0.2**, Windows 10/11 x64 · .NET Framework 4.8 · MIT licensed · 100% offline
+> **Version 3.1.0**, Windows 10/11 x64 · .NET Framework 4.8 · MIT licensed · offline (optional startup version check, can be disabled)
 
 ---
 
@@ -23,6 +24,28 @@ on affected G915/G915X units, and it's small enough to read end-to-end in a coff
 |---|---|
 | `KeyboardRepeatFilter.exe` | Runs in the system tray and silently filters stutter/duplicate keypresses (and, optionally, chattering mouse clicks) in real time. |
 | `KeyboardHeatmap.exe` | Companion CLI that reads the filter log and generates a self-contained HTML heatmap of filtered key counts, great for *seeing* which keys misbehave. |
+
+---
+
+## What's new in 3.1.0
+
+- **Boot straight into a profile.** Selecting a profile from **Tray → Profile** now also makes it
+  your startup profile: it is remembered in `config.json` (`DefaultProfile`) and loaded on every
+  launch, including at Windows sign-in via **Autostart**. Pick **(default) config** to clear it.
+- **CapsLock is never filtered.** As a toggle key, a swallowed CapsLock event could leave its state
+  and indicator light out of sync (and need a restart to recover). It is now always excluded in every
+  mode, with nothing to configure, so that can't happen.
+- **Startup update check.** The app makes one best-effort request to the GitHub releases API to see
+  whether a newer version exists. With notifications on you get a toast; the **About** box always
+  shows the status (latest, newer available, could not check) and never blocks on the network. No data
+  is sent and nothing is downloaded. Set `"CheckForUpdates": false` to stay fully offline.
+- **Hardware-token support (`BurstBypass`, opt-in).** A security key like a **YubiKey** "types" a
+  one-time password at machine speed, and repeated characters in it (such as two `u`s) were being
+  dropped as stutters, breaking sign-in. Enable `"BurstBypass": true` and the filter recognises the
+  machine-speed burst and steps aside for its duration. Off by default; a normal keyboard never trips
+  it.
+
+See [`CHANGELOG.md`](CHANGELOG.md) for the complete list.
 
 ---
 
@@ -133,7 +156,8 @@ See [`CHANGELOG.md`](CHANGELOG.md) for the complete list.
 A low-level keyboard hook (`WH_KEYBOARD_LL`) inspects every key event and discards repeats that
 arrive faster than a configurable threshold (default **28 ms**, below the biomechanical limit of a
 real double-tap). Filtering is per-key configurable and certain keys (Backspace, Enter, volume) are
-excluded by default so legitimate fast input is never touched.
+excluded by default so legitimate fast input is never touched. **CapsLock is always excluded** in
+every mode, since dropping one of its events could desync the toggle and its indicator light.
 
 ### Two filter modes
 - **Block double presses** (`BlockRepress`, default), blocks the spurious *re-press*, so one tap
@@ -161,9 +185,12 @@ buttons, and is **off by default** so keyboard-only users are unaffected. Turn i
 ### Profiles (with a ready-made Gaming profile)
 Keep more than one configuration side by side. Drop any number of config `.json` files next to the
 app and switch between them live from **Tray → Profile**. Every file that looks like a config (it
-shares our setting names) appears as a selectable profile; the startup `config.json` is marked
+shares our setting names) appears as a selectable profile; the base `config.json` is marked
 **(default)**. Selecting one loads it as the live configuration and applies it instantly, great for
-keeping, say, a precise everyday-typing setup and an aggressive gaming setup a click apart.
+keeping, say, a precise everyday-typing setup and an aggressive gaming setup a click apart. Selecting
+a profile also makes it your **startup profile** (saved to `config.json` as `DefaultProfile`), so the
+app comes back up on it next time, including at Windows sign-in; pick **(default) config** to clear
+that and start on the base config again.
 
 A **`gaming.json`** profile ships in the box, tuned for movement:
 
@@ -190,6 +217,24 @@ Windows security (UIPI) prevents a normal-user hook from filtering input to **ad
 windows. The app detects this state, turns the tray icon **yellow** with a plain-language tooltip,
 shows a brief focus-safe corner notice (toggleable), and records it in the log, recovering
 automatically when a normal window regains focus.
+
+### Hardware-token support
+A security key that "types" a one-time password (a **YubiKey** tap or hold) sends its characters at
+machine speed, and those codes often contain repeated characters that the filter can mistake for a
+stutter and drop, breaking authentication. Set `"BurstBypass": true` in `config.json` and the filter
+recognises a sustained burst of keystrokes far faster than a human can type and steps aside for its
+duration, so every character (repeats included) passes through. It is **off by default** with no tray
+toggle, since a normal keyboard never reaches the burst threshold. See
+[Hardware tokens](docs/USAGE.md#hardware-tokens-yubikey-and-similar) for the one edge case it cannot
+fully cover.
+
+### Update checking
+On startup the app makes a single best-effort request to the GitHub releases API to see whether a
+newer version is out. If one is, and notifications are on, a brief toast points you to the release
+page; the **About** box always reports the status (latest, newer available, could not check, or
+disabled) and only reads the cached result, so it opens instantly and never waits on the network. No
+data is sent and nothing is downloaded or installed. This is the only outbound network access the app
+makes, and `"CheckForUpdates": false` turns it off so the app stays **100% offline**.
 
 ### Diagnostic heatmap
 `KeyboardHeatmap.exe` turns your filter log into a beautiful, self-contained HTML report so you can
@@ -237,7 +282,7 @@ success, `KeyboardHeatmap.exe` opens it for you automatically.
 1. Build the solution in `Release` mode (or download a release).
 2. Open the `releases` folder after the build completes.
 3. Ensure it contains `KeyboardRepeatFilter.exe`, `KeyboardHeatmap.exe`, `Newtonsoft.Json.dll`,
-   `config.json`, and the bundled `gaming.json` profile.
+   `config.json`, and the bundled `gaming.json` and `WoW.json` profiles.
 4. Copy those files to a writable folder of your choice (for example `C:\Utils\KeyboardRepeatFilter`).
 5. Run `KeyboardRepeatFilter.exe`.
 6. Confirm the tray icon appears and type normally, the stutter should be gone.
@@ -261,8 +306,9 @@ indicates the app is unsafe.
 
 To run it: on the **UAC** prompt click **Yes**; on the **SmartScreen** prompt click **More info**,
 then **Run anyway**. If you'd rather verify before trusting it, the complete C# source is in the
-`src` folder, the app makes no network access, and you can build the executables yourself from
-source (see [Build Environment](#build-environment)).
+`src` folder, the only network access is an optional version check you can disable
+(`"CheckForUpdates": false`), and you can build the executables yourself from source (see
+[Build Environment](#build-environment)).
 
 #### Antivirus false positives
 
@@ -312,12 +358,15 @@ Everything is controlled by `config.json` next to the executable. Full reference
 |---|---|---|
 | `LogLevel` | `Info` | `Trace` logs every filtered key (needed for the heatmap). |
 | `LogFilePath` | `C:/Temp/KeyboardRepeatFilter.log` | Where the log is written. |
+| `DefaultProfile` | _(none)_ | Profile to load automatically at startup; normally set for you by selecting one in **Tray → Profile**. |
 | `HeatmapDays` | `all` | Heatmap window: `all`, or a number of days back from now to chart (older entries skipped). |
 | `FilterMode` | `BlockRepress` | `BlockRepress` (stop double presses) or `BlockRelease` (protect held keys). |
 | `ShowElevatedWindowNotice` | `true` | Show the brief popup when an admin window is focused. |
 | `RunAsAdmin` | `false` | Relaunch elevated on every launch (UAC prompt each time). Toggle from the tray. |
 | `MinRepeatIntervalMs` | `28.0` | Repeats faster than this are treated as stutter. |
-| `ExcludedKeys` | `["Back", "Return"]` | Keys never filtered, by name or number. |
+| `BurstBypass` | `false` | Opt-in: step aside during machine-speed input bursts so hardware tokens (YubiKey) keep repeated characters. |
+| `CheckForUpdates` | `true` | One startup version check against GitHub; set `false` to stay fully offline. |
+| `ExcludedKeys` | `["Back", "Return"]` | Keys never filtered, by name or number (CapsLock is always excluded). |
 | `PerKeyMinRepeatIntervalMs` | `{}` | Per-key threshold overrides, by name or number. |
 | `FilterMouseButtons` | `false` | Enable debouncing of chattering mouse buttons. |
 | `MouseMinRepeatIntervalMs` | `50.0` | Mouse clicks faster than this are treated as chatter. |

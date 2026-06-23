@@ -527,6 +527,12 @@ namespace KeyboardRepeatFilter
         // UI; a short UI timer then surfaces the result (a toast) once it completes.
         private static void StartUpdateCheck()
         {
+            if (_config != null && !_config.CheckForUpdates)
+            {
+                // Fully offline by choice: skip the only network call the app makes.
+                return;
+            }
+
             var current = Assembly.GetExecutingAssembly().GetName().Version;
 
             var thread = new Thread(() =>
@@ -730,7 +736,11 @@ namespace KeyboardRepeatFilter
             string updateLine;
             string targetUrl = repoUrl;
 
-            if (!_updateCheckComplete || update == null)
+            if (_config != null && !_config.CheckForUpdates)
+            {
+                updateLine = "Update check is disabled.\r\n\r\n";
+            }
+            else if (!_updateCheckComplete || update == null)
             {
                 updateLine = "Checking for updates...\r\n\r\n";
             }

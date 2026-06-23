@@ -61,6 +61,13 @@ namespace KeyboardRepeatFilter
         // and only the rare user who types secrets with such a device needs it.
         public bool BurstBypass { get; set; } = false;
 
+        // When true (default), the app makes a single best-effort request to the
+        // GitHub releases API at startup to see whether a newer version exists (no
+        // data is sent, nothing is downloaded). Set to false to keep the app fully
+        // offline: the check is skipped entirely and the About box reports it as
+        // disabled. The only outbound network access the app ever makes is this check.
+        public bool CheckForUpdates { get; set; } = true;
+
         // Master switch for mouse-button debouncing. When true, a separate
         // low-level mouse hook drops a button-down that arrives within
         // MouseMinRepeatIntervalMs of that button's previous button-up, which

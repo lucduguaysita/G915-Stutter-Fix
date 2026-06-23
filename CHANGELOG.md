@@ -26,7 +26,9 @@ All notable changes to this project are documented in this file.
   a brief toast (click it to open the releases page); users who disabled nag popups are not toasted.
   Either way, the **About** box notes when a newer version is available and its Yes button then opens
   the releases page. No data is sent, nothing is downloaded or installed, and any failure (offline,
-  rate limit, etc.) is silent: the app is fully usable without the check.
+  rate limit, etc.) is silent: the app is fully usable without the check. This is the only outbound
+  network access the app makes; set `"CheckForUpdates": false` in `config.json` to keep it fully
+  offline (the check is skipped and the About box reports it as disabled).
 
 ### Fixed
 - **CapsLock could desync.** CapsLock is a toggle key, so a swallowed or deferred event (which both

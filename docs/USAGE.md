@@ -43,6 +43,7 @@ Your `releases` folder should contain:
 | `RunAsAdmin` | `false` | When `true`, the app relaunches itself elevated on every launch if not already elevated (a UAC prompt appears each time). Toggle from the tray menu. |
 | `MinRepeatIntervalMs` | `28.0` | Repeats faster than this many milliseconds are treated as stutter. |
 | `BurstBypass` | `false` | Opt-in. When `true`, the filter detects machine-speed input (a hardware token such as a YubiKey typing a one-time password) and suspends filtering for that burst, so repeated characters are not dropped. Leave `false` unless you authenticate with such a device; a normal keyboard never reaches the burst threshold. There is no tray toggle, set it here. |
+| `CheckForUpdates` | `true` | When `true`, the app makes one best-effort request to the GitHub releases API at startup to see whether a newer version exists (no data sent, nothing downloaded). Set to `false` to keep the app fully offline; this is the only network access it ever makes. |
 | `ExcludedKeys` | `["Back", "Return"]` | Keys that are never filtered. Names or numeric codes (see below). **CapsLock is always excluded** regardless of this list, so its toggle state can never desync. |
 | `ExcludedVkCodes` | _(none)_ | Legacy numeric-only form of `ExcludedKeys`; still honored and merged. |
 | `PerKeyMinRepeatIntervalMs` | `{}` | Per-key threshold overrides, keyed by key name or numeric code. |
@@ -214,6 +215,10 @@ appears; click it to open the releases page, or just let it dismiss. If you disa
 toast appears, but the **About** box still tells you a newer version is available. The check sends no
 data, never downloads or installs anything, and fails silently (offline, rate-limited, etc.), so the
 app works exactly the same with no network access.
+
+This is the only outbound network access the app makes. To keep it fully offline, set
+`"CheckForUpdates": false` in `config.json`: the check is skipped entirely and the About box reports
+it as disabled.
 
 Every toggle persists to `config.json`, so the menu and the file never disagree.
 
