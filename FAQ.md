@@ -96,6 +96,29 @@ many games read the device through Raw Input / DirectInput below the hook, and e
 processes bypass a normal-user hook (try **Always run as administrator** for that last case). When
 the keystrokes never reach the hook, no setting can help.
 
+## Can it switch to a gaming profile automatically when I launch a game?
+
+Yes, as of 3.2.0 (a feature contributed by [@Timmaykc](https://github.com/Timmaykc)). Turn on **Tray
+→ Game profile switching → Auto-switch profiles for games** and the app watches for a running game
+and temporarily activates a matching profile, reverting to your base profile the moment the game
+closes. **World of Warcraft** maps to the bundled **WoW** profile out of the box; any other detected
+game uses `DefaultGameProfile` (`gaming` by default). You can still pick a profile by hand while a
+game is running, that manual choice holds until the game closes and is not saved as your startup
+default, and the submenu's status line shows what is currently in effect.
+
+It is **off by default**, so nothing changes unless you enable it. Configure the behavior with
+`AutoSwitchProfilesForGames`, `GameProfileMap`, and `DefaultGameProfile` in `config.json`.
+
+## Does the game auto-switch feature need an internet connection?
+
+No, not to run. Which executables count as "a game" comes from Discord's public detectable-games
+list, but the always-running tray app never downloads it: your explicitly mapped games (like WoW) are
+recognized immediately with no list at all. Only when you choose **Tray → Game profile switching →
+Check for game list update** does a small, separate, network-isolated companion, `GameListUpdater.exe`,
+fetch the list once and write `games.txt` next to the app. If you never run that companion, the
+feature stays fully offline and still auto-switches for any game you have mapped in `GameProfileMap`.
+The resident filter itself never makes this call and remains air-gapped.
+
 ## Do I need admin rights to run it?
 
 No.
@@ -145,9 +168,15 @@ Yes.
 
 It does not inject into processes, install drivers, or modify system files.
 It simply listens to keyboard events and discards invalid ones.
-This is not a keylogger, only duplicated key are log in c:\temp.
-There is no phone home, no update checks, no network connectivity is required.
-It works perfectly in a air-gapped environment.
+This is not a keylogger: only the virtual-key codes of *filtered* (duplicate) keypresses are written
+to the local log in `C:\temp`, never what you actually type, and nothing about your keystrokes is
+ever sent anywhere.
+
+Its only network activity is optional and never carries your data: a best-effort **startup update
+check** against the GitHub releases API (no data sent, nothing downloaded, and you can turn it off
+with `"CheckForUpdates": false`), plus the separate, manually-run `GameListUpdater.exe` that fetches
+Discord's public game list only when you ask it to. Disable the update check and skip that companion
+and the app runs perfectly in a fully air-gapped environment.
 
 ## My antivirus (e.g. BitDefender) flagged or blocked the executable. Is it infected?
 
