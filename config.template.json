@@ -9,6 +9,14 @@
   "MinRepeatIntervalMs": 28.0,
   "BurstBypass": false,
   "CheckForUpdates": true,
+  "AutoSwitchProfilesForGames": false,
+  "DefaultGameProfile": "gaming",
+  "GameProfileMap": {
+    "wow.exe": "WoW",
+    "wow-64.exe": "WoW",
+    "wowclassic.exe": "WoW",
+    "wowt-64.exe": "WoW"
+  },
   "FilterMouseButtons": false,
   "MouseMinRepeatIntervalMs": 50.0,
   "ExcludedMouseButtons": [],

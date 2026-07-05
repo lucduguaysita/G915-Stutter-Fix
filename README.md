@@ -14,7 +14,7 @@ is an optional version check at startup, which you can disable to keep it fully 
 app and your system is exactly as it was. User reports confirm it eliminates the stutter/double-keypress
 problem on affected G915/G915X units, and it's small enough to read end-to-end in a coffee break.
 
-> **Version 3.1.0**, Windows 10/11 x64 · .NET Framework 4.8 · MIT licensed · offline (optional startup version check, can be disabled)
+> **Version 3.2.0**, Windows 10/11 x64 · .NET Framework 4.8 · MIT licensed · offline (optional startup version check, can be disabled)
 
 ---
 
@@ -24,6 +24,22 @@ problem on affected G915/G915X units, and it's small enough to read end-to-end i
 |---|---|
 | `KeyboardRepeatFilter.exe` | Runs in the system tray and silently filters stutter/duplicate keypresses (and, optionally, chattering mouse clicks) in real time. |
 | `KeyboardHeatmap.exe` | Companion CLI that reads the filter log and generates a self-contained HTML heatmap of filtered key counts, great for *seeing* which keys misbehave. |
+| `GameListUpdater.exe` | Network-isolated companion, launched on demand from the tray, that downloads Discord's public detectable-games list and writes `games.txt` for the auto-switch-profiles-for-games feature. |
+
+---
+
+## What's new in 3.2.0
+
+- **Auto-switch profiles for games** (contributed by [**@Timmaykc**](https://github.com/Timmaykc)).
+  Turn on **Tray → Game profile switching** and the app watches for a running game and temporarily
+  activates a matching profile, reverting to your base profile when the game closes. World of Warcraft
+  maps to the **WoW** profile out of the box; any other detected game uses `DefaultGameProfile`
+  (`gaming`). A manual profile pick while a game runs holds until the game closes and is not saved as
+  your startup default. It is **off by default**: with it off, the resident app neither watches
+  processes nor makes any new network request. The game list comes from Discord's public
+  detectable-games list, fetched on demand by the network-isolated `GameListUpdater.exe`.
+
+See [`CHANGELOG.md`](CHANGELOG.md) for the complete list.
 
 ---
 
@@ -205,6 +221,24 @@ Activate it from **Tray → Profile → gaming**.
 > **Reality check:** see [Gaming and anti-cheat](docs/USAGE.md#gaming-and-anti-cheat) for what a
 > filter can and cannot do in games, kernel-level anti-cheat and Raw Input can keep keystrokes away
 > from any user-mode hook, and no profile changes that.
+
+### Auto-switch profiles for games
+Let a game pick your profile for you. Turn on **Tray → Game profile switching → Auto-switch profiles
+for games** and the app watches for a running game and temporarily activates a matching profile,
+reverting to your base profile the moment the game closes. World of Warcraft maps to the **WoW**
+profile out of the box; every other detected game uses `DefaultGameProfile` (`gaming` by default). You
+can still pick a profile by hand while a game is running, that manual choice holds until the game
+closes and is not saved as your startup default. The status line in the submenu shows what is in
+effect.
+
+Which executables count as "a game" comes from **Discord's public detectable-games list**. Choose
+**Check for game list update** to fetch it: a small, network-isolated companion, `GameListUpdater.exe`,
+downloads the list and writes `games.txt` next to the app. The resident tray app itself never makes
+that call, so with the feature off (the default) nothing new touches the network or watches your
+processes. Configure the mapping with `AutoSwitchProfilesForGames`, `GameProfileMap`, and
+`DefaultGameProfile` in `config.json`.
+
+> This feature was contributed by [**@Timmaykc**](https://github.com/Timmaykc). Thank you!
 
 ### Friendly, forgiving configuration
 `ExcludedKeys` and per-key thresholds accept key **names** exactly as they appear in the log, the

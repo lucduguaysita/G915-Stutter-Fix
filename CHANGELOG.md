@@ -2,6 +2,21 @@
 
 All notable changes to this project are documented in this file.
 
+## [3.2.0] - 2026-07-05
+
+### Added
+- **Auto-switch profiles for games** (contributed by [@Timmaykc](https://github.com/Timmaykc)).
+  A new **Tray → Game profile switching** menu can watch for a running game and temporarily activate a
+  matching profile, reverting to the base profile when the game exits. World of Warcraft maps to the
+  `WoW` profile by default; any other detected game uses `DefaultGameProfile` (`gaming`). A manual
+  profile pick while a game runs takes over until the game closes and is not saved as the startup
+  default, and a status line shows what is in effect. Which executables count as games comes from
+  Discord's public detectable-games list, fetched on demand by a small, network-isolated companion
+  `GameListUpdater.exe` (via **Check for game list update**), which writes `games.txt` next to the app.
+  The feature is **off by default**: with it off, the resident app neither watches processes nor makes
+  any new network request (the download only ever runs from the separate updater you launch). Backed
+  by new `AutoSwitchProfilesForGames`, `GameProfileMap`, and `DefaultGameProfile` config fields.
+
 ## [3.1.0] - 2026-06-23
 
 ### Added
