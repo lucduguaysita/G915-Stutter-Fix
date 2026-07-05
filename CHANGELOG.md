@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented in this file.
 
-## [Unreleased]
+## [3.2.0] - 2026-07-05
 
 ### Added
 - **Auto-switch profiles for games** (contributed by [@Timmaykc](https://github.com/Timmaykc)).

@@ -14,7 +14,7 @@ is an optional version check at startup, which you can disable to keep it fully 
 app and your system is exactly as it was. User reports confirm it eliminates the stutter/double-keypress
 problem on affected G915/G915X units, and it's small enough to read end-to-end in a coffee break.
 
-> **Version 3.1.0**, Windows 10/11 x64 · .NET Framework 4.8 · MIT licensed · offline (optional startup version check, can be disabled)
+> **Version 3.2.0**, Windows 10/11 x64 · .NET Framework 4.8 · MIT licensed · offline (optional startup version check, can be disabled)
 
 ---
 
@@ -24,6 +24,22 @@ problem on affected G915/G915X units, and it's small enough to read end-to-end i
 |---|---|
 | `KeyboardRepeatFilter.exe` | Runs in the system tray and silently filters stutter/duplicate keypresses (and, optionally, chattering mouse clicks) in real time. |
 | `KeyboardHeatmap.exe` | Companion CLI that reads the filter log and generates a self-contained HTML heatmap of filtered key counts, great for *seeing* which keys misbehave. |
+| `GameListUpdater.exe` | Network-isolated companion, launched on demand from the tray, that downloads Discord's public detectable-games list and writes `games.txt` for the auto-switch-profiles-for-games feature. |
+
+---
+
+## What's new in 3.2.0
+
+- **Auto-switch profiles for games** (contributed by [**@Timmaykc**](https://github.com/Timmaykc)).
+  Turn on **Tray → Game profile switching** and the app watches for a running game and temporarily
+  activates a matching profile, reverting to your base profile when the game closes. World of Warcraft
+  maps to the **WoW** profile out of the box; any other detected game uses `DefaultGameProfile`
+  (`gaming`). A manual profile pick while a game runs holds until the game closes and is not saved as
+  your startup default. It is **off by default**: with it off, the resident app neither watches
+  processes nor makes any new network request. The game list comes from Discord's public
+  detectable-games list, fetched on demand by the network-isolated `GameListUpdater.exe`.
+
+See [`CHANGELOG.md`](CHANGELOG.md) for the complete list.
 
 ---
 
