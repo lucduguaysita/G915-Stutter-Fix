@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace KeyboardRepeatFilter
@@ -103,5 +104,32 @@ namespace KeyboardRepeatFilter
         // decimal VK code, following the same rules as ExcludedKeys, e.g.
         // { "I": 40.0 } or { "73": 40.0 }.
         public Dictionary<string, double> PerKeyMinRepeatIntervalMs { get; set; } = new Dictionary<string, double>();
+
+        // Game-profile switching, contributed by GitHub user Timmaykc.
+        //
+        // When true, a background timer watches for running games and temporarily
+        // switches to a matching profile, reverting to the base profile when no game
+        // is running. Toggled from the tray ("Auto-switch profiles for games"). A
+        // manual profile pick from the tray while a game runs suspends this until the
+        // next game start/stop. Off by default so an upgrade never starts monitoring
+        // processes or swapping profiles without the user opting in from the tray.
+        public bool AutoSwitchProfilesForGames { get; set; } = false;
+
+        // Per-game profile overrides for auto-switching: process EXE name (case-
+        // insensitive) -> profile file name (with or without ".json"). Any detected
+        // game NOT listed here uses DefaultGameProfile. WoW clients map to WoW.
+        public Dictionary<string, string> GameProfileMap { get; set; } =
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "wow.exe", "WoW" }, { "wow-64.exe", "WoW" },
+                { "wowclassic.exe", "WoW" }, { "wowt-64.exe", "WoW" }
+            };
+
+        // Profile activated for any detected game not in GameProfileMap. The "is this
+        // a game" list comes from games.txt (Discord's detectable-games list) next to
+        // the app, refreshed via the tray "Check for game list update" item. Mapped
+        // executables (GameProfileMap keys) are always recognised as games even before
+        // any list is downloaded, so the WoW mapping works out of the box.
+        public string DefaultGameProfile { get; set; } = "gaming";
     }
 }

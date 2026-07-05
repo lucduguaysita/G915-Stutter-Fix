@@ -21,6 +21,9 @@
     <Compile Remove="KeyboardHeatmap\**" />
     <EmbeddedResource Remove="KeyboardHeatmap\**" />
     <None Remove="KeyboardHeatmap\**" />
+    <Compile Remove="GameListUpdater\**" />
+    <EmbeddedResource Remove="GameListUpdater\**" />
+    <None Remove="GameListUpdater\**" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="app.ico" />
@@ -39,6 +42,13 @@
        post-build copy below always has a fresh exe to place next to the app. -->
   <ItemGroup>
     <ProjectReference Include="KeyboardHeatmap\KeyboardHeatmap.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
+    <!-- Game-list updater companion (contributed by Timmaykc). Built alongside the
+         app but not referenced as an assembly; the post-build step copies its exe
+         next to the app so the tray "Check for game list update" item can launch it. -->
+    <ProjectReference Include="GameListUpdater\GameListUpdater.csproj">
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <Private>false</Private>
     </ProjectReference>
@@ -77,8 +87,11 @@
   <Target Name="CopyHeatmapToOutput" AfterTargets="Build">
     <PropertyGroup>
       <HeatmapExe>$(MSBuildProjectDirectory)\KeyboardHeatmap\bin\$(Configuration)\KeyboardHeatmap.exe</HeatmapExe>
+      <!-- SDK-style output nests under the target framework. -->
+      <GameListUpdaterExe>$(MSBuildProjectDirectory)\GameListUpdater\bin\$(Configuration)\net48\GameListUpdater.exe</GameListUpdaterExe>
     </PropertyGroup>
     <Copy SourceFiles="$(HeatmapExe)" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" Condition="Exists('$(HeatmapExe)')" />
+    <Copy SourceFiles="$(GameListUpdaterExe)" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" Condition="Exists('$(GameListUpdaterExe)')" />
   </Target>
   <Target Name="RefreshReleasesFolder" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
     <PropertyGroup>
@@ -92,5 +105,6 @@
     <Copy SourceFiles="$(TargetDir)gaming.json" DestinationFolder="$(ReleasesDir)" Condition="Exists('$(TargetDir)gaming.json')" />
     <Copy SourceFiles="$(TargetDir)WoW.json" DestinationFolder="$(ReleasesDir)" Condition="Exists('$(TargetDir)WoW.json')" />
     <Copy SourceFiles="$(MSBuildProjectDirectory)\KeyboardHeatmap\bin\Release\KeyboardHeatmap.exe" DestinationFolder="$(ReleasesDir)" Condition="Exists('$(MSBuildProjectDirectory)\KeyboardHeatmap\bin\Release\KeyboardHeatmap.exe')" />
+    <Copy SourceFiles="$(MSBuildProjectDirectory)\GameListUpdater\bin\Release\net48\GameListUpdater.exe" DestinationFolder="$(ReleasesDir)" Condition="Exists('$(MSBuildProjectDirectory)\GameListUpdater\bin\Release\net48\GameListUpdater.exe')" />
   </Target>
 </Project>

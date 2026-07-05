@@ -50,6 +50,45 @@ namespace KeyboardRepeatFilter
         private const string TooltipNormal = "Keyboard Repeat Filter";
         private const string TooltipBypassed = "Keyboard Repeat Filter - paused for this admin window";
 
+        // --- Game-profile switching (feature contributed by GitHub user Timmaykc) ---
+        // Watches for a known game process and swaps to a matching profile while it
+        // runs, reverting to the base profile when it exits. All of this state is
+        // touched only on the UI thread (the watcher polls on a WinForms timer).
+        private static GameProfileWatcher _gameWatcher;
+        // Exe name of the currently detected game, or null when none is running.
+        private static string _runningGameExe;
+        // The profile to restore when the current game exits: whatever was active
+        // before the game (or a manual in-game pick) changed it.
+        private static string _preGameProfilePath;
+        // True while a game-triggered (or in-game manual) profile is overlaid on the
+        // base profile, so game exit knows to revert.
+        private static bool _gameProfileActive;
+        // Set when the user manually picks a profile while a game is running: the
+        // watcher then stops auto-swapping until the game exits (least surprise), and
+        // the pick is treated as transient rather than saved as the startup default.
+        private static bool _manualOverrideDuringGame;
+        // Result handoff for the background game-list update run (see StartGameListUpdate).
+        private static volatile GameListUpdateResult _gameListResult;
+        private static bool _gameListCheckRunning;
+
+        // Tray items updated from the game-switch handlers, captured when the menu is
+        // built in Main.
+        private static List<KeyValuePair<string, MenuItem>> _profileMenuItems;
+        private static MenuItem _repressItem;
+        private static MenuItem _releaseItem;
+        private static MenuItem _mouseItem;
+        private static MenuItem _noticeItem;
+        private static MenuItem _adminItem;
+        private static MenuItem _autoGameItem;
+        private static MenuItem _gameStatusItem;
+
+        private sealed class GameListUpdateResult
+        {
+            public int Code;
+            public string Output;
+            public string Error;
+        }
+
         [STAThread]
         private static void Main()
         {
@@ -210,13 +249,21 @@ namespace KeyboardRepeatFilter
             };
             contextMenu.MenuItems.Add(noticeItem);
 
+            // Capture the toggle items so the game-profile handlers can refresh their
+            // checkmarks when a profile is swapped automatically.
+            _repressItem = repressItem;
+            _releaseItem = releaseItem;
+            _mouseItem = mouseItem;
+            _noticeItem = noticeItem;
+            _adminItem = adminItem;
+
             // --- Profiles: activate another matching config file from this folder ---
             // Any *.json next to the app that looks like one of our config files is
             // offered as a profile. Selecting one loads it as the live config and
             // applies it immediately; later tray toggles save back into whichever
             // profile is active. The list is built at startup.
             var profileMenu = new MenuItem("Profile");
-            var profileItems = new List<MenuItem>();
+            _profileMenuItems = new List<KeyValuePair<string, MenuItem>>();
             foreach (var pf in FindProfileFiles())
             {
                 string filePath = pf.Path;
@@ -224,32 +271,24 @@ namespace KeyboardRepeatFilter
                 // default. Flag it in the menu so that role is clear.
                 string displayName = PathsEqual(filePath, ConfigFilePath) ? "(default) " + pf.Name : pf.Name;
                 var item = new MenuItem(displayName) { RadioCheck = true, Checked = PathsEqual(filePath, _activeConfigPath) };
-                item.Click += (s, e) =>
-                {
-                    if (!ActivateProfile(filePath)) return;
-
-                    foreach (var mi in profileItems) mi.Checked = false;
-                    item.Checked = true;
-
-                    // Selecting a profile also makes it the startup default: record it
-                    // in config.json so the next launch (including Windows sign-in via
-                    // Autostart) comes up on it. Selecting config.json clears the
-                    // default so the app starts on config.json again.
-                    PersistDefaultProfile(PathsEqual(filePath, ConfigFilePath) ? null : Path.GetFileName(filePath));
-
-                    // Reflect the freshly loaded settings in the other toggles.
-                    bool rel = string.Equals(_config.FilterMode, "BlockRelease", StringComparison.OrdinalIgnoreCase);
-                    repressItem.Checked = !rel;
-                    releaseItem.Checked = rel;
-                    mouseItem.Checked = _config.FilterMouseButtons;
-                    noticeItem.Checked = !_config.ShowElevatedWindowNotice;
-                    adminItem.Checked = _config.RunAsAdmin;
-                };
-                profileItems.Add(item);
+                item.Click += (s, e) => OnProfilePicked(filePath);
+                _profileMenuItems.Add(new KeyValuePair<string, MenuItem>(filePath, item));
                 profileMenu.MenuItems.Add(item);
             }
-            profileMenu.Enabled = profileItems.Count > 0;
+            profileMenu.Enabled = _profileMenuItems.Count > 0;
             contextMenu.MenuItems.Add(profileMenu);
+
+            // --- Game-profile switching (contributed by GitHub user Timmaykc) ---
+            // Auto-swaps to a matching profile while a detected game runs and reverts
+            // when it exits; the game list is fetched on demand by GameListUpdater.exe.
+            var gamesMenu = new MenuItem("Game profile switching");
+            _autoGameItem = new MenuItem("Auto-switch profiles for games") { Checked = _config.AutoSwitchProfilesForGames };
+            _autoGameItem.Click += (s, e) => ToggleAutoGameSwitch();
+            gamesMenu.MenuItems.Add(_autoGameItem);
+            gamesMenu.MenuItems.Add(new MenuItem("Check for game list update", (s, e) => StartGameListUpdate()));
+            _gameStatusItem = new MenuItem("-") { Enabled = false };
+            gamesMenu.MenuItems.Add(_gameStatusItem);
+            contextMenu.MenuItems.Add(gamesMenu);
 
             // --- Heatmap launchers ---
             var heatmapMenu = new MenuItem("Heatmap");
@@ -283,6 +322,17 @@ namespace KeyboardRepeatFilter
             _bypassTimer.Tick += (_, __) => UpdateBypassIndicator();
             _bypassTimer.Start();
             UpdateBypassIndicator();
+
+            // Game-profile switching: start watching only when the feature is enabled.
+            _gameWatcher = new GameProfileWatcher();
+            _gameWatcher.GameStarted += OnGameStarted;
+            _gameWatcher.GameStopped += OnGameStopped;
+            if (_config.AutoSwitchProfilesForGames)
+            {
+                _gameWatcher.SetKnownGames(LoadKnownGameExes());
+                _gameWatcher.Start();
+            }
+            UpdateGameStatusItem();
 
             StartUpdateCheck();
 
@@ -364,6 +414,7 @@ namespace KeyboardRepeatFilter
             LogLifecycle("Elevating", "relaunching with administrator rights at user request");
             _bypassTimer?.Stop();
             _updateToastTimer?.Stop();
+            _gameWatcher?.Stop();
             try { _toast?.Close(); } catch { /* ignore */ }
             _notifyIcon.Visible = false;
             _filter?.Stop();
@@ -377,6 +428,7 @@ namespace KeyboardRepeatFilter
         {
             _bypassTimer?.Stop();
             _updateToastTimer?.Stop();
+            _gameWatcher?.Stop();
             try { _toast?.Close(); } catch { /* ignore */ }
             _notifyIcon.Visible = false;
             _filter.Stop();
@@ -1061,6 +1113,304 @@ namespace KeyboardRepeatFilter
             StartMouseFilter();
             LogLifecycle("ProfileActivated", $"file={Path.GetFileName(path)}");
             return true;
+        }
+
+        // Handles a profile chosen from the tray. Normally the pick also becomes the
+        // startup default; but while a game is running it is treated as a transient
+        // in-game override that suspends auto-switching and reverts when the game
+        // exits (part of the game-profile feature contributed by Timmaykc).
+        private static void OnProfilePicked(string filePath)
+        {
+            string prevActive = _activeConfigPath;
+            if (!ActivateProfile(filePath)) return;
+
+            RefreshTrayForActiveProfile();
+
+            if (_runningGameExe != null)
+            {
+                // Remember the base to revert to on game exit, unless a game swap
+                // already captured it.
+                if (!_gameProfileActive) _preGameProfilePath = prevActive;
+                _gameProfileActive = true;
+                _manualOverrideDuringGame = true;
+                LogLifecycle("GameManualOverride", $"game={_runningGameExe} -> {Path.GetFileName(filePath)} (held until game exits)");
+                UpdateGameStatusItem();
+                return;
+            }
+
+            // Selecting a profile also makes it the startup default: record it in
+            // config.json so the next launch (including Windows sign-in via Autostart)
+            // comes up on it. Selecting config.json clears the default.
+            PersistDefaultProfile(PathsEqual(filePath, ConfigFilePath) ? null : Path.GetFileName(filePath));
+        }
+
+        // Re-points the tray radio/toggle checkmarks at whatever profile is now live,
+        // used after both manual and game-triggered profile swaps.
+        private static void RefreshTrayForActiveProfile()
+        {
+            if (_profileMenuItems != null)
+            {
+                foreach (var kv in _profileMenuItems)
+                    kv.Value.Checked = PathsEqual(kv.Key, _activeConfigPath);
+            }
+
+            bool rel = string.Equals(_config.FilterMode, "BlockRelease", StringComparison.OrdinalIgnoreCase);
+            if (_repressItem != null) _repressItem.Checked = !rel;
+            if (_releaseItem != null) _releaseItem.Checked = rel;
+            if (_mouseItem != null) _mouseItem.Checked = _config.FilterMouseButtons;
+            if (_noticeItem != null) _noticeItem.Checked = !_config.ShowElevatedWindowNotice;
+            if (_adminItem != null) _adminItem.Checked = _config.RunAsAdmin;
+        }
+
+        // Raised on the UI thread when a known game starts. Overlays the matching
+        // profile on top of the base profile, unless a manual in-game override is in
+        // effect or the game maps to no/unknown profile.
+        private static void OnGameStarted(string exe)
+        {
+            _runningGameExe = exe;
+
+            if (!_config.AutoSwitchProfilesForGames || _manualOverrideDuringGame)
+            {
+                UpdateGameStatusItem();
+                return;
+            }
+
+            string profileName = ResolveGameProfileName(exe);
+            if (string.IsNullOrWhiteSpace(profileName))
+            {
+                UpdateGameStatusItem();
+                return;
+            }
+
+            string targetPath = ResolveProfilePath(profileName);
+            if (targetPath == null)
+            {
+                LogLifecycle("GameProfileMissing", $"game={exe}, profile='{profileName}' not found; leaving profile unchanged");
+                UpdateGameStatusItem();
+                return;
+            }
+
+            if (PathsEqual(targetPath, _activeConfigPath))
+            {
+                UpdateGameStatusItem(); // already on the right profile
+                return;
+            }
+
+            _preGameProfilePath = _activeConfigPath;
+            if (ActivateProfile(targetPath))
+            {
+                _gameProfileActive = true;
+                RefreshTrayForActiveProfile();
+                LogLifecycle("GameProfileActivated", $"game={exe} -> {Path.GetFileName(targetPath)}");
+            }
+            else
+            {
+                _preGameProfilePath = null;
+            }
+            UpdateGameStatusItem();
+        }
+
+        // Raised on the UI thread when the last known game exits. Reverts to the base
+        // profile captured when the overlay was applied and clears any manual override.
+        private static void OnGameStopped()
+        {
+            string exe = _runningGameExe;
+            _runningGameExe = null;
+            _manualOverrideDuringGame = false;
+
+            if (_gameProfileActive)
+            {
+                string revertTo = _preGameProfilePath ?? ConfigFilePath;
+                if (ActivateProfile(revertTo))
+                {
+                    RefreshTrayForActiveProfile();
+                    LogLifecycle("GameProfileReverted", $"game={exe ?? "(unknown)"} exited -> {Path.GetFileName(revertTo)}");
+                }
+                _gameProfileActive = false;
+            }
+
+            _preGameProfilePath = null;
+            UpdateGameStatusItem();
+        }
+
+        // Profile name for a detected game: an explicit GameProfileMap entry (matched
+        // case-insensitively, since Newtonsoft rebuilds the map with a default
+        // comparer on load), else the shared DefaultGameProfile.
+        private static string ResolveGameProfileName(string exe)
+        {
+            if (_config.GameProfileMap != null)
+            {
+                foreach (var kv in _config.GameProfileMap)
+                {
+                    if (string.Equals(kv.Key, exe, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(kv.Value))
+                        return kv.Value;
+                }
+            }
+            return _config.DefaultGameProfile;
+        }
+
+        // Tray toggle for the whole feature. Enabling starts the watcher; disabling
+        // reverts any active game profile and stops watching.
+        private static void ToggleAutoGameSwitch()
+        {
+            _config.AutoSwitchProfilesForGames = !_config.AutoSwitchProfilesForGames;
+            _autoGameItem.Checked = _config.AutoSwitchProfilesForGames;
+            SaveConfig();
+
+            if (_config.AutoSwitchProfilesForGames)
+            {
+                _gameWatcher.SetKnownGames(LoadKnownGameExes());
+                _gameWatcher.Start();
+                LogLifecycle("GameAutoSwitch", "enabled");
+            }
+            else
+            {
+                if (_gameProfileActive || _runningGameExe != null) OnGameStopped();
+                _gameWatcher.Stop();
+                LogLifecycle("GameAutoSwitch", "disabled");
+            }
+            UpdateGameStatusItem();
+        }
+
+        // Reflects the current game-switch state in the disabled status line so the
+        // user can see whether a game is detected and which override is in effect.
+        private static void UpdateGameStatusItem()
+        {
+            if (_gameStatusItem == null) return;
+
+            if (!_config.AutoSwitchProfilesForGames)
+                _gameStatusItem.Text = "Auto-switch is off";
+            else if (_runningGameExe == null)
+                _gameStatusItem.Text = "No game detected";
+            else if (_manualOverrideDuringGame)
+                _gameStatusItem.Text = $"Manual override until {_runningGameExe} closes";
+            else if (_gameProfileActive)
+                _gameStatusItem.Text = $"In game: {_runningGameExe} ({Path.GetFileNameWithoutExtension(_activeConfigPath)})";
+            else
+                _gameStatusItem.Text = $"In game: {_runningGameExe}";
+        }
+
+        // The set of executables the watcher treats as games: every GameProfileMap
+        // key (so explicit mappings work even before any list is downloaded) plus
+        // every entry in games.txt (written next to the app by GameListUpdater.exe).
+        private static HashSet<string> LoadKnownGameExes()
+        {
+            var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            if (_config.GameProfileMap != null)
+            {
+                foreach (var key in _config.GameProfileMap.Keys)
+                    if (!string.IsNullOrWhiteSpace(key)) set.Add(key.Trim());
+            }
+
+            try
+            {
+                var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "games.txt");
+                if (File.Exists(path))
+                {
+                    foreach (var line in File.ReadAllLines(path))
+                    {
+                        var t = line.Trim();
+                        if (t.Length == 0 || t[0] == '#') continue;
+                        set.Add(t);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogLifecycle("GameListLoadError", ex.Message);
+            }
+
+            return set;
+        }
+
+        // Runs the network-isolated GameListUpdater.exe on a background thread so the
+        // up-to-45s download never freezes the tray, then reports the outcome and
+        // reloads games.txt on the UI thread via a short poll timer, mirroring how the
+        // startup update check is surfaced.
+        private static void StartGameListUpdate()
+        {
+            if (_gameListCheckRunning) return;
+
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            var exePath = Path.Combine(baseDir, "GameListUpdater.exe");
+            if (!File.Exists(exePath))
+            {
+                MessageBox.Show(
+                    "GameListUpdater.exe was not found next to the application.\r\n" +
+                    "Make sure it is in the same folder as KeyboardRepeatFilter.exe.",
+                    "Game list", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            _gameListCheckRunning = true;
+            _gameListResult = null;
+
+            var thread = new Thread(() =>
+            {
+                var r = new GameListUpdateResult();
+                try
+                {
+                    var psi = new ProcessStartInfo
+                    {
+                        FileName = exePath,
+                        WorkingDirectory = baseDir,
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true
+                    };
+                    using (var p = Process.Start(psi))
+                    {
+                        r.Output = p.StandardOutput.ReadToEnd();
+                        r.Error = p.StandardError.ReadToEnd();
+                        p.WaitForExit();
+                        r.Code = p.ExitCode;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    r.Code = 2;
+                    r.Error = ex.Message;
+                }
+                _gameListResult = r;
+            })
+            {
+                IsBackground = true,
+                Name = "KeyboardRepeatFilter.GameListUpdate"
+            };
+            thread.Start();
+
+            var timer = new System.Windows.Forms.Timer { Interval = 400 };
+            timer.Tick += (_, __) =>
+            {
+                var r = _gameListResult;
+                if (r == null) return;
+
+                timer.Stop();
+                timer.Dispose();
+                _gameListResult = null;
+                _gameListCheckRunning = false;
+
+                // Pick up any freshly written games.txt for the running watcher.
+                if (_config.AutoSwitchProfilesForGames && _gameWatcher != null)
+                    _gameWatcher.SetKnownGames(LoadKnownGameExes());
+
+                string detail = (r.Code == 2
+                    ? (string.IsNullOrWhiteSpace(r.Error) ? r.Output : r.Error)
+                    : r.Output)?.Trim();
+
+                string message =
+                    r.Code == 0 ? "Game list updated." :
+                    r.Code == 1 ? "Game list is already up to date." :
+                                  "Could not update the game list.";
+                if (!string.IsNullOrWhiteSpace(detail)) message += "\r\n\r\n" + detail;
+
+                LogLifecycle("GameListUpdate", $"exit={r.Code}, {detail}");
+                MessageBox.Show(message, "Game list", MessageBoxButtons.OK,
+                    r.Code == 2 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
+            };
+            timer.Start();
         }
 
         private static bool PathsEqual(string a, string b)

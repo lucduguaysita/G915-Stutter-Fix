@@ -206,6 +206,24 @@ Activate it from **Tray → Profile → gaming**.
 > filter can and cannot do in games, kernel-level anti-cheat and Raw Input can keep keystrokes away
 > from any user-mode hook, and no profile changes that.
 
+### Auto-switch profiles for games
+Let a game pick your profile for you. Turn on **Tray → Game profile switching → Auto-switch profiles
+for games** and the app watches for a running game and temporarily activates a matching profile,
+reverting to your base profile the moment the game closes. World of Warcraft maps to the **WoW**
+profile out of the box; every other detected game uses `DefaultGameProfile` (`gaming` by default). You
+can still pick a profile by hand while a game is running, that manual choice holds until the game
+closes and is not saved as your startup default. The status line in the submenu shows what is in
+effect.
+
+Which executables count as "a game" comes from **Discord's public detectable-games list**. Choose
+**Check for game list update** to fetch it: a small, network-isolated companion, `GameListUpdater.exe`,
+downloads the list and writes `games.txt` next to the app. The resident tray app itself never makes
+that call, so with the feature off (the default) nothing new touches the network or watches your
+processes. Configure the mapping with `AutoSwitchProfilesForGames`, `GameProfileMap`, and
+`DefaultGameProfile` in `config.json`.
+
+> This feature was contributed by [**@Timmaykc**](https://github.com/Timmaykc). Thank you!
+
 ### Friendly, forgiving configuration
 `ExcludedKeys` and per-key thresholds accept key **names** exactly as they appear in the log, the
 `VK_` prefix is optional and matching is case-insensitive. Generic modifiers (`Ctrl`, `Shift`,
