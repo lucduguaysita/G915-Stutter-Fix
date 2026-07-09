@@ -20,7 +20,9 @@ namespace KeyboardHeatmap
     ///   The output file is placed in the same directory as the log file.
     ///
     /// Flags:
-    ///   -v | -V | --v | --V   Include the "Daily filtered event count" section in the output.
+    ///   -v | -V | --v | --V     Include the "Daily filtered event count" section in the output.
+    ///   -classic | --classic    Render the classic HTML keyboard layout instead of the
+    ///                           G915X photo overlay.
     /// </summary>
     internal static class Program
     {
@@ -28,11 +30,15 @@ namespace KeyboardHeatmap
         {
             // ── Strip flags from args ──────────────────────────────────────────────
             bool showDaily = false;
+            bool classic = false;
             var positional = new System.Collections.Generic.List<string>();
             foreach (string arg in args)
             {
                 if (arg == "-v" || arg == "-V" || arg == "--v" || arg == "--V")
                     showDaily = true;
+                else if (string.Equals(arg, "-classic", StringComparison.OrdinalIgnoreCase) ||
+                         string.Equals(arg, "--classic", StringComparison.OrdinalIgnoreCase))
+                    classic = true;
                 else
                     positional.Add(arg);
             }
@@ -121,11 +127,60 @@ namespace KeyboardHeatmap
             if (!showDaily)
                 Console.WriteLine("Tip:      Use -v to include the daily filtered event count in the output.");
 
+            // ── Keyboard photo + key map (embedded in the exe) ─────────────────────
+            KeyMap keyMap = null;
+            byte[] photoPng = null;
+            MouseMap mouseMap = null;
+            byte[] mouseTopPng = null;
+            byte[] mouseSidePng = null;
+            if (classic)
+            {
+                Console.WriteLine("Layout:   classic HTML keyboard");
+            }
+            else
+            {
+                try
+                {
+                    string mapJson = ReadEmbeddedText("G915X.keymap.json");
+                    photoPng = ReadEmbeddedBytes("G915X.png");
+                    keyMap = KeyMap.Parse(mapJson, "embedded G915X.keymap.json");
+                    Console.WriteLine($"Layout:   G915X keyboard photo ({keyMap.Keys.Count} mapped keys)");
+                }
+                catch (Exception ex)
+                {
+                    keyMap = null;
+                    photoPng = null;
+                    Console.WriteLine($"Warning:  could not load embedded keyboard photo ({ex.Message}), falling back to classic layout.");
+                }
+            }
+
+            // ── Mouse photo + button map (only meaningful alongside the keyboard
+            // photo; failure here just omits the mouse section, it does not fall
+            // back to the classic SVG mouse, which is reserved for -classic). ────
+            if (keyMap != null)
+            {
+                try
+                {
+                    string mouseJson = ReadEmbeddedText("G502X Plus.mousemap.json");
+                    mouseTopPng = ReadEmbeddedBytes("G502X Plus top.png");
+                    mouseSidePng = ReadEmbeddedBytes("G502X Plus side.png");
+                    mouseMap = MouseMap.Parse(mouseJson, "embedded G502X Plus.mousemap.json");
+                    Console.WriteLine("Mouse:    G502X Plus photo overlay enabled");
+                }
+                catch (Exception ex)
+                {
+                    mouseMap = null;
+                    mouseTopPng = null;
+                    mouseSidePng = null;
+                    Console.WriteLine($"Warning:  could not load embedded mouse photo ({ex.Message}), mouse section will be omitted.");
+                }
+            }
+
             // ── Generate HTML ──────────────────────────────────────────────────────
             string html;
             try
             {
-                html = HeatmapGenerator.Generate(entries, showDaily);
+                html = HeatmapGenerator.Generate(entries, showDaily, keyMap, photoPng, mouseMap, mouseTopPng, mouseSidePng);
             }
             catch (Exception ex)
             {
@@ -151,6 +206,34 @@ namespace KeyboardHeatmap
             TryOpenBrowser(outputPath);
 
             return 0;
+        }
+
+        // Finds an embedded resource by filename suffix so the lookup is immune to
+        // namespace/folder renames changing the manifest name prefix.
+        private static System.IO.Stream OpenEmbedded(string nameSuffix)
+        {
+            var asm = typeof(Program).Assembly;
+            string resName = asm.GetManifestResourceNames()
+                .FirstOrDefault(n => n.EndsWith(nameSuffix, StringComparison.OrdinalIgnoreCase));
+            if (resName == null)
+                throw new FileNotFoundException("Embedded resource not found: " + nameSuffix);
+            return asm.GetManifestResourceStream(resName);
+        }
+
+        private static string ReadEmbeddedText(string nameSuffix)
+        {
+            using (var reader = new StreamReader(OpenEmbedded(nameSuffix)))
+                return reader.ReadToEnd();
+        }
+
+        private static byte[] ReadEmbeddedBytes(string nameSuffix)
+        {
+            using (var stream = OpenEmbedded(nameSuffix))
+            using (var ms = new MemoryStream())
+            {
+                stream.CopyTo(ms);
+                return ms.ToArray();
+            }
         }
 
         // Returns the day window from the config value, or null for "all"/unset/

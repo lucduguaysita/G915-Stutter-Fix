@@ -14,7 +14,7 @@ is an optional version check at startup, which you can disable to keep it fully 
 app and your system is exactly as it was. User reports confirm it eliminates the stutter/double-keypress
 problem on affected G915/G915X units, and it's small enough to read end-to-end in a coffee break.
 
-> **Version 3.2.0**, Windows 10/11 x64 · .NET Framework 4.8 · MIT licensed · offline (optional startup version check, can be disabled)
+> **Version 3.3.0**, Windows 10/11 x64 · .NET Framework 4.8 · MIT licensed · offline (optional startup version check, can be disabled)
 
 ---
 
@@ -23,8 +23,24 @@ problem on affected G915/G915X units, and it's small enough to read end-to-end i
 | Tool | Description |
 |---|---|
 | `KeyboardRepeatFilter.exe` | Runs in the system tray and silently filters stutter/duplicate keypresses (and, optionally, chattering mouse clicks) in real time. |
-| `KeyboardHeatmap.exe` | Companion CLI that reads the filter log and generates a self-contained HTML heatmap of filtered key counts, great for *seeing* which keys misbehave. |
+| `KeyboardHeatmap.exe` | Companion CLI that reads the filter log and generates a self-contained HTML heatmap, overlaying filtered key/click counts directly on photos of a G915X keyboard and G502X Plus mouse, great for *seeing* which keys misbehave. A classic HTML keyboard layout is still available as a fallback. |
 | `GameListUpdater.exe` | Network-isolated companion, launched on demand from the tray, that downloads Discord's public detectable-games list and writes `games.txt` for the auto-switch-profiles-for-games feature. |
+
+---
+
+## What's new in 3.3.0
+
+- **Photo-realistic heatmap** (idea contributed by [**@Timmaykc**](https://github.com/Timmaykc)). The
+  heatmap now overlays filtered key/click counts directly on real photos of a G915X keyboard and G502X
+  Plus mouse instead of a generic diagram, so you can see exactly which physical keys and buttons are
+  misbehaving. There is no per-SKU detection: the same two photos are used regardless of your actual
+  keyboard/mouse model. Pick **Tray → Heatmap → Generate report** for the photo layout, or **Generate
+  report (classic)** for the original HTML keyboard diagram.
+- **Worst-offenders tooltip** (also suggested by [**@Timmaykc**](https://github.com/Timmaykc)). Hovering
+  over a day in the daily filtered-event table now shows a tooltip listing that day's top misbehaving
+  keys, most-filtered first.
+
+See [`CHANGELOG.md`](CHANGELOG.md) for the complete list.
 
 ---
 
@@ -278,12 +294,22 @@ see exactly which keys (and which days) are the worst offenders.
 
 ## Heatmap
 
-<img width="880" alt="Keyboard Repeat Filter heatmap report, 2.0 ember theme" src="docs/heatmap.png" />
-
 A diagnostic visualization showing which keys generate filtered/duplicate events, rendered with a
 warm ember intensity ramp (light and dark themes), a "busiest row" flag, summary stat cards, an
 optional daily-activity chart, and a banner that surfaces any configuration warnings found in the
 log.
+
+### Photo layout (default)
+Filtered key/click counts overlaid directly on photos of a G915X keyboard and G502X Plus mouse (see
+[What's new in 3.3.0](#whats-new-in-330)).
+
+<img width="880" alt="Keyboard Repeat Filter heatmap report, photo layout" src="docs/Heatmap new.png" />
+
+### Classic layout
+The original diagram-style report, still available via **Generate report (classic)** or the
+`-classic` flag.
+
+<img width="880" alt="Keyboard Repeat Filter heatmap report, 2.0 ember theme" src="docs/heatmap.png" />
 
 | Argument | Default | Description |
 |---|---|---|

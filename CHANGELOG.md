@@ -2,6 +2,20 @@
 
 All notable changes to this project are documented in this file.
 
+## [3.3.0] - 2026-07-09
+
+### Added
+- **Photo-realistic heatmap** (idea contributed by [@Timmaykc](https://github.com/Timmaykc)). The
+  `KeyboardHeatmap.exe` report now overlays filtered key/click counts directly on real photos of a
+  G915X keyboard and G502X Plus mouse instead of a generic diagram, driven by new `KeyMap`/`MouseMap`
+  classes that parse hit-box maps (`G915X.keymap.json`, `G502X Plus.mousemap.json`) embedded alongside
+  the photos. There is no per-SKU detection: the same two photos are shown regardless of the actual
+  connected keyboard/mouse model. The original HTML keyboard diagram is kept as a fallback, selected
+  via the new `-classic` flag (also exposed as **Tray → Heatmap → Generate report (classic)**).
+- **Worst-offenders tooltip** (also suggested by [@Timmaykc](https://github.com/Timmaykc)). Hovering
+  over a day in the daily filtered-event table shows a tooltip listing that day's top misbehaving keys,
+  most-filtered first.
+
 ## [3.2.0] - 2026-07-05
 
 ### Added

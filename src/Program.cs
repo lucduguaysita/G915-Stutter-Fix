@@ -292,8 +292,8 @@ namespace KeyboardRepeatFilter
 
             // --- Heatmap launchers ---
             var heatmapMenu = new MenuItem("Heatmap");
-            heatmapMenu.MenuItems.Add(new MenuItem("Generate report", (s, e) => LaunchHeatmap(verbose: false)));
-            heatmapMenu.MenuItems.Add(new MenuItem("Generate report (verbose)", (s, e) => LaunchHeatmap(verbose: true)));
+            heatmapMenu.MenuItems.Add(new MenuItem("Generate report", (s, e) => LaunchHeatmap(classic: false)));
+            heatmapMenu.MenuItems.Add(new MenuItem("Generate report (classic)", (s, e) => LaunchHeatmap(classic: true)));
             contextMenu.MenuItems.Add(heatmapMenu);
 
             // --- About item ---
@@ -716,7 +716,9 @@ namespace KeyboardRepeatFilter
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool DestroyIcon(IntPtr hIcon);
 
-        private static void LaunchHeatmap(bool verbose)
+        // Standard report = G915X photo layout, classic = HTML keyboard layout.
+        // Both include the verbose daily-count section.
+        private static void LaunchHeatmap(bool classic)
         {
             // KeyboardHeatmap.exe lives next to this app and reads config.json from
             // its working directory to resolve the log path, so launch it from here.
@@ -757,7 +759,7 @@ namespace KeyboardRepeatFilter
                 Process.Start(new ProcessStartInfo
                 {
                     FileName = exePath,
-                    Arguments = verbose ? "-v" : string.Empty,
+                    Arguments = classic ? "-v -classic" : "-v",
                     WorkingDirectory = baseDir,
                     UseShellExecute = false,
                     CreateNoWindow = true

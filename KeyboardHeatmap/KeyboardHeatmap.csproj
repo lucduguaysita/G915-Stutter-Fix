@@ -46,11 +46,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="KeyMap.cs" />
+    <Compile Include="MouseMap.cs" />
     <Compile Include="LogEntry.cs" />
     <Compile Include="LogParser.cs" />
     <Compile Include="HeatmapGenerator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\G502X Plus side.png" />
+    <EmbeddedResource Include="Assets\G502X Plus top.png" />
+    <EmbeddedResource Include="Assets\G915X.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\G502X Plus.mousemap.json" />
+    <EmbeddedResource Include="Assets\G915X.keymap.json" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

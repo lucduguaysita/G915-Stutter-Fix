@@ -1,0 +1,16 @@
+{
+  "comment": "Per-button hit boxes for the G502X Plus photos, in original image pixels. Left/Right/Middle are on the top-down photo; X1/X2 (side thumb buttons) are on the side photo. Estimated from product-render seams and button markers, not hand-painted like G915X.keymap.json.",
+  "topImage": "G502X Plus top.png",
+  "topWidth": 1024,
+  "topHeight": 1536,
+  "sideImage": "G502X Plus side.png",
+  "sideWidth": 1024,
+  "sideHeight": 1536,
+  "buttons": [
+    { "name": "Left",   "image": "top",  "x": 190, "y": 150, "width": 299, "height": 670 },
+    { "name": "Right",  "image": "top",  "x": 636, "y": 150, "width": 234, "height": 670 },
+    { "name": "Middle", "image": "top",  "x": 525, "y": 320, "width": 75,  "height": 160 },
+    { "name": "X2",     "image": "side", "x": 545, "y": 655, "width": 97,  "height": 240 },
+    { "name": "X1",     "image": "side", "x": 597, "y": 895, "width": 76,  "height": 265 }
+  ]
+}

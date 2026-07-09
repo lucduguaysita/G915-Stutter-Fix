@@ -1,0 +1,1178 @@
+{
+  "image": "G915X.png",
+  "imageWidth": 3736,
+  "imageHeight": 1401,
+  "comment": "Per-key cap bounds on the photo: x/y = top-left of the keycap face (round buttons: the button face), in original image pixels. labelX/labelY = center of the painted count box, where count text belongs. vk = Windows virtual-key code (null for keys with no VK: G-keys, Fn). NumpadEnter shares VK 13 with Enter (extended-key flag distinguishes them).",
+  "keys": [
+    {
+      "name": "G6",
+      "vk": null,
+      "x": 558,
+      "y": 60,
+      "width": 111,
+      "height": 101,
+      "labelX": 622,
+      "labelY": 214
+    },
+    {
+      "name": "G7",
+      "vk": null,
+      "x": 711,
+      "y": 60,
+      "width": 109,
+      "height": 102,
+      "labelX": 760,
+      "labelY": 214
+    },
+    {
+      "name": "G8",
+      "vk": null,
+      "x": 863,
+      "y": 60,
+      "width": 111,
+      "height": 102,
+      "labelX": 916,
+      "labelY": 213
+    },
+    {
+      "name": "G9",
+      "vk": null,
+      "x": 1016,
+      "y": 60,
+      "width": 110,
+      "height": 101,
+      "labelX": 1076,
+      "labelY": 213
+    },
+    {
+      "name": "Escape",
+      "vk": 27,
+      "x": 224,
+      "y": 292,
+      "width": 149,
+      "height": 145,
+      "labelX": 295,
+      "labelY": 397
+    },
+    {
+      "name": "F1",
+      "vk": 112,
+      "x": 514,
+      "y": 284,
+      "width": 153,
+      "height": 153,
+      "labelX": 590,
+      "labelY": 397
+    },
+    {
+      "name": "F2",
+      "vk": 113,
+      "x": 673,
+      "y": 291,
+      "width": 147,
+      "height": 147,
+      "labelX": 745,
+      "labelY": 397
+    },
+    {
+      "name": "F3",
+      "vk": 114,
+      "x": 828,
+      "y": 292,
+      "width": 145,
+      "height": 142,
+      "labelX": 898,
+      "labelY": 397
+    },
+    {
+      "name": "F4",
+      "vk": 115,
+      "x": 981,
+      "y": 292,
+      "width": 146,
+      "height": 142,
+      "labelX": 1053,
+      "labelY": 397
+    },
+    {
+      "name": "F5",
+      "vk": 116,
+      "x": 1279,
+      "y": 292,
+      "width": 140,
+      "height": 146,
+      "labelX": 1345,
+      "labelY": 397
+    },
+    {
+      "name": "F6",
+      "vk": 117,
+      "x": 1425,
+      "y": 292,
+      "width": 144,
+      "height": 146,
+      "labelX": 1496,
+      "labelY": 397
+    },
+    {
+      "name": "F7",
+      "vk": 118,
+      "x": 1576,
+      "y": 292,
+      "width": 144,
+      "height": 146,
+      "labelX": 1649,
+      "labelY": 397
+    },
+    {
+      "name": "F8",
+      "vk": 119,
+      "x": 1728,
+      "y": 291,
+      "width": 151,
+      "height": 151,
+      "labelX": 1801,
+      "labelY": 397
+    },
+    {
+      "name": "F9",
+      "vk": 120,
+      "x": 1985,
+      "y": 291,
+      "width": 143,
+      "height": 146,
+      "labelX": 2058,
+      "labelY": 397
+    },
+    {
+      "name": "F10",
+      "vk": 121,
+      "x": 2136,
+      "y": 273,
+      "width": 160,
+      "height": 168,
+      "labelX": 2208,
+      "labelY": 397
+    },
+    {
+      "name": "F11",
+      "vk": 122,
+      "x": 2284,
+      "y": 291,
+      "width": 146,
+      "height": 149,
+      "labelX": 2356,
+      "labelY": 397
+    },
+    {
+      "name": "F12",
+      "vk": 123,
+      "x": 2432,
+      "y": 292,
+      "width": 140,
+      "height": 143,
+      "labelX": 2503,
+      "labelY": 397
+    },
+    {
+      "name": "PrintScreen",
+      "vk": 44,
+      "x": 2646,
+      "y": 280,
+      "width": 138,
+      "height": 155,
+      "labelX": 2716,
+      "labelY": 397
+    },
+    {
+      "name": "ScrollLock",
+      "vk": 145,
+      "x": 2790,
+      "y": 292,
+      "width": 140,
+      "height": 142,
+      "labelX": 2861,
+      "labelY": 397
+    },
+    {
+      "name": "Pause",
+      "vk": 19,
+      "x": 2938,
+      "y": 292,
+      "width": 147,
+      "height": 143,
+      "labelX": 3010,
+      "labelY": 397
+    },
+    {
+      "name": "MediaPrevTrack",
+      "vk": 177,
+      "x": 3142,
+      "y": 288,
+      "width": 100,
+      "height": 90,
+      "labelX": 3184,
+      "labelY": 443
+    },
+    {
+      "name": "MediaPlayPause",
+      "vk": 179,
+      "x": 3277,
+      "y": 289,
+      "width": 101,
+      "height": 90,
+      "labelX": 3324,
+      "labelY": 443
+    },
+    {
+      "name": "MediaNextTrack",
+      "vk": 176,
+      "x": 3411,
+      "y": 288,
+      "width": 129,
+      "height": 92,
+      "labelX": 3460,
+      "labelY": 442
+    },
+    {
+      "name": "VolumeMute",
+      "vk": 173,
+      "x": 3545,
+      "y": 288,
+      "width": 105,
+      "height": 91,
+      "labelX": 3597,
+      "labelY": 443
+    },
+    {
+      "name": "G1",
+      "vk": null,
+      "x": 43,
+      "y": 531,
+      "width": 147,
+      "height": 150,
+      "labelX": 110,
+      "labelY": 634
+    },
+    {
+      "name": "Grave",
+      "vk": 192,
+      "x": 228,
+      "y": 530,
+      "width": 149,
+      "height": 150,
+      "labelX": 299,
+      "labelY": 634
+    },
+    {
+      "name": "D1",
+      "vk": 49,
+      "x": 384,
+      "y": 529,
+      "width": 152,
+      "height": 152,
+      "labelX": 456,
+      "labelY": 634
+    },
+    {
+      "name": "D2",
+      "vk": 50,
+      "x": 538,
+      "y": 530,
+      "width": 156,
+      "height": 151,
+      "labelX": 615,
+      "labelY": 634
+    },
+    {
+      "name": "D3",
+      "vk": 51,
+      "x": 700,
+      "y": 530,
+      "width": 150,
+      "height": 151,
+      "labelX": 772,
+      "labelY": 634
+    },
+    {
+      "name": "D4",
+      "vk": 52,
+      "x": 857,
+      "y": 530,
+      "width": 150,
+      "height": 150,
+      "labelX": 930,
+      "labelY": 634
+    },
+    {
+      "name": "D5",
+      "vk": 53,
+      "x": 1015,
+      "y": 530,
+      "width": 152,
+      "height": 151,
+      "labelX": 1089,
+      "labelY": 634
+    },
+    {
+      "name": "D6",
+      "vk": 54,
+      "x": 1174,
+      "y": 530,
+      "width": 149,
+      "height": 151,
+      "labelX": 1248,
+      "labelY": 634
+    },
+    {
+      "name": "D7",
+      "vk": 55,
+      "x": 1330,
+      "y": 530,
+      "width": 151,
+      "height": 151,
+      "labelX": 1405,
+      "labelY": 634
+    },
+    {
+      "name": "D8",
+      "vk": 56,
+      "x": 1489,
+      "y": 531,
+      "width": 148,
+      "height": 150,
+      "labelX": 1563,
+      "labelY": 634
+    },
+    {
+      "name": "D9",
+      "vk": 57,
+      "x": 1646,
+      "y": 531,
+      "width": 149,
+      "height": 150,
+      "labelX": 1720,
+      "labelY": 634
+    },
+    {
+      "name": "D0",
+      "vk": 48,
+      "x": 1802,
+      "y": 530,
+      "width": 148,
+      "height": 151,
+      "labelX": 1876,
+      "labelY": 634
+    },
+    {
+      "name": "OemMinus",
+      "vk": 189,
+      "x": 1957,
+      "y": 531,
+      "width": 150,
+      "height": 150,
+      "labelX": 2032,
+      "labelY": 634
+    },
+    {
+      "name": "OemPlus",
+      "vk": 187,
+      "x": 2116,
+      "y": 530,
+      "width": 149,
+      "height": 151,
+      "labelX": 2191,
+      "labelY": 634
+    },
+    {
+      "name": "Backspace",
+      "vk": 8,
+      "x": 2273,
+      "y": 530,
+      "width": 299,
+      "height": 151,
+      "labelX": 2436,
+      "labelY": 633
+    },
+    {
+      "name": "Insert",
+      "vk": 45,
+      "x": 2630,
+      "y": 531,
+      "width": 156,
+      "height": 150,
+      "labelX": 2714,
+      "labelY": 634
+    },
+    {
+      "name": "Home",
+      "vk": 36,
+      "x": 2788,
+      "y": 531,
+      "width": 142,
+      "height": 149,
+      "labelX": 2861,
+      "labelY": 634
+    },
+    {
+      "name": "PageUp",
+      "vk": 33,
+      "x": 2936,
+      "y": 531,
+      "width": 142,
+      "height": 149,
+      "labelX": 3009,
+      "labelY": 634
+    },
+    {
+      "name": "NumLock",
+      "vk": 144,
+      "x": 3119,
+      "y": 531,
+      "width": 136,
+      "height": 147,
+      "labelX": 3190,
+      "labelY": 634
+    },
+    {
+      "name": "NumpadDivide",
+      "vk": 111,
+      "x": 3259,
+      "y": 531,
+      "width": 139,
+      "height": 148,
+      "labelX": 3333,
+      "labelY": 634
+    },
+    {
+      "name": "NumpadMultiply",
+      "vk": 106,
+      "x": 3403,
+      "y": 532,
+      "width": 141,
+      "height": 148,
+      "labelX": 3477,
+      "labelY": 634
+    },
+    {
+      "name": "NumpadSubtract",
+      "vk": 109,
+      "x": 3547,
+      "y": 531,
+      "width": 144,
+      "height": 150,
+      "labelX": 3623,
+      "labelY": 634
+    },
+    {
+      "name": "G2",
+      "vk": null,
+      "x": 43,
+      "y": 697,
+      "width": 143,
+      "height": 149,
+      "labelX": 110,
+      "labelY": 800
+    },
+    {
+      "name": "Tab",
+      "vk": 9,
+      "x": 229,
+      "y": 693,
+      "width": 227,
+      "height": 152,
+      "labelX": 349,
+      "labelY": 799
+    },
+    {
+      "name": "Q",
+      "vk": 81,
+      "x": 464,
+      "y": 694,
+      "width": 151,
+      "height": 151,
+      "labelX": 538,
+      "labelY": 799
+    },
+    {
+      "name": "W",
+      "vk": 87,
+      "x": 624,
+      "y": 694,
+      "width": 147,
+      "height": 151,
+      "labelX": 695,
+      "labelY": 799
+    },
+    {
+      "name": "E",
+      "vk": 69,
+      "x": 779,
+      "y": 694,
+      "width": 150,
+      "height": 151,
+      "labelX": 852,
+      "labelY": 799
+    },
+    {
+      "name": "R",
+      "vk": 82,
+      "x": 938,
+      "y": 694,
+      "width": 150,
+      "height": 151,
+      "labelX": 1012,
+      "labelY": 799
+    },
+    {
+      "name": "T",
+      "vk": 84,
+      "x": 1096,
+      "y": 694,
+      "width": 149,
+      "height": 152,
+      "labelX": 1169,
+      "labelY": 799
+    },
+    {
+      "name": "Y",
+      "vk": 89,
+      "x": 1254,
+      "y": 694,
+      "width": 149,
+      "height": 151,
+      "labelX": 1328,
+      "labelY": 799
+    },
+    {
+      "name": "U",
+      "vk": 85,
+      "x": 1411,
+      "y": 694,
+      "width": 151,
+      "height": 151,
+      "labelX": 1485,
+      "labelY": 799
+    },
+    {
+      "name": "I",
+      "vk": 73,
+      "x": 1570,
+      "y": 694,
+      "width": 149,
+      "height": 151,
+      "labelX": 1645,
+      "labelY": 799
+    },
+    {
+      "name": "O",
+      "vk": 79,
+      "x": 1729,
+      "y": 693,
+      "width": 150,
+      "height": 153,
+      "labelX": 1804,
+      "labelY": 799
+    },
+    {
+      "name": "P",
+      "vk": 80,
+      "x": 1888,
+      "y": 693,
+      "width": 148,
+      "height": 153,
+      "labelX": 1962,
+      "labelY": 799
+    },
+    {
+      "name": "OemOpenBracket",
+      "vk": 219,
+      "x": 2044,
+      "y": 693,
+      "width": 149,
+      "height": 153,
+      "labelX": 2119,
+      "labelY": 799
+    },
+    {
+      "name": "OemCloseBracket",
+      "vk": 221,
+      "x": 2202,
+      "y": 694,
+      "width": 149,
+      "height": 151,
+      "labelX": 2278,
+      "labelY": 799
+    },
+    {
+      "name": "OemBackslash",
+      "vk": 220,
+      "x": 2359,
+      "y": 694,
+      "width": 213,
+      "height": 151,
+      "labelX": 2454,
+      "labelY": 799
+    },
+    {
+      "name": "Delete",
+      "vk": 46,
+      "x": 2641,
+      "y": 694,
+      "width": 140,
+      "height": 146,
+      "labelX": 2714,
+      "labelY": 799
+    },
+    {
+      "name": "End",
+      "vk": 35,
+      "x": 2788,
+      "y": 694,
+      "width": 140,
+      "height": 148,
+      "labelX": 2861,
+      "labelY": 799
+    },
+    {
+      "name": "PageDown",
+      "vk": 34,
+      "x": 2936,
+      "y": 694,
+      "width": 142,
+      "height": 152,
+      "labelX": 3008,
+      "labelY": 799
+    },
+    {
+      "name": "Numpad7",
+      "vk": 103,
+      "x": 3119,
+      "y": 694,
+      "width": 134,
+      "height": 151,
+      "labelX": 3194,
+      "labelY": 765
+    },
+    {
+      "name": "Numpad8",
+      "vk": 104,
+      "x": 3260,
+      "y": 694,
+      "width": 137,
+      "height": 151,
+      "labelX": 3336,
+      "labelY": 764
+    },
+    {
+      "name": "Numpad9",
+      "vk": 105,
+      "x": 3405,
+      "y": 694,
+      "width": 139,
+      "height": 151,
+      "labelX": 3481,
+      "labelY": 765
+    },
+    {
+      "name": "G3",
+      "vk": null,
+      "x": 43,
+      "y": 861,
+      "width": 142,
+      "height": 150,
+      "labelX": 110,
+      "labelY": 964
+    },
+    {
+      "name": "CapsLock",
+      "vk": 20,
+      "x": 229,
+      "y": 858,
+      "width": 263,
+      "height": 152,
+      "labelX": 349,
+      "labelY": 964
+    },
+    {
+      "name": "A",
+      "vk": 65,
+      "x": 501,
+      "y": 858,
+      "width": 148,
+      "height": 152,
+      "labelX": 573,
+      "labelY": 964
+    },
+    {
+      "name": "S",
+      "vk": 83,
+      "x": 659,
+      "y": 858,
+      "width": 147,
+      "height": 153,
+      "labelX": 730,
+      "labelY": 964
+    },
+    {
+      "name": "D",
+      "vk": 68,
+      "x": 815,
+      "y": 858,
+      "width": 150,
+      "height": 153,
+      "labelX": 888,
+      "labelY": 964
+    },
+    {
+      "name": "F",
+      "vk": 70,
+      "x": 974,
+      "y": 858,
+      "width": 150,
+      "height": 153,
+      "labelX": 1047,
+      "labelY": 964
+    },
+    {
+      "name": "G",
+      "vk": 71,
+      "x": 1134,
+      "y": 858,
+      "width": 148,
+      "height": 153,
+      "labelX": 1206,
+      "labelY": 964
+    },
+    {
+      "name": "H",
+      "vk": 72,
+      "x": 1292,
+      "y": 858,
+      "width": 148,
+      "height": 152,
+      "labelX": 1365,
+      "labelY": 964
+    },
+    {
+      "name": "J",
+      "vk": 74,
+      "x": 1450,
+      "y": 858,
+      "width": 148,
+      "height": 153,
+      "labelX": 1523,
+      "labelY": 964
+    },
+    {
+      "name": "K",
+      "vk": 75,
+      "x": 1607,
+      "y": 858,
+      "width": 149,
+      "height": 153,
+      "labelX": 1682,
+      "labelY": 964
+    },
+    {
+      "name": "L",
+      "vk": 76,
+      "x": 1767,
+      "y": 858,
+      "width": 150,
+      "height": 153,
+      "labelX": 1842,
+      "labelY": 964
+    },
+    {
+      "name": "OemSemicolon",
+      "vk": 186,
+      "x": 1926,
+      "y": 858,
+      "width": 148,
+      "height": 153,
+      "labelX": 2001,
+      "labelY": 964
+    },
+    {
+      "name": "OemQuote",
+      "vk": 222,
+      "x": 2083,
+      "y": 858,
+      "width": 148,
+      "height": 153,
+      "labelX": 2159,
+      "labelY": 964
+    },
+    {
+      "name": "Enter",
+      "vk": 13,
+      "x": 2241,
+      "y": 858,
+      "width": 331,
+      "height": 152,
+      "labelX": 2385,
+      "labelY": 964
+    },
+    {
+      "name": "Numpad4",
+      "vk": 100,
+      "x": 3119,
+      "y": 858,
+      "width": 134,
+      "height": 153,
+      "labelX": 3192,
+      "labelY": 929
+    },
+    {
+      "name": "Numpad5",
+      "vk": 101,
+      "x": 3259,
+      "y": 859,
+      "width": 138,
+      "height": 152,
+      "labelX": 3332,
+      "labelY": 964
+    },
+    {
+      "name": "Numpad6",
+      "vk": 102,
+      "x": 3405,
+      "y": 859,
+      "width": 139,
+      "height": 152,
+      "labelX": 3477,
+      "labelY": 934
+    },
+    {
+      "name": "NumpadAdd",
+      "vk": 107,
+      "x": 3550,
+      "y": 694,
+      "width": 141,
+      "height": 317,
+      "labelX": 3625,
+      "labelY": 957
+    },
+    {
+      "name": "G4",
+      "vk": null,
+      "x": 43,
+      "y": 1026,
+      "width": 142,
+      "height": 152,
+      "labelX": 110,
+      "labelY": 1130
+    },
+    {
+      "name": "LShift",
+      "vk": 160,
+      "x": 229,
+      "y": 1024,
+      "width": 340,
+      "height": 153,
+      "labelX": 388,
+      "labelY": 1129
+    },
+    {
+      "name": "Z",
+      "vk": 90,
+      "x": 579,
+      "y": 1024,
+      "width": 148,
+      "height": 153,
+      "labelX": 650,
+      "labelY": 1130
+    },
+    {
+      "name": "X",
+      "vk": 88,
+      "x": 737,
+      "y": 1024,
+      "width": 147,
+      "height": 153,
+      "labelX": 808,
+      "labelY": 1130
+    },
+    {
+      "name": "C",
+      "vk": 67,
+      "x": 894,
+      "y": 1024,
+      "width": 149,
+      "height": 152,
+      "labelX": 967,
+      "labelY": 1130
+    },
+    {
+      "name": "V",
+      "vk": 86,
+      "x": 1053,
+      "y": 1025,
+      "width": 147,
+      "height": 151,
+      "labelX": 1125,
+      "labelY": 1130
+    },
+    {
+      "name": "B",
+      "vk": 66,
+      "x": 1209,
+      "y": 1024,
+      "width": 147,
+      "height": 153,
+      "labelX": 1281,
+      "labelY": 1130
+    },
+    {
+      "name": "N",
+      "vk": 78,
+      "x": 1365,
+      "y": 1024,
+      "width": 149,
+      "height": 153,
+      "labelX": 1439,
+      "labelY": 1130
+    },
+    {
+      "name": "M",
+      "vk": 77,
+      "x": 1525,
+      "y": 1024,
+      "width": 147,
+      "height": 153,
+      "labelX": 1597,
+      "labelY": 1130
+    },
+    {
+      "name": "OemComma",
+      "vk": 188,
+      "x": 1682,
+      "y": 1024,
+      "width": 148,
+      "height": 152,
+      "labelX": 1756,
+      "labelY": 1130
+    },
+    {
+      "name": "OemPeriod",
+      "vk": 190,
+      "x": 1840,
+      "y": 1024,
+      "width": 148,
+      "height": 152,
+      "labelX": 1914,
+      "labelY": 1130
+    },
+    {
+      "name": "OemQuestion",
+      "vk": 191,
+      "x": 2000,
+      "y": 1024,
+      "width": 146,
+      "height": 153,
+      "labelX": 2074,
+      "labelY": 1130
+    },
+    {
+      "name": "RShift",
+      "vk": 161,
+      "x": 2156,
+      "y": 1024,
+      "width": 416,
+      "height": 152,
+      "labelX": 2370,
+      "labelY": 1129
+    },
+    {
+      "name": "Up",
+      "vk": 38,
+      "x": 2786,
+      "y": 1025,
+      "width": 142,
+      "height": 151,
+      "labelX": 2862,
+      "labelY": 1117
+    },
+    {
+      "name": "Numpad1",
+      "vk": 97,
+      "x": 3118,
+      "y": 1024,
+      "width": 134,
+      "height": 152,
+      "labelX": 3192,
+      "labelY": 1096
+    },
+    {
+      "name": "Numpad2",
+      "vk": 98,
+      "x": 3259,
+      "y": 1024,
+      "width": 138,
+      "height": 153,
+      "labelX": 3339,
+      "labelY": 1093
+    },
+    {
+      "name": "Numpad3",
+      "vk": 99,
+      "x": 3405,
+      "y": 1025,
+      "width": 139,
+      "height": 151,
+      "labelX": 3476,
+      "labelY": 1095
+    },
+    {
+      "name": "Numpad0",
+      "vk": 96,
+      "x": 3118,
+      "y": 1191,
+      "width": 280,
+      "height": 154,
+      "labelX": 3255,
+      "labelY": 1255
+    },
+    {
+      "name": "NumpadDecimal",
+      "vk": 110,
+      "x": 3405,
+      "y": 1191,
+      "width": 139,
+      "height": 154,
+      "labelX": 3476,
+      "labelY": 1257
+    },
+    {
+      "name": "NumpadEnter",
+      "vk": 13,
+      "x": 3550,
+      "y": 1025,
+      "width": 142,
+      "height": 320,
+      "labelX": 3623,
+      "labelY": 1257
+    },
+    {
+      "name": "G5",
+      "vk": null,
+      "x": 42,
+      "y": 1193,
+      "width": 144,
+      "height": 149,
+      "labelX": 110,
+      "labelY": 1298
+    },
+    {
+      "name": "LControl",
+      "vk": 162,
+      "x": 229,
+      "y": 1192,
+      "width": 189,
+      "height": 152,
+      "labelX": 320,
+      "labelY": 1298
+    },
+    {
+      "name": "LWin",
+      "vk": 91,
+      "x": 427,
+      "y": 1192,
+      "width": 188,
+      "height": 152,
+      "labelX": 519,
+      "labelY": 1298
+    },
+    {
+      "name": "LAlt",
+      "vk": 164,
+      "x": 623,
+      "y": 1192,
+      "width": 183,
+      "height": 150,
+      "labelX": 712,
+      "labelY": 1298
+    },
+    {
+      "name": "Space",
+      "vk": 32,
+      "x": 815,
+      "y": 1191,
+      "width": 960,
+      "height": 154,
+      "labelX": 1283,
+      "labelY": 1297
+    },
+    {
+      "name": "RAlt",
+      "vk": 165,
+      "x": 1786,
+      "y": 1192,
+      "width": 185,
+      "height": 153,
+      "labelX": 1878,
+      "labelY": 1298
+    },
+    {
+      "name": "Fn",
+      "vk": null,
+      "x": 1980,
+      "y": 1192,
+      "width": 185,
+      "height": 153,
+      "labelX": 2073,
+      "labelY": 1298
+    },
+    {
+      "name": "Apps",
+      "vk": 93,
+      "x": 2175,
+      "y": 1192,
+      "width": 188,
+      "height": 153,
+      "labelX": 2270,
+      "labelY": 1298
+    },
+    {
+      "name": "RControl",
+      "vk": 163,
+      "x": 2370,
+      "y": 1191,
+      "width": 201,
+      "height": 153,
+      "labelX": 2469,
+      "labelY": 1298
+    },
+    {
+      "name": "Left",
+      "vk": 37,
+      "x": 2640,
+      "y": 1192,
+      "width": 140,
+      "height": 152,
+      "labelX": 2713,
+      "labelY": 1298
+    },
+    {
+      "name": "Down",
+      "vk": 40,
+      "x": 2787,
+      "y": 1192,
+      "width": 140,
+      "height": 152,
+      "labelX": 2859,
+      "labelY": 1298
+    },
+    {
+      "name": "Right",
+      "vk": 39,
+      "x": 2935,
+      "y": 1191,
+      "width": 139,
+      "height": 153,
+      "labelX": 3007,
+      "labelY": 1298
+    }
+  ]
+}

@@ -53,7 +53,9 @@ namespace KeyboardHeatmap
             new[] { "#FFD24D", "#3A2406", "#E0A82E" }
         };
 
-        public static string Generate(List<LogEntry> entries, bool showDaily = false)
+        public static string Generate(List<LogEntry> entries, bool showDaily = false,
+                                      KeyMap keyMap = null, byte[] photoPng = null,
+                                      MouseMap mouseMap = null, byte[] mouseTopPng = null, byte[] mouseSidePng = null)
         {
             // ── Aggregate ──────────────────────────────────────────────────────────
             var filtered = entries.Where(e => e.Kind == LogEntryKind.Filtered).ToList();
@@ -88,6 +90,32 @@ namespace KeyboardHeatmap
             }
 
             int maxMouseCount = mouseCounts.Count > 0 ? mouseCounts.Values.Max() : 1;
+
+            // Per-VK counts for the photo overlay (every keyboard event logs its VK;
+            // mouse events have none and fall out naturally).
+            var vkCounts = new Dictionary<int, int>();
+            foreach (var e in filtered)
+                if (e.KeyCode.HasValue)
+                    Increment(vkCounts, e.KeyCode.Value);
+
+            // Pair each mapped key with its count. Keys sharing a VK (Enter and
+            // NumpadEnter both log 13) credit the first map entry only, matching
+            // KeyMap.FindByVk; G-keys and Fn have no VK and always show zero.
+            List<(KeyBox Key, int Count)> photoKeys = null;
+            int maxPhotoCount = 1;
+            if (keyMap != null && photoPng != null && photoPng.Length > 0)
+            {
+                photoKeys = new List<(KeyBox Key, int Count)>();
+                var seenVks = new HashSet<int>();
+                foreach (var k in keyMap.Keys)
+                {
+                    int count = 0;
+                    if (k.Vk.HasValue && seenVks.Add(k.Vk.Value))
+                        vkCounts.TryGetValue(k.Vk.Value, out count);
+                    photoKeys.Add((k, count));
+                    maxPhotoCount = Math.Max(maxPhotoCount, count);
+                }
+            }
 
             int totalFiltered = filtered.Count;
             int maxLetterCount = letterCounts.Count > 0 ? letterCounts.Values.Max() : 1;
@@ -171,8 +199,13 @@ namespace KeyboardHeatmap
             AppendStat(sb, $"{dateTo}", "Last event");
             sb.AppendLine("</div>");
 
-            // Legend
-            sb.AppendLine("<p class=\"section-label\">Keys, color intensity = filter count &nbsp;|&nbsp; row labels show PCB matrix row</p>");
+            // Photo mode shows the G915X photo instead of the classic HTML keyboard
+            // and special-key grid (every key is on the photo already).
+            bool photoMode = photoKeys != null;
+
+            // Legend (shared intensity scale for whichever keyboard is rendered)
+            if (!photoMode)
+                sb.AppendLine("<p class=\"section-label\">Keys, color intensity = filter count &nbsp;|&nbsp; row labels show PCB matrix row</p>");
             sb.AppendLine("<div class=\"legend\">");
             sb.AppendLine("<span class=\"legend-text\">0</span>");
             sb.AppendLine("<div class=\"legend-bar\">");
@@ -182,48 +215,55 @@ namespace KeyboardHeatmap
                 sb.AppendLine($"<span style=\"background:{fill}\"></span>");
             }
             sb.AppendLine("</div>");
-            sb.AppendLine($"<span class=\"legend-text\">{maxKeyboardCount}</span>");
+            sb.AppendLine($"<span class=\"legend-text\">{(photoMode ? maxPhotoCount : maxKeyboardCount)}</span>");
             sb.AppendLine("<span class=\"legend-unit\">filtered events</span>");
             sb.AppendLine("</div>");
 
-            // Keyboard rows
-            sb.AppendLine("<div class=\"keyboard\">");
-            int[] offsets = { 0, 12, 0, 0 }; // px left-padding per row (3 & 4 anchor left)
-
-            for (int ri = 0; ri < kbRows.Length; ri++)
+            if (photoMode)
             {
-                bool isWarningRow = rowTotals[ri] > 0 && rowTotals[ri] == maxRowTotal;
-                string rowClass = isWarningRow ? "kb-row-wrap warning-row" : "kb-row-wrap";
-                string badgeClass = isWarningRow ? "row-badge warning-badge" : "row-badge";
-                string label = isWarningRow ? RowLabels[ri] + " ⚠" : RowLabels[ri];
-                string badgeTitle = isWarningRow ? " title=\"This row has the most filtered events\"" : "";
+                AppendPhotoKeyboard(sb, keyMap, photoPng, photoKeys, maxPhotoCount);
+            }
+            else
+            {
+                // Keyboard rows
+                sb.AppendLine("<div class=\"keyboard\">");
+                int[] offsets = { 0, 12, 0, 0 }; // px left-padding per row (3 & 4 anchor left)
 
-                sb.AppendLine($"<div class=\"{rowClass}\">");
-                sb.AppendLine($"<span class=\"{badgeClass}\"{badgeTitle}>{label}</span>");
-                sb.AppendLine($"<div class=\"kb-row\" style=\"padding-left:{offsets[ri]}px\">");
-
-                foreach (var k in kbRows[ri])
+                for (int ri = 0; ri < kbRows.Length; ri++)
                 {
-                    int count = CountFor(k);
-                    string[] colors = GetColors(count, maxKeyboardCount, dark: false);
-                    string tooltip = $"{k.Tip}: {count} filtered event{(count != 1 ? "s" : "")}";
+                    bool isWarningRow = rowTotals[ri] > 0 && rowTotals[ri] == maxRowTotal;
+                    string rowClass = isWarningRow ? "kb-row-wrap warning-row" : "kb-row-wrap";
+                    string badgeClass = isWarningRow ? "row-badge warning-badge" : "row-badge";
+                    string label = isWarningRow ? RowLabels[ri] + " ⚠" : RowLabels[ri];
+                    string badgeTitle = isWarningRow ? " title=\"This row has the most filtered events\"" : "";
 
-                    sb.AppendLine($"<div class=\"key\" title=\"{EscapeHtml(tooltip)}\" data-count=\"{count}\" " +
-                                  $"style=\"width:{k.Width}px;background:{colors[0]};border-color:{colors[2]};color:{colors[1]}\">");
-                    sb.AppendLine($"  <span class=\"klabel\">{EscapeHtml(k.Label)}</span>");
-                    if (count > 0)
-                        sb.AppendLine($"  <span class=\"kcount\">{count}</span>");
-                    sb.AppendLine("</div>");
+                    sb.AppendLine($"<div class=\"{rowClass}\">");
+                    sb.AppendLine($"<span class=\"{badgeClass}\"{badgeTitle}>{label}</span>");
+                    sb.AppendLine($"<div class=\"kb-row\" style=\"padding-left:{offsets[ri]}px\">");
+
+                    foreach (var k in kbRows[ri])
+                    {
+                        int count = CountFor(k);
+                        string[] colors = GetColors(count, maxKeyboardCount, dark: false);
+                        string tooltip = $"{k.Tip}: {count} filtered event{(count != 1 ? "s" : "")}";
+
+                        sb.AppendLine($"<div class=\"key\" title=\"{EscapeHtml(tooltip)}\" data-count=\"{count}\" " +
+                                      $"style=\"width:{k.Width}px;background:{colors[0]};border-color:{colors[2]};color:{colors[1]}\">");
+                        sb.AppendLine($"  <span class=\"klabel\">{EscapeHtml(k.Label)}</span>");
+                        if (count > 0)
+                            sb.AppendLine($"  <span class=\"kcount\">{count}</span>");
+                        sb.AppendLine("</div>");
+                    }
+
+                    sb.AppendLine("</div>"); // kb-row
+                    sb.AppendLine("</div>"); // kb-row-wrap
                 }
 
-                sb.AppendLine("</div>"); // kb-row
-                sb.AppendLine("</div>"); // kb-row-wrap
+                sb.AppendLine("</div>"); // keyboard
             }
 
-            sb.AppendLine("</div>"); // keyboard
-
-            // Special keys
-            if (specialCounts.Count > 0)
+            // Special keys (classic layout only; the photo covers every key)
+            if (!photoMode && specialCounts.Count > 0)
             {
                 sb.AppendLine("<p class=\"section-label\">Special &amp; navigation keys</p>");
                 sb.AppendLine("<div class=\"special-grid\">");
@@ -246,23 +286,32 @@ namespace KeyboardHeatmap
                 sb.AppendLine("</div>"); // special-grid
             }
 
-            // Mouse buttons (only when the mouse filter has caught anything)
+            // Mouse buttons: classic mode draws the SVG mouse illustration; photo
+            // mode tints the G502X Plus product photos instead, when that mouse
+            // map + photos were available (falls back to omitting the section,
+            // not to the SVG, since the SVG is reserved for the classic report).
+            bool mousePhotoReady = photoMode && mouseMap != null && mouseTopPng != null && mouseSidePng != null;
             if (mouseCounts.Count > 0)
             {
-                sb.AppendLine("<p class=\"section-label\">Mouse buttons, color intensity = filter count</p>");
-                AppendMouse(sb, mouseCounts, maxMouseCount);
+                if (mousePhotoReady)
+                    AppendPhotoMouse(sb, mouseMap, mouseTopPng, mouseSidePng, mouseCounts, maxMouseCount);
+                else if (!photoMode)
+                {
+                    sb.AppendLine("<p class=\"section-label\">Mouse buttons, color intensity = filter count</p>");
+                    AppendMouse(sb, mouseCounts, maxMouseCount);
+                }
             }
 
             // Per-day chart data table (opt-in via -v flag)
             if (showDaily)
             {
-                sb.AppendLine("<p class=\"section-label\">Daily filtered event count</p>");
+                sb.AppendLine("<p class=\"section-label\">Daily filtered event count &nbsp;|&nbsp; hover a day for its worst keys</p>");
                 AppendDailyTable(sb, filtered);
             }
 
             sb.AppendLine("</div>"); // page
             sb.AppendLine("<script>");
-            sb.AppendLine(GetDarkModeScript(letterCounts, specialCounts, maxLetterCount, maxMouseCount, maxKeyboardCount));
+            sb.AppendLine(GetDarkModeScript(letterCounts, specialCounts, maxLetterCount, maxMouseCount, maxKeyboardCount, maxPhotoCount));
             sb.AppendLine("</script>");
             sb.AppendLine("</body>");
             sb.AppendLine("</html>");
@@ -410,6 +459,125 @@ namespace KeyboardHeatmap
 
         private static string Plural(int n) => n != 1 ? "s" : "";
 
+        // Renders the keyboard photo inside an SVG whose viewBox is the original
+        // image size, so key boxes are placed in original-pixel coordinates and
+        // scale automatically with the photo at any zoom level. The zoom buttons
+        // just change the SVG's CSS width; the browser rescales everything.
+        private static void AppendPhotoKeyboard(StringBuilder sb, KeyMap map, byte[] photoPng,
+            List<(KeyBox Key, int Count)> photoKeys, int maxPhotoCount)
+        {
+            string b64 = Convert.ToBase64String(photoPng);
+
+            sb.AppendLine("<p class=\"section-label\">G915 X LIGHTSPEED WIRELESS GAMING KEYBOARD (white), color intensity = filter count &nbsp;|&nbsp; hover a key for details</p>");
+
+            sb.AppendLine("<div class=\"photo-controls\">");
+            sb.AppendLine("  <button type=\"button\" id=\"pz-out\" title=\"Zoom out\">&minus;</button>");
+            sb.AppendLine("  <span id=\"pz-label\">100%</span>");
+            sb.AppendLine("  <button type=\"button\" id=\"pz-in\" title=\"Zoom in\">+</button>");
+            sb.AppendLine("  <button type=\"button\" id=\"pz-reset\" title=\"Fit to page\">Fit</button>");
+            sb.AppendLine("</div>");
+
+            sb.AppendLine("<div class=\"photo-wrap\">");
+            sb.AppendLine($"<svg id=\"photo-svg\" viewBox=\"0 0 {map.ImageWidth} {map.ImageHeight}\" " +
+                          "role=\"img\" aria-label=\"G915 X LIGHTSPEED WIRELESS GAMING KEYBOARD (white) with filter counts\">");
+            sb.AppendLine($"<image href=\"data:image/png;base64,{b64}\" x=\"0\" y=\"0\" " +
+                          $"width=\"{map.ImageWidth}\" height=\"{map.ImageHeight}\"/>");
+
+            AppendPhotoBoxRects(sb, photoKeys, maxPhotoCount);
+
+            sb.AppendLine("</svg>");
+            sb.AppendLine("</div>"); // photo-wrap
+
+            sb.AppendLine("<script>");
+            sb.AppendLine("(function() {");
+            sb.AppendLine("  var svg = document.getElementById('photo-svg');");
+            sb.AppendLine("  var lbl = document.getElementById('pz-label');");
+            sb.AppendLine("  var pct = 100;"); // 100% = photo fits the page width
+            sb.AppendLine("  function apply() { svg.style.width = pct + '%'; lbl.textContent = Math.round(pct) + '%'; }");
+            sb.AppendLine("  document.getElementById('pz-in').addEventListener('click', function() { pct = Math.min(400, pct * 1.25); apply(); });");
+            sb.AppendLine("  document.getElementById('pz-out').addEventListener('click', function() { pct = Math.max(50, pct / 1.25); apply(); });");
+            sb.AppendLine("  document.getElementById('pz-reset').addEventListener('click', function() { pct = 100; apply(); });");
+            sb.AppendLine("  apply();");
+            sb.AppendLine("})();");
+            sb.AppendLine("</script>");
+        }
+
+        // Renders the two G502X Plus product photos (top-down + side) with bold
+        // count labels over each button, mirroring AppendPhotoKeyboard's approach:
+        // an SVG per photo, viewBox'd to the original image, so hit boxes stay
+        // pixel-accurate at any CSS scale. Both photos are transparent-background
+        // PNGs, so they sit correctly on the page background in either light or
+        // dark mode.
+        private static void AppendPhotoMouse(StringBuilder sb, MouseMap map, byte[] topPng, byte[] sidePng,
+            Dictionary<string, int> mouseCounts, int maxMouseCount)
+        {
+            int Count(string name) => mouseCounts.TryGetValue(name, out int c) ? c : 0;
+            var topItems = map.TopButtons.Select(b => (Box: b, Count: Count(b.Name)));
+            var sideItems = map.SideButtons.Select(b => (Box: b, Count: Count(b.Name)));
+
+            sb.AppendLine("<p class=\"section-label\">G502 X PLUS, color intensity = filter count &nbsp;|&nbsp; hover a button for details</p>");
+            sb.AppendLine("<div class=\"mouse-photo-wrap\">");
+            AppendMousePhotoPanel(sb, "top", map.TopWidth, map.TopHeight, topPng, topItems, maxMouseCount);
+            AppendMousePhotoPanel(sb, "side", map.SideWidth, map.SideHeight, sidePng, sideItems, maxMouseCount);
+            sb.AppendLine("</div>"); // mouse-photo-wrap
+        }
+
+        private static void AppendMousePhotoPanel(StringBuilder sb, string viewName, int width, int height,
+            byte[] png, IEnumerable<(KeyBox Box, int Count)> items, int maxCount)
+        {
+            string b64 = Convert.ToBase64String(png);
+            sb.AppendLine("<div class=\"mouse-photo-panel\">");
+            sb.AppendLine($"<svg viewBox=\"0 0 {width} {height}\" role=\"img\" aria-label=\"Mouse {viewName} view with filter counts\">");
+            sb.AppendLine($"<image href=\"data:image/png;base64,{b64}\" x=\"0\" y=\"0\" width=\"{width}\" height=\"{height}\"/>");
+            AppendPhotoBoxRects(sb, items, maxCount, "pmouse", tintFill: false);
+            sb.AppendLine("</svg>");
+            sb.AppendLine("</div>"); // mouse-photo-panel
+        }
+
+        // Emits one <g class="pkey"> per box, always with an invisible hover rect
+        // (so the tooltip works whether or not the box has events) plus a centered
+        // count label when it does. Shared by the keyboard photo and the mouse
+        // photos; extraClass tags mouse buttons for their own CSS (see .pmouse).
+        // The keyboard photo also tints the box itself (tintFill); the mouse
+        // photo's buttons are small and irregular, so a filled rectangle there
+        // just looked like a giant paint swatch covering half the mouse, not the
+        // button, so for those we skip the fill and rely on a bigger, bolder
+        // count label instead. The label color always comes from the light ramp
+        // (not the page's dark mode) since it is read against the product
+        // photo's fixed light-gray surface, not against the page background.
+        private static void AppendPhotoBoxRects(StringBuilder sb, IEnumerable<(KeyBox Box, int Count)> items,
+            int maxCount, string extraClass = null, bool tintFill = true)
+        {
+            string cls = extraClass == null ? "pkey" : "pkey " + extraClass;
+            foreach (var (k, count) in items)
+            {
+                string tooltip = $"{k.Name}: {count} filtered event{Plural(count)}";
+                sb.AppendLine($"<g class=\"{cls}\" data-count=\"{count}\">");
+                sb.AppendLine($"  <title>{EscapeHtml(tooltip)}</title>");
+
+                if (count > 0 && tintFill)
+                {
+                    string[] colors = GetColors(count, maxCount, dark: false);
+                    sb.AppendLine($"  <rect x=\"{k.X}\" y=\"{k.Y}\" width=\"{k.Width}\" height=\"{k.Height}\" rx=\"8\" " +
+                                  $"style=\"fill:{colors[0]};fill-opacity:0.6;stroke:{colors[2]};stroke-width:3\"/>");
+                    sb.AppendLine($"  <text x=\"{k.LabelX}\" y=\"{k.LabelY}\" style=\"fill:{colors[1]}\">{count}</text>");
+                }
+                else
+                {
+                    // Invisible hover target so every mapped box still shows a tooltip.
+                    sb.AppendLine($"  <rect x=\"{k.X}\" y=\"{k.Y}\" width=\"{k.Width}\" height=\"{k.Height}\" " +
+                                  "style=\"fill:#000;fill-opacity:0\"/>");
+                    if (count > 0)
+                    {
+                        string[] colors = GetColors(count, maxCount, dark: false);
+                        sb.AppendLine($"  <text x=\"{k.LabelX}\" y=\"{k.LabelY}\" style=\"fill:{colors[2]}\">{count}</text>");
+                    }
+                }
+
+                sb.AppendLine("</g>");
+            }
+        }
+
         private static void AppendStat(StringBuilder sb, string value, string label)
         {
             sb.AppendLine("<div class=\"stat\">");
@@ -420,33 +588,71 @@ namespace KeyboardHeatmap
 
         private static void AppendDailyTable(StringBuilder sb, List<LogEntry> filtered)
         {
+            // Keep each day's entries (not just the count) so we can summarise the
+            // worst-offending keys in the row's hover tooltip.
             var byDay = filtered
                 .GroupBy(e => e.Timestamp.Date)
-                .OrderBy(g => g.Key)
-                .ToDictionary(g => g.Key, g => g.Count());
+                .OrderByDescending(g => g.Key)
+                .ToList();
 
             if (byDay.Count == 0) return;
 
-            int dayMax = byDay.Values.Max();
+            int dayMax = byDay.Max(g => g.Count());
 
             sb.AppendLine("<div class=\"daily-table\">");
-            foreach (var kv in byDay)
+            foreach (var g in byDay)
             {
+                int dayCount = g.Count();
                 // Severity is relative to the busiest day in the log: a quiet day
                 // stays green, a middling day reaches yellow, the worst day(s) run
                 // to crimson. The bar's length and colour share the same ratio.
-                double ratio = dayMax > 0 ? (double)kv.Value / dayMax : 0;
+                double ratio = dayMax > 0 ? (double)dayCount / dayMax : 0;
                 double pct = ratio * 100;
                 string gradient = DayBarGradient(ratio);
-                sb.AppendLine("<div class=\"day-row\">");
-                sb.AppendLine($"  <span class=\"day-label\">{kv.Key:MMM d}</span>");
+                string offenders = TopOffenders(g);
+                sb.AppendLine($"<div class=\"day-row\" title=\"{EscapeHtml(offenders)}\">");
+                sb.AppendLine($"  <span class=\"day-label\">{g.Key:MMM d}</span>");
                 sb.AppendLine($"  <div class=\"day-bar-wrap\">");
                 sb.AppendLine($"    <div class=\"day-bar\" style=\"width:{pct:F1}%;background:{gradient}\"></div>");
                 sb.AppendLine($"  </div>");
-                sb.AppendLine($"  <span class=\"day-count\">{kv.Value}</span>");
+                sb.AppendLine($"  <span class=\"day-count\">{dayCount}</span>");
                 sb.AppendLine("</div>");
             }
             sb.AppendLine("</div>");
+        }
+
+        // Builds the "worst offenders" tooltip for one day: the top keys by filter
+        // count, most first, as newline-separated "NAME COUNT×" lines (native title
+        // tooltips render the newlines as line breaks).
+        private static string TopOffenders(IEnumerable<LogEntry> dayEntries, int topN = 5)
+        {
+            var counts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            foreach (var e in dayEntries)
+            {
+                if (string.IsNullOrEmpty(e.KeyName)) continue;
+                Increment(counts, FriendlyKeyName(e.KeyName));
+            }
+            if (counts.Count == 0) return "No key details";
+
+            var ordered = counts.OrderByDescending(kv => kv.Value).ThenBy(kv => kv.Key).ToList();
+            var lines = new StringBuilder("Worst offenders:");
+            foreach (var kv in ordered.Take(topN))
+                lines.Append('\n').Append(kv.Key).Append(' ').Append(kv.Value).Append('×');
+            int more = counts.Count - topN;
+            if (more > 0)
+                lines.Append($"\n(+{more} more key{(more != 1 ? "s" : "")})");
+            return lines.ToString();
+        }
+
+        // Turns a logged key name into something readable for the offender summary:
+        // "Mouse_Left" -> "Mouse Left", "VK_DELETE" -> "DELETE", others unchanged.
+        private static string FriendlyKeyName(string raw)
+        {
+            if (raw.StartsWith(MousePrefix, StringComparison.OrdinalIgnoreCase))
+                return "Mouse " + raw.Substring(MousePrefix.Length);
+            if (raw.StartsWith("VK_", StringComparison.OrdinalIgnoreCase))
+                return raw.Substring(3);
+            return raw;
         }
 
         // Builds a green -> (yellow) -> hot gradient for a daily bar. The hot end
@@ -661,6 +867,85 @@ h1 {
 .klabel { font-size: 11px; font-weight: 500; line-height: 1; }
 .kcount { font-size: 10px; margin-top: 2px; opacity: 0.9; }
 
+/* ── Keyboard photo ── */
+.photo-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: #666688;
+}
+
+.photo-controls button {
+    min-width: 26px;
+    height: 22px;
+    border: 0.5px solid #ddddef;
+    border-radius: 5px;
+    background: #ffffff;
+    color: #1a1a2e;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1;
+    padding: 0 6px;
+}
+
+.photo-controls button:hover { background: #f0f0f8; }
+
+#pz-label { min-width: 38px; text-align: center; }
+
+.photo-wrap {
+    overflow: auto;
+    border: 0.5px solid #ddddef;
+    border-radius: 8px;
+    background: #ffffff;
+    margin-bottom: 0.5rem;
+}
+
+#photo-svg { display: block; width: 100%; }
+
+.pkey { cursor: default; }
+.pkey text {
+    font-size: 26px;
+    font-weight: 600;
+    text-anchor: middle;
+    dominant-baseline: central;
+    pointer-events: none;
+    paint-order: stroke;
+    stroke: rgba(0,0,0,0.25);
+    stroke-width: 2px;
+}
+
+/* ── Mouse photo (G502X Plus) ──
+   No card background here, unlike .photo-wrap: the product photos are
+   transparent-background PNGs by design, so they should float directly on
+   the page background and pick up light/dark mode for free rather than
+   sitting in a hardcoded white/dark box. */
+.mouse-photo-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 0.5rem;
+}
+
+.mouse-photo-panel {
+    flex: 1 1 220px;
+    max-width: 260px;
+}
+
+.mouse-photo-panel svg { display: block; width: 100%; }
+
+/* Mouse buttons skip the tinted-rect fill (see AppendPhotoBoxRects) since a
+   rectangle over an irregular button reads as a paint swatch, not a highlight;
+   the count carries the whole signal here, so it runs bigger and bolder. */
+.pkey.pmouse text {
+    font-size: 46px;
+    font-weight: 800;
+    stroke: rgba(0,0,0,0.35);
+    stroke-width: 3px;
+}
+
 /* ── Special keys ── */
 .special-grid {
     display: flex;
@@ -712,6 +997,7 @@ h1 {
     display: flex;
     align-items: center;
     gap: 8px;
+    cursor: help;
 }
 
 .day-label {
@@ -761,6 +1047,10 @@ h1 {
     .config-warn { background: rgba(250,199,117,0.08); border-color: #BA7517; color: #FAC775; }
     .config-warn p { color: #c9b48f; }
     .key { background: #1a1a2e; border-color: #2e2e4e; color: #555577; }
+    .photo-wrap { background: #1a1a2e; border-color: #2e2e4e; }
+    .photo-controls { color: #8888aa; }
+    .photo-controls button { background: #1e1e2e; border-color: #2e2e4e; color: #e0e0f0; }
+    .photo-controls button:hover { background: #2a2a3e; }
     .skey { background: #1a1a2e; border-color: #2e2e4e; color: #555577; }
     .day-bar-wrap { background: #2a2a3e; }
     .day-label { color: #8888aa; }
@@ -785,7 +1075,8 @@ h1 {
             Dictionary<string, int> specialCounts,
             int maxLetterCount,
             int maxMouseCount,
-            int maxKeyboardCount)
+            int maxKeyboardCount,
+            int maxPhotoCount)
         {
             // Build JS arrays for dark-mode ramp application
             var sb = new StringBuilder();
@@ -855,8 +1146,28 @@ h1 {
             sb.AppendLine("    applyColors(el, scaled, maxCount);");
             sb.AppendLine("  });");
 
-            // Mouse button groups: repaint the shape + its text(s) with the dark ramp.
+            // Photo overlay keys: repaint tinted rects + counts with the dark ramp
+            // (zero-count keys stay as invisible hover targets). Mouse-photo
+            // buttons (.pmouse) have no rect fill and a theme-independent label
+            // color (read against the fixed-light product photo, not the page),
+            // so they need no repainting here.
+            sb.AppendLine($"  var maxPh = {Math.Max(1, maxPhotoCount)};");
+            sb.AppendLine("  var pkeys = document.querySelectorAll('.pkey:not(.pmouse)');");
+            sb.AppendLine("  pkeys.forEach(function(g) {");
+            sb.AppendLine("    var c = parseInt(g.getAttribute('data-count'), 10) || 0;");
+            sb.AppendLine("    if (c === 0) return;");
+            sb.AppendLine("    var idx = Math.min(Math.floor(c / maxPh * 5), 4);");
+            sb.AppendLine("    var r = darkRamp[idx];");
+            sb.AppendLine("    var rect = g.querySelector('rect');");
+            sb.AppendLine("    if (rect) { rect.style.fill = r[0]; rect.style.stroke = r[2]; }");
+            sb.AppendLine("    var txt = g.querySelector('text');");
+            sb.AppendLine("    if (txt) { txt.style.fill = r[1]; }");
+            sb.AppendLine("  });");
+
             sb.AppendLine($"  var maxMouse = {Math.Max(1, maxMouseCount)};");
+
+            // Mouse button groups (classic SVG illustration): repaint the shape +
+            // its text(s) with the dark ramp.
             sb.AppendLine("  var mbtns = document.querySelectorAll('.mbtn');");
             sb.AppendLine("  mbtns.forEach(function(g) {");
             sb.AppendLine("    var c = parseInt(g.getAttribute('data-count'), 10) || 0;");
