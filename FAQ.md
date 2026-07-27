@@ -47,7 +47,7 @@ Names match what you see in the log (the `VK_` prefix is optional and case doesn
 `Ctrl`, `Shift`, or `Alt` automatically covers both the left and right keys. Plain numbers (virtual-
 key codes) still work too. See `docs/USAGE.md` for the full reference.
 
-### Why do TextExpander, Espanso, YubiKey, or automation tools require `BurstBypass`?
+## Why do TextExpander, Espanso, YubiKey, or automation tools require `BurstBypass`?
 
 Because these tools don’t “type” like a human. They emit **machine‑speed bursts** of keystrokes, often with repeated characters, at intervals far below what a physical keyboard can produce. The filter correctly identifies such ultra‑fast repeats as *impossible for human typing* and suppresses them as stutters.
 
