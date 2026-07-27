@@ -64,7 +64,7 @@ Enabling:
 
 ```json
 "BurstBypass": true
-
+```
 ## Which operating systems are supported?
 
 This fix supports **Windows 10/11 x64**. It is developed and tested on Windows 11; the APIs it uses
