@@ -75,7 +75,8 @@ See [`CHANGELOG.md`](CHANGELOG.md) for the complete list.
   one-time password at machine speed, and repeated characters in it (such as two `u`s) were being
   dropped as stutters, breaking sign-in. Enable `"BurstBypass": true` and the filter recognises the
   machine-speed burst and steps aside for its duration. Off by default; a normal keyboard never trips
-  it.
+  it. Also required for snippet expanders (TextExpander, Espanso, etc.) because they emit machine‑speed
+  bursts similar to hardware tokens.
 
 See [`CHANGELOG.md`](CHANGELOG.md) for the complete list.
 
