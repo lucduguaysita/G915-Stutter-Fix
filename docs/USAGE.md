@@ -130,6 +130,12 @@ generate a fresh code on every tap, simply tapping again resolves it. A guarante
 would require identifying the token as a distinct input device, which is a larger change not yet
 implemented.
 
+`BurstBypass` is only for genuine hardware like this. Snippet expanders (TextExpander, Espanso),
+Grammarly's inline corrections, and similar tools don't type through a real keyboard at all, they
+retype text via Windows' synthetic-input API (`SendInput`), and Windows tags those events distinctly
+from a physical key press. The filter recognises that tag and always lets such keystrokes through,
+`BurstBypass` or not, so nothing needs to be configured for them.
+
 ## Gaming and anti-cheat
 
 For games, use the **Protect held keys** filter mode (`"FilterMode": "BlockRelease"`). It is the only
