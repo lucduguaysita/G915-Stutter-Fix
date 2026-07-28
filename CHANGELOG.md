@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented in this file.
 
+## [3.3.1] - 2026-07-28
+
+### Fixed
+- **Synthetic keystrokes (Grammarly, text expanders) no longer get filtered.** Tools such as
+  Grammarly's inline corrections, TextExpander, and Espanso retype text via Windows' synthetic-input
+  API (`SendInput`) rather than a real keyboard, and a fast or repeated-letter retype looked identical
+  to hardware stutter, so the filter dropped characters from it. Windows tags synthetic keystrokes
+  distinctly from physical ones; the filter now recognises that tag and always lets such keystrokes
+  through, regardless of `BurstBypass`. Reported in [#8](https://github.com/lucduguaysita/G915-Stutter-Fix/issues/8).
+
 ## [3.3.0] - 2026-07-09
 
 ### Added

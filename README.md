@@ -75,8 +75,8 @@ See [`CHANGELOG.md`](CHANGELOG.md) for the complete list.
   one-time password at machine speed, and repeated characters in it (such as two `u`s) were being
   dropped as stutters, breaking sign-in. Enable `"BurstBypass": true` and the filter recognises the
   machine-speed burst and steps aside for its duration. Off by default; a normal keyboard never trips
-  it. Also required for snippet expanders (TextExpander, Espanso, etc.) because they emit machine‑speed
-  bursts similar to hardware tokens.
+  it. (Snippet expanders such as TextExpander and Espanso, and tools like Grammarly, no longer need
+  this at all — see below.)
 
 See [`CHANGELOG.md`](CHANGELOG.md) for the complete list.
 
@@ -279,6 +279,12 @@ toggle, since a normal keyboard never reaches the burst threshold. See
 [Hardware tokens](docs/USAGE.md#hardware-tokens-yubikey-and-similar) for the one edge case it cannot
 fully cover.
 
+This setting is only for genuine hardware. Snippet expanders (TextExpander, Espanso), Grammarly's
+inline corrections, and similar tools don't use a real keyboard at all: they retype text through
+Windows' synthetic-input API (`SendInput`), which Windows tags distinctly from a physical key press.
+The filter recognises that tag and always lets such keystrokes through, `BurstBypass` or not, so
+these tools need no configuration.
+
 ### Update checking
 On startup the app makes a single best-effort request to the GitHub releases API to see whether a
 newer version is out. If one is, and notifications are on, a brief toast points you to the release
@@ -425,7 +431,7 @@ Everything is controlled by `config.json` next to the executable. Full reference
 | `ShowElevatedWindowNotice` | `true` | Show the brief popup when an admin window is focused. |
 | `RunAsAdmin` | `false` | Relaunch elevated on every launch (UAC prompt each time). Toggle from the tray. |
 | `MinRepeatIntervalMs` | `28.0` | Repeats faster than this are treated as stutter. |
-| `BurstBypass` | `false` | Opt-in: step aside during machine-speed input bursts so hardware tokens (YubiKey) keep repeated characters. Also required for snippet expanders (TextExpander, Espanso) because they emit machine‑speed bursts |
+| `BurstBypass` | `false` | Opt-in: step aside during machine-speed input bursts so hardware tokens (YubiKey) keep repeated characters. Not needed for snippet expanders (TextExpander, Espanso) or Grammarly: those retype via synthetic keystrokes, which the filter always lets through regardless of this setting. |
 | `CheckForUpdates` | `true` | One startup version check against GitHub; set `false` to stay fully offline. |
 | `ExcludedKeys` | `["Back", "Return"]` | Keys never filtered, by name or number (CapsLock is always excluded). |
 | `PerKeyMinRepeatIntervalMs` | `{}` | Per-key threshold overrides, by name or number. |

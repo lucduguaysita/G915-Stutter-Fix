@@ -47,24 +47,20 @@ Names match what you see in the log (the `VK_` prefix is optional and case doesn
 `Ctrl`, `Shift`, or `Alt` automatically covers both the left and right keys. Plain numbers (virtual-
 key codes) still work too. See `docs/USAGE.md` for the full reference.
 
-## Why do TextExpander, Espanso, YubiKey, or automation tools require `BurstBypass`?
+## Why does a YubiKey (or other hardware token) require `BurstBypass`?
 
-Because these tools don’t “type” like a human. They emit **machine‑speed bursts** of keystrokes, often with repeated characters, at intervals far below what a physical keyboard can produce. The filter correctly identifies such ultra‑fast repeats as *impossible for human typing* and suppresses them as stutters.
-
-Machine‑generated bursts typically include:
-
-- repeated characters (e.g., “ss”, “uu”, “tt”)
-- keystrokes spaced 1–2 ms apart
-- a final trigger key (Tab, Enter, Space)
-- sequences typed programmatically rather than physically
-
-This pattern is indistinguishable from the G915 stutter problem the filter is designed to block.
+Because a security key doesn’t “type” like a human, it emits a **machine‑speed burst** of keystrokes over real USB HID, often with repeated characters, at intervals far below what a physical keyboard can produce. The filter correctly identifies such ultra‑fast repeats as *impossible for human typing*, indistinguishable from the G915 stutter problem the filter is designed to block, and would otherwise suppress them.
 
 Enabling:
 
 ```json
 "BurstBypass": true
 ```
+
+makes the filter recognise a sustained burst of key-downs and step aside for its duration, so every character (repeats included) reaches the app. It is off by default because a normal keyboard never reaches the burst threshold.
+
+**TextExpander, Espanso, Grammarly's inline corrections, and similar tools do *not* need this.** They don't use a real keyboard at all: they retype text using Windows' synthetic-input API (`SendInput`), and Windows tags those events so they're distinguishable from a physical key press. The filter recognises that tag and always lets the keystrokes through, regardless of `BurstBypass`. That setting only matters for something that genuinely behaves like hardware, such as a YubiKey.
+
 ## Which operating systems are supported?
 
 This fix supports **Windows 10/11 x64**. It is developed and tested on Windows 11; the APIs it uses
