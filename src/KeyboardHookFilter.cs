@@ -29,6 +29,15 @@ namespace KeyboardRepeatFilter
         // arrows, etc.). Preserved when we re-inject a deferred key-up.
         private const uint LlkhfExtended = 0x01;
 
+        // Low-level keyboard hook flag Windows sets on any event that came from
+        // SendInput rather than a physical keypress, from any process (this one
+        // included). Text expanders, Grammarly's inline corrections, and similar
+        // tools retype text this way, often faster than a human and sometimes with
+        // doubled letters, which looks exactly like the stutter this app exists to
+        // remove. There is no legitimate reason to debounce synthetic input, so it
+        // is unconditionally passed through, the same way CapsLock is.
+        private const uint LlkhfInjected = 0x10;
+
         // SendInput plumbing for re-emitting a deferred key-up in BlockRelease mode.
         private const uint InputKeyboard = 1;
         private const uint KeyeventfExtendedkey = 0x0001;
@@ -273,6 +282,14 @@ namespace KeyboardRepeatFilter
 
                 // Pass through key-ups we re-injected ourselves; never re-filter them.
                 if (kb.dwExtraInfo == InjectedMarker)
+                {
+                    return CallNextHookEx(_hookId, nCode, wParam, lParam);
+                }
+
+                // Pass through any synthetic keystroke, ours or another process's,
+                // untouched and without feeding it into burst-rate tracking: it is
+                // not hardware, so it can never be hardware chatter.
+                if ((kb.flags & LlkhfInjected) != 0)
                 {
                     return CallNextHookEx(_hookId, nCode, wParam, lParam);
                 }
