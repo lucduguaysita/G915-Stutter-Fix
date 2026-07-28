@@ -75,7 +75,8 @@ See [`CHANGELOG.md`](CHANGELOG.md) for the complete list.
   one-time password at machine speed, and repeated characters in it (such as two `u`s) were being
   dropped as stutters, breaking sign-in. Enable `"BurstBypass": true` and the filter recognises the
   machine-speed burst and steps aside for its duration. Off by default; a normal keyboard never trips
-  it.
+  it. Also required for snippet expanders (TextExpander, Espanso, etc.) because they emit machine‑speed
+  bursts similar to hardware tokens.
 
 See [`CHANGELOG.md`](CHANGELOG.md) for the complete list.
 
@@ -424,7 +425,7 @@ Everything is controlled by `config.json` next to the executable. Full reference
 | `ShowElevatedWindowNotice` | `true` | Show the brief popup when an admin window is focused. |
 | `RunAsAdmin` | `false` | Relaunch elevated on every launch (UAC prompt each time). Toggle from the tray. |
 | `MinRepeatIntervalMs` | `28.0` | Repeats faster than this are treated as stutter. |
-| `BurstBypass` | `false` | Opt-in: step aside during machine-speed input bursts so hardware tokens (YubiKey) keep repeated characters. |
+| `BurstBypass` | `false` | Opt-in: step aside during machine-speed input bursts so hardware tokens (YubiKey) keep repeated characters. Also required for snippet expanders (TextExpander, Espanso) because they emit machine‑speed bursts |
 | `CheckForUpdates` | `true` | One startup version check against GitHub; set `false` to stay fully offline. |
 | `ExcludedKeys` | `["Back", "Return"]` | Keys never filtered, by name or number (CapsLock is always excluded). |
 | `PerKeyMinRepeatIntervalMs` | `{}` | Per-key threshold overrides, by name or number. |
