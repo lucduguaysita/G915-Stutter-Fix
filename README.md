@@ -15,6 +15,8 @@ app and your system is exactly as it was. User reports confirm it eliminates the
 problem on affected G915/G915X units, and it's small enough to read end-to-end in a coffee break.
 
 > **Version 3.3.1**, Windows 10/11 x64 · .NET Framework 4.8 · MIT licensed · offline (optional startup version check, can be disabled)
+>
+> **macOS:** see [`macos/README.md`](macos/README.md) — native menu-bar filter (same debounce algorithm via `CGEventTap`).
 
 ---
 
@@ -22,7 +24,8 @@ problem on affected G915/G915X units, and it's small enough to read end-to-end i
 
 | Tool | Description |
 |---|---|
-| `KeyboardRepeatFilter.exe` | Runs in the system tray and silently filters stutter/duplicate keypresses (and, optionally, chattering mouse clicks) in real time. |
+| `KeyboardRepeatFilter.exe` | Runs in the system tray and silently filters stutter/duplicate keypresses (and, optionally, chattering mouse clicks) in real time. **Windows.** |
+| `macos/G915StutterFix.app` | Native macOS menu-bar filter (BlockRepress / BlockRelease). Build with `macos/Scripts/build.sh`. |
 | `KeyboardHeatmap.exe` | Companion CLI that reads the filter log and generates a self-contained HTML heatmap, overlaying filtered key/click counts directly on photos of a G915X keyboard and G502X Plus mouse, great for *seeing* which keys misbehave. A classic HTML keyboard layout is still available as a fallback. |
 | `GameListUpdater.exe` | Network-isolated companion, launched on demand from the tray, that downloads Discord's public detectable-games list and writes `games.txt` for the auto-switch-profiles-for-games feature. |
 
