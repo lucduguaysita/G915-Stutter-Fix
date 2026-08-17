@@ -1,0 +1,13 @@
+{
+  "LogLevel": "Info",
+  "LogFilePath": "",
+  "FilterMode": "BlockRepress",
+  "MinRepeatIntervalMs": 70.0,
+  "BurstBypass": false,
+  "FilterMouseButtons": false,
+  "MouseMinRepeatIntervalMs": 50.0,
+  "ExcludedKeys": ["Back", "Return", "Volume_Down", "Volume_Up"],
+  "PerKeyMinRepeatIntervalMs": {
+    "I": 40.0
+  }
+}

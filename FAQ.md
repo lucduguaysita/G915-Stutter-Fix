@@ -63,15 +63,18 @@ makes the filter recognise a sustained burst of key-downs and step aside for its
 
 ## Which operating systems are supported?
 
-This fix supports **Windows 10/11 x64**. It is developed and tested on Windows 11; the APIs it uses
-are all available on Windows 10, so it runs there too (Windows 10 1903+ ships .NET Framework 4.8;
-older builds may need the 4.8 runtime installed).
+**Windows:** The main app (`KeyboardRepeatFilter.exe`) supports **Windows 10/11 x64**. It is developed
+and tested on Windows 11; the APIs it uses are all available on Windows 10, so it runs there too
+(Windows 10 1903+ ships .NET Framework 4.8; older builds may need the 4.8 runtime installed).
+
+**macOS:** A native companion lives under [`macos/`](macos/README.md). It uses `CGEventTap` (not the
+Windows binary) and needs Accessibility permission. Build with `./Scripts/build.sh`, then
+`open dist/G915StutterFix.app`.
 
 It will not run on:
 
 - Linux
-- macOS
-- Windows on ARM
+- Windows on ARM (Windows binary)
 
 ## Does this modify drivers or firmware?
 
