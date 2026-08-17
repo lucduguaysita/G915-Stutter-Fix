@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented in this file.
 
+## [macOS 1.0.0] - 2026-08-16
+
+### Added
+- **macOS build** (contributed by @filipemelo). A native menu-bar app (`G915StutterFix.app`) that
+  applies the same debounce algorithm as the Windows filter using `CGEventTap`, for macOS 13 or
+  later, built from `macos/` with Swift Package Manager. It ships as a separate, community-maintained
+  track (tags `macos-v*`) published as a pre-release that is intentionally not marked "latest", so
+  the Windows update check is unaffected. Prebuilt `arm64` and `x64` archives are attached to the
+  `macos-v1.0.0` release. Not tested by the maintainer.
+
 ## [3.3.1] - 2026-07-28
 
 ### Fixed
@@ -21,7 +31,7 @@ All notable changes to this project are documented in this file.
   classes that parse hit-box maps (`G915X.keymap.json`, `G502X Plus.mousemap.json`) embedded alongside
   the photos. There is no per-SKU detection: the same two photos are shown regardless of the actual
   connected keyboard/mouse model. The original HTML keyboard diagram is kept as a fallback, selected
-  via the new `-classic` flag (also exposed as **Tray → Heatmap → Generate report (classic)**).
+  via the new `-classic` flag (also exposed as **Tray â†’ Heatmap â†’ Generate report (classic)**).
 - **Worst-offenders tooltip** (also suggested by [@Timmaykc](https://github.com/Timmaykc)). Hovering
   over a day in the daily filtered-event table shows a tooltip listing that day's top misbehaving keys,
   most-filtered first.
@@ -30,7 +40,7 @@ All notable changes to this project are documented in this file.
 
 ### Added
 - **Auto-switch profiles for games** (contributed by [@Timmaykc](https://github.com/Timmaykc)).
-  A new **Tray → Game profile switching** menu can watch for a running game and temporarily activate a
+  A new **Tray â†’ Game profile switching** menu can watch for a running game and temporarily activate a
   matching profile, reverting to the base profile when the game exits. World of Warcraft maps to the
   `WoW` profile by default; any other detected game uses `DefaultGameProfile` (`gaming`). A manual
   profile pick while a game runs takes over until the game closes and is not saved as the startup
@@ -44,7 +54,7 @@ All notable changes to this project are documented in this file.
 ## [3.1.0] - 2026-06-23
 
 ### Added
-- **Startup profile, set from the tray.** Selecting a profile in **Tray → Profile** now also makes it
+- **Startup profile, set from the tray.** Selecting a profile in **Tray â†’ Profile** now also makes it
   the startup default: the choice is saved to `config.json` (`"DefaultProfile"`), so the next launch,
   including Windows sign-in via Autostart, comes up on that profile instead of `config.json`. The
   profile's filter mode and `RunAsAdmin` take effect from launch. The profile checkmark marks both the

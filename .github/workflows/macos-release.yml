@@ -1,0 +1,88 @@
+name: macos-release
+
+# Builds the macOS app on GitHub's hosted runners (you never need a macOS
+# machine) and publishes it on its OWN release track: tags like macos-v1.0.0,
+# marked pre-release and NOT "latest".
+#
+# Why pre-release + not-latest: your Windows app's CheckForUpdates queries
+#   https://api.github.com/repos/lucduguaysita/G915-Stutter-Fix/releases/latest
+# which returns the most recent NON-prerelease, non-draft release. Keeping the
+# macOS build a pre-release means that endpoint still returns your Windows
+# v3.3.1, so Windows users (and you) are never prompted to "update" to it.
+#
+# Run it by hand from the Actions tab (Run workflow) to test the build without
+# publishing anything.
+
+on:
+  push:
+    tags: ["macos-v*"]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build macOS app (${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-14   # arm64
+            arch: arm64
+          - runner: macos-13   # Intel x64
+            arch: x64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the app
+        run: |
+          cd macos
+          chmod +x Scripts/build.sh
+          ./Scripts/build.sh
+      - name: Zip the app bundle
+        run: |
+          VER="${GITHUB_REF_NAME#macos-v}"
+          case "$GITHUB_REF" in refs/tags/macos-v*) : ;; *) VER="dev" ;; esac
+          cd macos/dist
+          ZIP="G915StutterFix-macos-${VER}-${{ matrix.arch }}.zip"
+          ditto -c -k --keepParent G915StutterFix.app "$ZIP"
+          echo "Built $ZIP"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-${{ matrix.arch }}
+          path: macos/dist/*.zip
+          if-no-files-found: error
+
+  publish:
+    name: Publish macOS pre-release
+    needs: [build]
+    if: startsWith(github.ref, 'refs/tags/macos-v') && always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: _artifacts
+      - name: Assemble assets
+        run: |
+          set -e
+          VER="${GITHUB_REF_NAME#macos-v}"
+          mkdir -p dist
+          find _artifacts -name '*.zip' -exec cp {} dist/ \;
+          ( cd dist && shasum -a 256 *.zip > SHA256SUMS.txt )
+          echo "RELEASE_NAME=G915 Stutter Fix (macOS) $VER" >> "$GITHUB_ENV"
+          echo "Assets:"; ls -la dist
+      - name: Publish (pre-release, not latest)
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ env.RELEASE_NAME }}
+          body_path: RELEASE_NOTES_macos.md
+          prerelease: true
+          make_latest: "false"
+          files: |
+            dist/*.zip
+            dist/SHA256SUMS.txt
+          fail_on_unmatched_files: false

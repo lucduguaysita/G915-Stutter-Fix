@@ -1,0 +1,1 @@
+> Platforms: Windows (maintained here) and macOS 13+ (new, community-maintained by @filipemelo, not tested by the maintainer). The macOS app ships as a separate pre-release track (`macos-v*`) that does not affect the Windows update check. See [`macos/README.md`](macos/README.md). Please report macOS issues to the contributor.
