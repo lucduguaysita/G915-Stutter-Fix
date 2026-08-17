@@ -5,9 +5,15 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 CONFIGURATION="${1:-release}"
-swift build -c "$CONFIGURATION"
 
-BIN="$ROOT/.build/$CONFIGURATION/G915StutterFix"
+# Build one binary carrying both slices, so a single .app runs on Apple Silicon
+# and on Intel. GitHub retired its Intel hosted runners, so we can no longer
+# build the x86_64 slice on its own machine; the arm64 runner cross-compiles it.
+ARCHS=(--arch arm64 --arch x86_64)
+swift build -c "$CONFIGURATION" "${ARCHS[@]}"
+
+# Multi-arch output lands in .build/apple/Products/<Config>/, not .build/<config>/.
+BIN="$(swift build -c "$CONFIGURATION" "${ARCHS[@]}" --show-bin-path)/G915StutterFix"
 APP="$ROOT/dist/G915StutterFix.app"
 MACOS_DIR="$APP/Contents/MacOS"
 RESOURCES_DIR="$APP/Contents/Resources"
@@ -53,5 +59,6 @@ PLIST
 codesign --force --deep --sign - "$APP" 2>/dev/null || true
 
 echo "Built: $APP"
+lipo -info "$MACOS_DIR/G915StutterFix"
 echo "Open with: open \"$APP\""
 echo "Then grant Accessibility (System Settings → Privacy & Security → Accessibility)."

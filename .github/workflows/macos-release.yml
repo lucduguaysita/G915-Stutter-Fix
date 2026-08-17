@@ -10,6 +10,11 @@ name: macos-release
 # macOS build a pre-release means that endpoint still returns your Windows
 # v3.3.1, so Windows users (and you) are never prompted to "update" to it.
 #
+# One job, one asset: the build is a universal binary (arm64 + x86_64), so the
+# single .app runs on both Apple Silicon and Intel Macs. Do NOT reintroduce an
+# Intel runner leg -- GitHub retired the macos-13 image, and a job asking for it
+# sits in "queued" forever until Actions cancels it at the 24h mark.
+#
 # Run it by hand from the Actions tab (Run workflow) to test the build without
 # publishing anything.
 
@@ -23,66 +28,45 @@ permissions:
 
 jobs:
   build:
-    name: Build macOS app (${{ matrix.arch }})
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - runner: macos-14   # arm64
-            arch: arm64
-          - runner: macos-13   # Intel x64
-            arch: x64
-    runs-on: ${{ matrix.runner }}
+    name: Build and publish macOS app
+    runs-on: macos-14
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
+
       - name: Build the app
         run: |
           cd macos
           chmod +x Scripts/build.sh
           ./Scripts/build.sh
+
       - name: Zip the app bundle
         run: |
           VER="${GITHUB_REF_NAME#macos-v}"
           case "$GITHUB_REF" in refs/tags/macos-v*) : ;; *) VER="dev" ;; esac
           cd macos/dist
-          ZIP="G915StutterFix-macos-${VER}-${{ matrix.arch }}.zip"
+          ZIP="G915StutterFix-macos-${VER}.zip"
           ditto -c -k --keepParent G915StutterFix.app "$ZIP"
+          shasum -a 256 "$ZIP" > SHA256SUMS.txt
+          echo "RELEASE_NAME=G915 Stutter Fix (macOS) $VER" >> "$GITHUB_ENV"
           echo "Built $ZIP"
-      - uses: actions/upload-artifact@v4
+
+      - uses: actions/upload-artifact@v7
         with:
-          name: macos-${{ matrix.arch }}
-          path: macos/dist/*.zip
+          name: macos-universal
+          path: |
+            macos/dist/*.zip
+            macos/dist/SHA256SUMS.txt
           if-no-files-found: error
 
-  publish:
-    name: Publish macOS pre-release
-    needs: [build]
-    if: startsWith(github.ref, 'refs/tags/macos-v') && always()
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          path: _artifacts
-      - name: Assemble assets
-        run: |
-          set -e
-          VER="${GITHUB_REF_NAME#macos-v}"
-          mkdir -p dist
-          find _artifacts -name '*.zip' -exec cp {} dist/ \;
-          ( cd dist && shasum -a 256 *.zip > SHA256SUMS.txt )
-          echo "RELEASE_NAME=G915 Stutter Fix (macOS) $VER" >> "$GITHUB_ENV"
-          echo "Assets:"; ls -la dist
       - name: Publish (pre-release, not latest)
-        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/macos-v')
+        uses: softprops/action-gh-release@v3
         with:
           name: ${{ env.RELEASE_NAME }}
           body_path: RELEASE_NOTES_macos.md
           prerelease: true
           make_latest: "false"
           files: |
-            dist/*.zip
-            dist/SHA256SUMS.txt
-          fail_on_unmatched_files: false
+            macos/dist/*.zip
+            macos/dist/SHA256SUMS.txt
+          fail_on_unmatched_files: true

@@ -6,11 +6,10 @@ This is a separate, community-maintained track from the Windows app and is not t
 
 ### Downloads
 
-- `G915StutterFix-macos-1.0.0-arm64.zip` for arm64 machines
-- `G915StutterFix-macos-1.0.0-x64.zip` for Intel (x64) machines
+- `G915StutterFix-macos-1.0.0.zip` is a universal build: it runs on both Apple Silicon and Intel (x64) Macs.
 
 Unzip, move `G915StutterFix.app` wherever you like, and launch it; it runs in the menu bar. The app is ad-hoc signed, so the first launch may require allowing it in your security settings, and it needs Accessibility / Input Monitoring permission to filter keystrokes. See `macos/README.md` for details. Please report macOS issues to the contributor.
 
 ### Checksums
 
-`SHA256SUMS.txt` lists the SHA-256 of each archive.
+`SHA256SUMS.txt` lists the SHA-256 of the archive.
