@@ -121,7 +121,7 @@ same PC.
 
 - Decrease `MinRepeatIntervalMs` slightly (for example `28` -> `26`).
 - Keep changes small and retest.
-- Consider excluding specific keys with `ExcludedVkCodes` if needed.
+- Consider excluding specific keys with `ExcludedKeys` if needed, by name (for example `"Back"`) or by numeric code.
 
 ## Config changes are ignored
 
