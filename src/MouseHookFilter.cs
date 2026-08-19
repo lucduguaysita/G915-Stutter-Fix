@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -181,7 +180,7 @@ namespace KeyboardRepeatFilter
                 case WmMButtonUp: button = 2; isDown = false; return true;
                 case WmXButtonDown:
                 case WmXButtonUp:
-                    var hook = (MsLlHookStruct)Marshal.PtrToStructure(lParam, typeof(MsLlHookStruct));
+                    var hook = Marshal.PtrToStructure<MsLlHookStruct>(lParam);
                     int which = (int)((hook.mouseData >> 16) & 0xFFFF);
                     if (which == Xbutton1) { button = 3; }
                     else if (which == Xbutton2) { button = 4; }
@@ -257,17 +256,11 @@ namespace KeyboardRepeatFilter
         private void LogConfigWarning(string message)
         {
             Console.WriteLine(message);
-            try
-            {
-                File.AppendAllText(_config.LogFilePath,
-                    $"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} - ConfigWarning: {message}{Environment.NewLine}");
-            }
-            catch
-            {
-                // Best-effort; never block startup on logging.
-            }
+            FilterLog.Write("ConfigWarning: " + message);
         }
 
+        // Runs on the hook thread; FilterLog.Write never touches the disk. See the
+        // header of FilterLog for why a synchronous write here was a problem.
         private void LogFiltered(int button, string action)
         {
             if (_config.LogLevel != "Trace")
@@ -275,15 +268,7 @@ namespace KeyboardRepeatFilter
                 return;
             }
 
-            try
-            {
-                File.AppendAllText(_config.LogFilePath,
-                    $"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} - Mouse_{ButtonNames[button]} {action}{Environment.NewLine}");
-            }
-            catch
-            {
-                // silent any errors when writing to the log file.
-            }
+            FilterLog.Write($"Mouse_{ButtonNames[button]} {action}");
         }
 
         [StructLayout(LayoutKind.Sequential)]

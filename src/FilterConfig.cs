@@ -62,6 +62,36 @@ namespace KeyboardRepeatFilter
         // and only the rare user who types secrets with such a device needs it.
         public bool BurstBypass { get; set; } = false;
 
+        // Opt-in: also debounce keystrokes that arrived as synthetic input rather than
+        // from a physical keyboard. Off by default, and it should stay off on an
+        // ordinary desktop.
+        //
+        // Windows tags every keystroke that came from SendInput, and the filter
+        // normally passes those straight through: software-generated input cannot be
+        // hardware chatter, and debouncing it corrupts the tools that rely on it.
+        // Text expanders, Grammarly's inline corrections, and key remappers such as
+        // AutoHotkey all retype text this way, often faster than a human and sometimes
+        // with doubled letters, which looks exactly like the stutter this app removes.
+        //
+        // The exception is a machine you reach through remote-desktop software (RDP,
+        // RustDesk, VNC). There, the keystrokes of the person at the keyboard arrive as
+        // synthetic input injected by the remote-desktop client, so the filter has
+        // nothing to act on and the stutter of the *client's* keyboard lands in the
+        // session unfiltered. Turning this on lets a copy running on the remote machine
+        // debounce that stream as a last resort.
+        //
+        // It is a last resort because the timing is no longer the keyboard's: the
+        // events have crossed a network, and key bounce is a sub-30ms event that
+        // network jitter alone can stretch past the threshold or fabricate. Filtering
+        // on the machine the keyboard is physically attached to is still the reliable
+        // answer; this switch is for when that is not possible. Expect to raise
+        // MinRepeatIntervalMs, and expect remappers and text expanders on the same
+        // machine to be debounced along with everything else.
+        //
+        // Key-ups this app re-injects itself (BlockRelease mode) are always passed
+        // through regardless of this setting; they carry a private marker.
+        public bool FilterSyntheticKeys { get; set; } = false;
+
         // When true (default), the app makes a single best-effort request to the
         // GitHub releases API at startup to see whether a newer version exists (no
         // data is sent, nothing is downloaded). Set to false to keep the app fully

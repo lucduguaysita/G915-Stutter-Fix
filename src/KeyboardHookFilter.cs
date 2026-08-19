@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -82,6 +81,10 @@ namespace KeyboardRepeatFilter
         private readonly Timer[] _releaseTimers = new Timer[256];
         private bool _blockRelease;
 
+        // Mirrors FilterConfig.FilterSyntheticKeys, read once at Start() so the hook
+        // callback never touches the config object.
+        private bool _filterSynthetic;
+
         // Burst-bypass state (opt-in). While a machine-speed stream of key-downs is in
         // progress, filtering is suspended so a hardware token's repeated characters
         // are not dropped. All inert when _burstBypass is false.
@@ -105,6 +108,8 @@ namespace KeyboardRepeatFilter
         public void Start()
         {
             _blockRelease = string.Equals(_config.FilterMode, "BlockRelease", StringComparison.OrdinalIgnoreCase);
+
+            _filterSynthetic = _config.FilterSyntheticKeys;
 
             _burstBypass = _config.BurstBypass;
             _burstGapTicks = (long)(Stopwatch.Frequency * BurstGapMs / 1000.0);
@@ -276,7 +281,7 @@ namespace KeyboardRepeatFilter
         {
             if (nCode == HcAction)
             {
-                var kb = (KbdLlHookStruct)Marshal.PtrToStructure(lParam, typeof(KbdLlHookStruct));
+                var kb = Marshal.PtrToStructure<KbdLlHookStruct>(lParam);
                 var vk = unchecked((int)kb.vkCode);
                 var message = unchecked((int)wParam.ToInt64());
 
@@ -288,8 +293,11 @@ namespace KeyboardRepeatFilter
 
                 // Pass through any synthetic keystroke, ours or another process's,
                 // untouched and without feeding it into burst-rate tracking: it is
-                // not hardware, so it can never be hardware chatter.
-                if ((kb.flags & LlkhfInjected) != 0)
+                // not hardware, so it can never be hardware chatter. FilterSyntheticKeys
+                // opts out of this for the one case where the assumption breaks, a
+                // remote-desktop session where the real keyboard's events arrive
+                // injected; see FilterConfig for what that costs.
+                if (!_filterSynthetic && (kb.flags & LlkhfInjected) != 0)
                 {
                     return CallNextHookEx(_hookId, nCode, wParam, lParam);
                 }
@@ -406,29 +414,33 @@ namespace KeyboardRepeatFilter
         // key-down follows within the threshold, drop both so the key stays
         // logically held; otherwise a timer re-emits the genuine key-up.
         // Returns true when the event should be swallowed.
+        // Single exit on purpose: _sync is also taken by the release timers, so the
+        // log call is deferred to after the lock is dropped rather than run inside it.
         private bool HandleBlockRelease(int vk, int message, uint flags, uint scanCode)
         {
+            var isDown = message == WmKeyDown || message == WmSysKeyDown;
+            var isUp = message == WmKeyUp || message == WmSysKeyUp;
+            var swallow = false;
+            var logReleaseHeld = false;
+
             lock (_sync)
             {
                 if (BurstActive())
                 {
                     // Machine-speed burst (e.g. a hardware token): defer and swallow
                     // nothing so every character, repeats included, passes through.
-                    if (message == WmKeyDown || message == WmSysKeyDown)
+                    if (isDown)
                     {
                         if (_pendingUp[vk]) CancelPendingUp(vk);
                         _isPressed[vk] = true;
                     }
-                    else if (message == WmKeyUp || message == WmSysKeyUp)
+                    else if (isUp)
                     {
                         if (_pendingUp[vk]) CancelPendingUp(vk);
                         _isPressed[vk] = false;
                     }
-
-                    return false;
                 }
-
-                if (message == WmKeyDown || message == WmSysKeyDown)
+                else if (isDown)
                 {
                     if (_pendingUp[vk])
                     {
@@ -436,42 +448,47 @@ namespace KeyboardRepeatFilter
                         // window: classic bounce. Cancel the pending release and
                         // swallow this duplicate down so the key stays held.
                         CancelPendingUp(vk);
-                        LogFiltered(vk, "release-held");
-                        return true;
+                        logReleaseHeld = true;
+                        swallow = true;
                     }
-
-                    _isPressed[vk] = true;
-                    return false;
+                    else
+                    {
+                        _isPressed[vk] = true;
+                    }
                 }
-
-                if (message == WmKeyUp || message == WmSysKeyUp)
+                else if (isUp)
                 {
                     if (_pendingUp[vk])
                     {
                         // Already deferring an up for this key; keep withholding.
-                        return true;
+                        swallow = true;
                     }
-
-                    if (!_isPressed[vk])
+                    else if (!_isPressed[vk])
                     {
                         // We never observed the matching key-down (e.g. the key was
                         // held across a filter restart or an elevated-window bypass).
                         // Let the up pass untouched rather than deferring and later
                         // injecting an unmatched key-up.
-                        return false;
                     }
-
-                    // Defer the key-up and wait to see whether a bounce down
-                    // follows within the threshold.
-                    _pendingUp[vk] = true;
-                    _pendingExtended[vk] = (flags & LlkhfExtended) != 0;
-                    _pendingScan[vk] = scanCode;
-                    EnsureTimer(vk).Change(_thresholdMsByVk[vk], Timeout.Infinite);
-                    return true;
+                    else
+                    {
+                        // Defer the key-up and wait to see whether a bounce down
+                        // follows within the threshold.
+                        _pendingUp[vk] = true;
+                        _pendingExtended[vk] = (flags & LlkhfExtended) != 0;
+                        _pendingScan[vk] = scanCode;
+                        EnsureTimer(vk).Change(_thresholdMsByVk[vk], Timeout.Infinite);
+                        swallow = true;
+                    }
                 }
             }
 
-            return false;
+            if (logReleaseHeld)
+            {
+                LogFiltered(vk, "release-held");
+            }
+
+            return swallow;
         }
 
         private Timer EnsureTimer(int vk)
@@ -558,17 +575,12 @@ namespace KeyboardRepeatFilter
         private void LogConfigWarning(string message)
         {
             Console.WriteLine(message);
-            try
-            {
-                File.AppendAllText(_config.LogFilePath,
-                    $"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} - ConfigWarning: {message}{Environment.NewLine}");
-            }
-            catch
-            {
-                // Best-effort; never block startup on logging.
-            }
+            FilterLog.Write("ConfigWarning: " + message);
         }
 
+        // Called from the hook thread on every filtered event. FilterLog.Write only
+        // stamps and enqueues, so nothing here can block the hook on disk I/O; see
+        // the header of FilterLog for why that matters beyond this app.
         private void LogFiltered(int vk, string action)
         {
             if (_config.LogLevel != "Trace")
@@ -577,14 +589,7 @@ namespace KeyboardRepeatFilter
             }
 
             string keyName = VirtualKeys.ResourceManager.GetString(vk.ToString("X2"));
-            try
-            {
-                File.AppendAllText(_config.LogFilePath, $@"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff")} - {keyName}={vk} {action}{Environment.NewLine}");
-            }
-            catch
-            {
-                // silent any errors when writing to the log file.
-            }
+            FilterLog.Write($"{keyName}={vk} {action}");
         }
 
         [StructLayout(LayoutKind.Sequential)]

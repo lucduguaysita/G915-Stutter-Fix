@@ -43,6 +43,7 @@ Your `releases` folder should contain:
 | `RunAsAdmin` | `false` | When `true`, the app relaunches itself elevated on every launch if not already elevated (a UAC prompt appears each time). Toggle from the tray menu. |
 | `MinRepeatIntervalMs` | `28.0` | Repeats faster than this many milliseconds are treated as stutter. |
 | `BurstBypass` | `false` | Opt-in. When `true`, the filter detects machine-speed input (a hardware token such as a YubiKey typing a one-time password) and suspends filtering for that burst, so repeated characters are not dropped. Leave `false` unless you authenticate with such a device; a normal keyboard never reaches the burst threshold. There is no tray toggle, set it here. |
+| `FilterSyntheticKeys` | `false` | Opt-in. When `true`, keystrokes that other software injected (`SendInput`) are debounced like hardware instead of being passed through. Leave `false` on an ordinary desktop: it would debounce text expanders, Grammarly, and remappers such as AutoHotkey. It exists for a machine reached over remote desktop, where the real keyboard's events arrive injected and nothing else can filter them; see [TROUBLESHOOTING.md](../TROUBLESHOOTING.md). |
 | `CheckForUpdates` | `true` | When `true`, the app makes one best-effort request to the GitHub releases API at startup to see whether a newer version exists (no data sent, nothing downloaded). Set to `false` to keep the app fully offline; this is the only network access it ever makes. |
 | `ExcludedKeys` | `["Back", "Return"]` | Keys that are never filtered. Names or numeric codes (see below). **CapsLock is always excluded** regardless of this list, so its toggle state can never desync. |
 | `ExcludedVkCodes` | _(none)_ | Legacy numeric-only form of `ExcludedKeys`; still honored and merged. |
@@ -134,7 +135,9 @@ implemented.
 Grammarly's inline corrections, and similar tools don't type through a real keyboard at all, they
 retype text via Windows' synthetic-input API (`SendInput`), and Windows tags those events distinctly
 from a physical key press. The filter recognises that tag and always lets such keystrokes through,
-`BurstBypass` or not, so nothing needs to be configured for them.
+`BurstBypass` or not, so nothing needs to be configured for them. `FilterSyntheticKeys` turns that
+pass-through off for the one case it hurts, a remote-desktop session; see
+[TROUBLESHOOTING.md](../TROUBLESHOOTING.md).
 
 ## Gaming and anti-cheat
 

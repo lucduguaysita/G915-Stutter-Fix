@@ -2,6 +2,33 @@
 
 All notable changes to this project are documented in this file.
 
+## [3.4.0] - 2026-08-19
+
+### Added
+- **`FilterSyntheticKeys` (opt-in, off by default).** Since 3.3.1 the filter passes every injected
+  keystroke through untouched, which is right on a desktop but leaves a remote-desktop host with
+  nothing to filter: RDP, RustDesk, and VNC deliver the client keyboard's events as synthetic input,
+  so the client's stutter lands in the session unfiltered and a copy running on the remote machine
+  cannot help. Setting `"FilterSyntheticKeys": true` on that machine turns the pass-through off so
+  the injected stream is debounced like hardware. Filtering on the machine the keyboard is attached
+  to remains the reliable answer: over a remote session the timing has crossed a network, and this
+  also debounces remappers, text expanders, and Grammarly on the same machine. Key-ups the app
+  re-injects itself are always passed through regardless. Raised by a tester using RustDesk.
+
+### Fixed
+- **Logging no longer runs on the hook threads.** With `"LogLevel": "Trace"`, every filtered key and
+  click was written with a synchronous `File.AppendAllText`, an open + write + close that antivirus
+  inspects, from inside the low-level hook callback (and, in `BlockRelease` mode, while holding the
+  lock the release timers also take). Windows blocks the session's raw input thread until a hook
+  callback returns, up to `LowLevelHooksTimeout` (300ms by default), and that same thread services
+  the rest of the session's input work including HID device attach, so a slow disk could turn a log
+  line into input lag felt well outside this app. All log lines now go through a single background
+  writer (`FilterLog`) that the hook threads hand off to without touching the disk: the worst
+  observed cost on the caller went from 0.535ms to 0.017ms, with no dependence on disk state at all.
+  Lines are batched one append per drain, the log file is not held open (so `KeyboardHeatmap.exe`
+  can still read it while the app runs), and if the queue ever overflows the dropped count is
+  reported in the log rather than leaving a silent gap. The on-disk log format is unchanged.
+
 ## [macOS 1.0.0] - 2026-08-16
 
 ### Added

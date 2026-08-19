@@ -117,6 +117,39 @@ Note that a hook only sees input in its own session, so the copy running on the
 physical console of a PC does not cover a separate Remote Desktop session on that
 same PC.
 
+### When you cannot filter on the client
+
+Sometimes the client is not yours to install on, or its own copy cannot see the
+keystrokes (some remote-desktop clients grab the keyboard before a hook can).
+For that case only, `config.json` on the **remote** machine has:
+
+```json
+"FilterSyntheticKeys": true
+```
+
+Normally the filter passes injected keystrokes straight through, because software
+generated input cannot be hardware chatter and debouncing it corrupts text
+expanders and remappers. In a remote session that rule works against you: the
+keystrokes of the person at the keyboard arrive injected by the remote-desktop
+client, so there is nothing left for the filter to act on. This switch turns the
+pass-through off so that stream is debounced like hardware.
+
+It is a last resort, and it costs you two things:
+
+- **The timing is no longer the keyboard's.** The events have crossed a network.
+  Key bounce is a sub-30 ms event, and jitter can stretch a real bounce past the
+  threshold (missed) or squeeze two deliberate presses under it (false positive).
+  Expect to raise `MinRepeatIntervalMs`, and expect it to be less reliable than
+  filtering on the client.
+- **Everything synthetic on that machine is now debounced**, including AutoHotkey
+  and other remappers, text expanders, and Grammarly's inline corrections. If you
+  run any of those on the remote machine, expect them to lose characters.
+
+Key-ups the app re-injects itself in `BlockRelease` mode are unaffected; they
+carry a private marker and are always passed through.
+
+Leave this off on any machine you type on directly.
+
 ## Legitimate repeats are being filtered
 
 - Decrease `MinRepeatIntervalMs` slightly (for example `28` -> `26`).

@@ -14,7 +14,7 @@ is an optional version check at startup, which you can disable to keep it fully 
 app and your system is exactly as it was. User reports confirm it eliminates the stutter/double-keypress
 problem on affected G915/G915X units, and it's small enough to read end-to-end in a coffee break.
 
-> **Version 3.3.1**, Windows 10/11 x64 · .NET Framework 4.8 · MIT licensed · offline (optional startup version check, can be disabled)
+> **Version 3.4.0**, Windows 10/11 x64 · .NET Framework 4.8 · MIT licensed · offline (optional startup version check, can be disabled)
 >
 > **macOS:** see [`macos/README.md`](macos/README.md) — native menu-bar filter (same debounce algorithm via `CGEventTap`).
 
@@ -28,6 +28,24 @@ problem on affected G915/G915X units, and it's small enough to read end-to-end i
 | `macos/G915StutterFix.app` | Native macOS menu-bar filter (BlockRepress / BlockRelease). Build with `macos/Scripts/build.sh`. |
 | `KeyboardHeatmap.exe` | Companion CLI that reads the filter log and generates a self-contained HTML heatmap, overlaying filtered key/click counts directly on photos of a G915X keyboard and G502X Plus mouse, great for *seeing* which keys misbehave. A classic HTML keyboard layout is still available as a fallback. |
 | `GameListUpdater.exe` | Network-isolated companion, launched on demand from the tray, that downloads Discord's public detectable-games list and writes `games.txt` for the auto-switch-profiles-for-games feature. |
+
+---
+
+## What's new in 3.4.0
+
+- **Logging no longer runs on the hook threads.** With `"LogLevel": "Trace"`, every filtered key and
+  click was written to disk from inside the low-level hook callback. Windows blocks the session's
+  raw input thread until a hook callback returns, so on a busy disk that could turn a log line into
+  input lag felt outside this app. Log lines now hand off to a background writer that the hook
+  threads never wait on; the worst observed cost on the hook thread dropped from 0.535ms to
+  0.017ms, with no dependence on disk state at all. Nothing about the log format changed.
+- **`FilterSyntheticKeys` (opt-in, off by default).** For a machine you reach over remote desktop
+  (RDP, RustDesk, VNC), where the real keyboard's keystrokes arrive as injected input and are
+  therefore passed through untouched, this switch lets that machine debounce them anyway. Filtering
+  on the machine the keyboard is attached to is still the reliable answer; see
+  [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md) for what the switch costs.
+
+See [`CHANGELOG.md`](CHANGELOG.md) for the complete list.
 
 ---
 
@@ -298,7 +316,9 @@ This setting is only for genuine hardware. Snippet expanders (TextExpander, Espa
 inline corrections, and similar tools don't use a real keyboard at all: they retype text through
 Windows' synthetic-input API (`SendInput`), which Windows tags distinctly from a physical key press.
 The filter recognises that tag and always lets such keystrokes through, `BurstBypass` or not, so
-these tools need no configuration.
+these tools need no configuration. The one situation where that rule works against you is a
+remote-desktop session, where the keystrokes of the person at the keyboard also arrive tagged as
+synthetic; see `FilterSyntheticKeys` in [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
 
 ### Update checking
 On startup the app makes a single best-effort request to the GitHub releases API to see whether a
@@ -447,6 +467,7 @@ Everything is controlled by `config.json` next to the executable. Full reference
 | `RunAsAdmin` | `false` | Relaunch elevated on every launch (UAC prompt each time). Toggle from the tray. |
 | `MinRepeatIntervalMs` | `28.0` | Repeats faster than this are treated as stutter. |
 | `BurstBypass` | `false` | Opt-in: step aside during machine-speed input bursts so hardware tokens (YubiKey) keep repeated characters. Not needed for snippet expanders (TextExpander, Espanso) or Grammarly: those retype via synthetic keystrokes, which the filter always lets through regardless of this setting. |
+| `FilterSyntheticKeys` | `false` | Opt-in: also debounce keystrokes injected by other software. Only for a machine you reach over remote desktop (RDP, RustDesk, VNC), where the real keyboard's events arrive injected; it also debounces remappers and text expanders on that machine, and the timing has crossed a network. |
 | `CheckForUpdates` | `true` | One startup version check against GitHub; set `false` to stay fully offline. |
 | `ExcludedKeys` | `["Back", "Return"]` | Keys never filtered, by name or number (CapsLock is always excluded). |
 | `PerKeyMinRepeatIntervalMs` | `{}` | Per-key threshold overrides, by name or number. |

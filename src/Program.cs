@@ -125,6 +125,10 @@ namespace KeyboardRepeatFilter
             _activeConfigPath = ConfigFilePath;
             _startedAtUtc = DateTime.UtcNow;
 
+            // Before anything logs. Every later _config swap re-points this, because
+            // a profile may carry a different LogFilePath.
+            FilterLog.Configure(_config.LogFilePath);
+
             // Honor a configured default profile before anything observes the config:
             // this runs ahead of the elevation check and the hook creation so the
             // profile's RunAsAdmin and filter settings take effect from launch, and
@@ -144,7 +148,9 @@ namespace KeyboardRepeatFilter
                 if (TryStartElevatedProcess())
                 {
                     // Release the singleton so the elevated instance (which waits for
-                    // the mutex) can take over, then stand down.
+                    // the mutex) can take over, then stand down. Flush first: this
+                    // path exits Main without reaching Application.Run.
+                    FilterLog.Shutdown();
                     try { _mutex.ReleaseMutex(); } catch { /* not owned / already released */ }
                     return;
                 }
@@ -337,6 +343,11 @@ namespace KeyboardRepeatFilter
             StartUpdateCheck();
 
             Application.Run();
+
+            // After Application.Run returns, so the ApplicationExit handler's own
+            // Shutdown line is already queued. Flushes what is left and stops the
+            // writer for good.
+            FilterLog.Shutdown();
 
             // Release the mutex when the application exits so a relaunch (e.g. the
             // elevated handoff) can acquire it promptly.
@@ -868,31 +879,21 @@ namespace KeyboardRepeatFilter
             }
 
             LogLifecycle("Shutdown", message);
+
+            // The writer is a background thread, so on a terminating exception the
+            // process can die before this line reaches disk. Wait briefly for the
+            // queue to drain, but leave the writer running: a handled
+            // Application.ThreadException does not end the session, and logging must
+            // survive it.
+            FilterLog.WaitForDrain(500);
         }
 
         private static void LogLifecycle(string phase, string details)
         {
-            try
-            {
-                var logPath = _config?.LogFilePath;
-                if (string.IsNullOrWhiteSpace(logPath))
-                {
-                    return;
-                }
-
-                var directory = Path.GetDirectoryName(logPath);
-                if (!string.IsNullOrWhiteSpace(directory))
-                {
-                    Directory.CreateDirectory(directory);
-                }
-
-                File.AppendAllText(logPath,
-                    $"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} - {phase}: {details}{Environment.NewLine}");
-            }
-            catch
-            {
-                // Keep tray app resilient; logging failures must not crash startup or shutdown.
-            }
+            // FilterLog owns the file, the directory, and every failure mode; this is
+            // just the line. It is the same writer the hook threads use, so lifecycle
+            // and filtered events stay in true order in the log.
+            FilterLog.Write($"{phase}: {details}");
         }
 
         private static string ConfigFilePath =>
@@ -1005,6 +1006,7 @@ namespace KeyboardRepeatFilter
 
                 _config = cfg;
                 _activeConfigPath = path;
+                FilterLog.Configure(_config.LogFilePath);
                 LogLifecycle("DefaultProfileActivated", $"file={Path.GetFileName(path)}");
             }
             catch (Exception ex)
@@ -1109,6 +1111,7 @@ namespace KeyboardRepeatFilter
 
             _config = cfg;
             _activeConfigPath = path;
+            FilterLog.Configure(_config.LogFilePath);
             RestartFilter();
             // Re-evaluate the mouse hook against the new profile's settings.
             StopMouseFilter();

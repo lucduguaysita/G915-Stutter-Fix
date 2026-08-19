@@ -8,6 +8,7 @@
   "RunAsAdmin": false,
   "MinRepeatIntervalMs": 28.0,
   "BurstBypass": false,
+  "FilterSyntheticKeys": false,
   "CheckForUpdates": true,
   "AutoSwitchProfilesForGames": false,
   "DefaultGameProfile": "gaming",

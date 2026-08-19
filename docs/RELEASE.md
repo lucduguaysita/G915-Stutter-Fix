@@ -4,11 +4,10 @@ This project uses GitHub releases and git tags for versioned distribution.
 
 ## 1) Update version and changelog
 
-- Update the assembly version in `Properties/AssemblyInfo.cs` (this is what the **About** box
-  shows):
-  - `AssemblyVersion`, `AssemblyFileVersion`, and `AssemblyInformationalVersion`
-- Update the matching version in `KeyboardRepeatFilter.csproj`:
-  - `<Version>x.y.z</Version>`
+- Update `<Version>x.y.z</Version>` in `KeyboardRepeatFilter.csproj`. That is the single source of
+  truth: the SDK generates `AssemblyVersion`, `AssemblyFileVersion`, and
+  `AssemblyInformationalVersion` from it, and the **About** box and the `Startup` log line both
+  report it. The main app has no hand-written `Properties/AssemblyInfo.cs`.
 - If `KeyboardHeatmap` changed, bump its version in `KeyboardHeatmap/Properties/AssemblyInfo.cs`
   (it is versioned independently of the main app).
 - Add a new dated section in `CHANGELOG.md` for that version.
