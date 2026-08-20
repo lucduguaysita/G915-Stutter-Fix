@@ -5,13 +5,15 @@ Use this quick checklist before publishing a release.
 ## Build and artifacts
 
 - Build succeeds in `Release` mode.
-- `releases` folder is refreshed automatically.
-- `releases` contains:
+- `releases` folder is refreshed automatically. The build wipes and repopulates it, so files copied
+  from `src` keep their original timestamps: an old timestamp there is not staleness.
+- `releases` contains exactly:
   - `KeyboardRepeatFilter.exe`
   - `KeyboardHeatmap.exe`
+  - `GameListUpdater.exe`
   - `Newtonsoft.Json.dll`
-  - `config.json`
-- `releases` does not contain stale files from previous builds.
+  - `config.json`, `gaming.json`, `WoW.json`
+- `releases` contains nothing else.
 
 ## App startup and tray
 
@@ -52,12 +54,20 @@ Use this quick checklist before publishing a release.
 
 ## KeyboardHeatmap
 
-- Run `KeyboardHeatmap.exe` from `releases` with a valid log file (or use **Tray → Keyboard
-  Heatmap → Generate report**).
+- Run `KeyboardHeatmap.exe` from `releases` with a valid log file (or use **Tray → Heatmap →
+  Generate report**, which always includes the daily section).
 - `KeyboardHeatmap.html` is generated in the expected output location and opens in the browser.
-- Heatmap renders with the ember color ramp; the busiest QWERTY row is flagged with ⚠.
+- The report renders with the ember color ramp (pale amber → crimson in light mode, dim ember →
+  bright gold in dark mode).
 - Run `KeyboardHeatmap.exe -v` and confirm the daily event count section appears with
-  green→yellow→crimson bars.
-- If the log contains a `ConfigWarning`, the report shows the warning banner.
-- Launching the heatmap with no log file present shows the "enable logging" guidance instead of
-  failing silently.
+  green→yellow→crimson bars. Without `-v` that section must be absent.
+- **Classic layout only:** run with `-classic` and confirm the busiest QWERTY row is flagged with ⚠
+  (`warning-row` / `warning-badge` in the markup). The default photo layout draws counts on the
+  keyboard photo and has no row badges, so this check does not apply to it.
+- If the log contains a `ConfigWarning`, the report shows the warning banner naming the offending
+  key; with a clean log there is no banner.
+- With the log file missing:
+  - from the command line, it exits non-zero with `Error: log file not found` plus usage, and writes
+    no HTML;
+  - from the tray, a message box explains the log is missing and points at `"LogLevel": "Trace"` and
+    `LogFilePath`, rather than failing silently.
